@@ -198,3 +198,5 @@ $$;
 
 grant execute on function booth_avg_service_min(uuid), event_board(text) to anon, authenticated;
 grant execute on function admin_event_stats(uuid) to authenticated;
+
+-- 0007 stats_by_channel: admin_event_stats 에 'by_channel' (sent 기준 alimtalk/sms 건수) 추가 — Supabase 적용본 참조

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>체험부스 스태프 매뉴얼</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  @page { size: A4; margin: 14mm 14mm 12mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif; color: #111827; margin: 0; font-size: 11.5pt; line-height: 1.45; letter-spacing: -0.01em; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #111827; padding-bottom: 8px; margin-bottom: 14px; }
+  h1 { font-size: 22pt; margin: 0; letter-spacing: -0.03em; }
+  .sub { color: #6b7280; font-size: 10pt; }
+  .box { border: 1.5px solid #111827; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+  .box h2 { font-size: 12.5pt; margin: 0 0 6px; }
+  .fill { display: inline-block; min-width: 110px; border-bottom: 1.5px solid #111827; padding: 0 4px; font-weight: 700; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  ol, ul { margin: 4px 0 0 18px; padding: 0; }
+  li { margin: 2px 0; }
+  .btn { display: inline-block; padding: 1px 7px; border-radius: 6px; font-weight: 700; font-size: 10.5pt; color: #fff; background: #111827; }
+  .btn.red { background: #dc2626; } .btn.gray { background: #fff; color: #111827; border: 1.5px solid #9ca3af; }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+  td, th { border: 1px solid #d1d5db; padding: 4px 6px; vertical-align: top; } th { background: #f3f4f6; text-align: left; width: 34%; }
+  .warn { background: #fffbeb; border-color: #f59e0b; }
+  footer { margin-top: 10px; font-size: 9.5pt; color: #6b7280; display: flex; justify-content: space-between; }
+  .big { font-size: 15pt; font-weight: 800; }
+</style></head>
+<body>
+<header>
+  <div><h1>체험부스 스태프 매뉴얼</h1><div class="sub">대기표 · 예약 체크인 시스템 (FLIT WAIT)</div></div>
+  <div style="text-align:right"><div>행사 <span class="fill">　　　　　　　　　</span></div><div style="margin-top:6px">부스 <span class="fill">　　　　　　　　　</span></div></div>
+</header>
+
+<div class="grid">
+  <div class="box">
+    <h2>① 아침에 — 로그인</h2>
+    <ol>
+      <li>폰에서 스태프 주소 열기 <span class="fill">wait.flitunion.com/s/　　　　</span></li>
+      <li>PIN 입력 <span class="fill" style="min-width:60px">　　　</span> → 입장</li>
+      <li>홈 화면에 추가해두면 다음부터 바로 열림</li>
+      <li>보조배터리 연결 · 화면 자동잠금 끄기</li>
+    </ol>
+  </div>
+  <div class="box">
+    <h2>② 손님이 접수하는 법</h2>
+    <ol>
+      <li>부스 앞 QR 찍기 → 이름·전화·인원 → <b>대기 접수</b></li>
+      <li>대기번호와 앞 팀 수가 손님 폰에 뜸</li>
+      <li>차례가 가까우면 카톡 알림, 호출하면 카톡 + 폰 진동</li>
+    </ol>
+    <div class="sub" style="margin-top:4px">폰 없는 손님 → <b>대리 접수</b> 버튼으로 이름만 넣고 번호를 불러줌</div>
+  </div>
+</div>
+
+<div class="box">
+  <h2>③ 운영 중 — 버튼 4개만 기억</h2>
+  <table>
+    <tr><th><span class="btn">다음 호출</span></th><td>맨 앞 팀을 호출. 손님 폰에 "지금 입장하세요" 알림이 감. <b>자리 날 때마다 한 번씩</b> 누르면 끝.</td></tr>
+    <tr><th><span class="btn">입장</span></th><td>손님이 왔을 때. 손님 폰의 <b>대기번호 화면</b>을 확인하고 누름.</td></tr>
+    <tr><th><span class="btn red">노쇼</span></th><td>호출 후 <span class="fill" style="min-width:30px">5</span>분이 지나도 안 오면. 안 눌러도 시간이 지나면 자동 노쇼됨. 손님이 늦게 오면 <b>다시 접수</b>하게 안내.</td></tr>
+    <tr><th><span class="btn gray">재호출</span></th><td>손님이 알림을 못 받은 것 같을 때 한 번 더 보냄.</td></tr>
+  </table>
+  <div class="sub" style="margin-top:6px">예약 부스는 <b>오늘 회차</b> 탭 → 손님 이름 옆 <span class="btn">체크인</span>. 시작 10분 뒤까지 안 온 예약은 자동 취소되고 빈 자리는 현장 대기 1순위에게 자동으로 호출됨.</div>
+</div>
+
+<div class="grid">
+  <div class="box warn">
+    <h2>④ 이럴 땐</h2>
+    <ul>
+      <li><b>재료 소진·우천·휴식</b> → 상단 <b>접수 일시중단</b>. 손님 화면에 바로 "일시중단" 표시. 재개도 같은 버튼.</li>
+      <li><b>폰이 죽음</b> → 다른 폰에서 같은 주소 + 같은 PIN. 데이터는 다 서버에 있어 그대로 이어짐.</li>
+      <li><b>잘못 눌렀어요</b> → 호출을 잘못했으면 <b>대기로</b>, 노쇼를 잘못 눌렀으면 운영본부에 연락 (복구 가능).</li>
+      <li><b>손님 "알림 안 와요"</b> → 손님 폰에서 접수 때 받은 화면(또는 카톡 링크)을 열면 자동으로 갱신됨. 재호출 한 번.</li>
+      <li><b>앱 자체가 안 열림(통신 장애)</b> → 종이 번호표로 전환, 운영본부에 즉시 연락. 복구되면 대리 접수로 순서 맞춤.</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h2>⑤ 꼭 지켜주세요</h2>
+    <ul>
+      <li>손님 <b>전화번호를 입으로 부르거나 적어두지 않기</b> (화면엔 뒤 4자리만 보임)</li>
+      <li>대기 순서는 시스템 순서대로. 지인 끼워넣기 금지</li>
+      <li>호출했는데 안 보이면 큰 소리로 <b>번호</b> 한 번 더 부르고 노쇼 처리</li>
+      <li>퇴근 전 <b>로그아웃</b> 안 해도 됨 (다음 날 그대로 사용)</li>
+    </ul>
+    <div style="margin-top:8px" class="big">운영본부 ☎ <span class="fill">　　　　　　　　</span></div>
+  </div>
+</div>
+
+<footer><span>운영 · 플릿 (FLIT) · wait.flitunion.com</span><span>이 매뉴얼은 부스 1장씩 — 상단 빈칸을 채워서 붙여주세요</span></footer>
+</body></html>

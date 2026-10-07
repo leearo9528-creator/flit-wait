@@ -4,7 +4,7 @@ import { useAsync, STATUS_LABEL } from '../../lib/util'
 import { Card, Button, Spinner, Alert, Empty } from '../../components/ui'
 
 interface Row { booth_id: string; name: string; mode: string; total: number; queue_total: number; served: number; no_show: number; cancelled: number; reserved_seats: number; capacity: number; avg_wait_min: number | null; people: number }
-interface Stats { by_booth: Row[]; by_hour: { hour: string; count: number }[]; notifications: Record<string, number> | null }
+interface Stats { by_booth: Row[]; by_hour: { hour: string; count: number }[]; notifications: Record<string, number> | null; by_channel?: Record<string, number> | null }
 
 export default function AdminStats({ eventId, eventName }: { eventId: string; eventName: string }) {
   const { data, error, loading, reload } = useAsync<Stats>(async () => {
@@ -35,7 +35,7 @@ export default function AdminStats({ eventId, eventName }: { eventId: string; ev
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Kpi label="총 접수" v={tot.total} /><Kpi label="체험 완료" v={tot.served} sub={`${tot.people}명`} />
         <Kpi label="노쇼" v={tot.no_show} sub={tot.total ? `${Math.round(tot.no_show / tot.total * 100)}%` : ''} />
-        <Kpi label="알림 발송" v={data.notifications?.sent ?? 0} sub={data.notifications?.failed ? `실패 ${data.notifications.failed}` : data.notifications?.pending ? `대기 ${data.notifications.pending}` : ''} />
+        <Kpi label="알림 발송" v={data.notifications?.sent ?? 0} sub={`알림톡 ${data.by_channel?.alimtalk ?? 0} · SMS ${data.by_channel?.sms ?? 0}${data.notifications?.failed ? ` · 실패 ${data.notifications.failed}` : ''}`} />
       </div>
 
       <Card>
