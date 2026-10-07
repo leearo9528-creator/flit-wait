@@ -5,7 +5,6 @@ import { useAsync, fmtTime, fmtDate, STATUS_LABEL, useTick, LS } from '../../lib
 import { Ticket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge } from '../../components/ui'
 import { useEffect } from 'react'
-import { supabase } from '../../lib/supabase'
 
 export default function MyTicket() {
   const { token = '' } = useParams()
@@ -35,15 +34,20 @@ export default function MyTicket() {
   }
 
   // 대기 상태 변화 감지: booth_versions 구독 (slug 기준 booth id 를 모르니 폴링 중심 + 전체 테이블 변경 구독)
+  // 손님 화면은 Realtime 대신 폴링 (동시접속 수천 명 대비 — Realtime 연결 수 한도 보호). 호출 임박/호출 상태면 더 자주.
   useEffect(() => {
-    const ch = supabase.channel(`ticket-${token}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'booth_versions' }, () => reload())
-      .subscribe()
-    const iv = setInterval(reload, 7000)
+    let timer: number
+    const tick = () => {
+      if (document.visibilityState === 'visible') reload()
+      const hot = t?.status === 'called' || (t?.ahead != null && t.ahead <= 2)
+      const base = hot ? 6000 : 15000
+      timer = window.setTimeout(tick, base + Math.random() * 3000)
+    }
+    timer = window.setTimeout(tick, 8000)
     const onVis = () => { if (document.visibilityState === 'visible') reload() }
     document.addEventListener('visibilitychange', onVis)
-    return () => { supabase.removeChannel(ch); clearInterval(iv); document.removeEventListener('visibilitychange', onVis) }
-  }, [token]) // eslint-disable-line
+    return () => { clearTimeout(timer); document.removeEventListener('visibilitychange', onVis) }
+  }, [token, t?.status, t?.ahead]) // eslint-disable-line
 
   if (loading) return <Spinner />
   if (error || !t) return <Page><Alert kind="error">{error ?? '티켓을 찾을 수 없습니다.'}</Alert></Page>

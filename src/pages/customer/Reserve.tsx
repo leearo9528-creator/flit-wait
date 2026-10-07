@@ -10,7 +10,7 @@ export default function Reserve() {
   const { slug = '' } = useParams()
   const nav = useNavigate()
   const { data, error, loading, reload } = useAsync<BoothSummary>(() => rpc('booth_summary', { p_slug: slug }), [slug])
-  useBoothLive(data?.booth.id, reload, 15000)
+  useBoothLive(data?.booth.id, reload, 20000, false)
 
   const [slotId, setSlotId] = useState<string | null>(null)
   const [name, setName] = useState('')

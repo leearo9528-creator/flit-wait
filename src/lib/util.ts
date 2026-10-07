@@ -28,20 +28,20 @@ export const STATUS_LABEL: Record<string, string> = {
 }
 
 /** 부스 version 변경 구독 + 폴링 fallback → 콜백 재실행 */
-export function useBoothLive(boothId: string | undefined, reload: () => void, pollMs = 8000) {
+export function useBoothLive(boothId: string | undefined, reload: () => void, pollMs = 8000, realtime = true) {
   const reloadRef = useRef(reload)
   reloadRef.current = reload
   useEffect(() => {
     if (!boothId) return
-    const ch = supabase
+    const ch = realtime ? supabase
       .channel(`booth-${boothId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'booth_versions', filter: `booth_id=eq.${boothId}` }, () => reloadRef.current())
-      .subscribe()
-    const iv = setInterval(() => reloadRef.current(), pollMs)
+      .subscribe() : null
+    const iv = setInterval(() => { if (document.visibilityState === 'visible') reloadRef.current() }, pollMs + Math.random() * 3000)
     const onVis = () => { if (document.visibilityState === 'visible') reloadRef.current() }
     document.addEventListener('visibilitychange', onVis)
-    return () => { supabase.removeChannel(ch); clearInterval(iv); document.removeEventListener('visibilitychange', onVis) }
-  }, [boothId, pollMs])
+    return () => { if (ch) supabase.removeChannel(ch); clearInterval(iv); document.removeEventListener('visibilitychange', onVis) }
+  }, [boothId, pollMs, realtime])
 }
 
 /** 간단 async 상태 */

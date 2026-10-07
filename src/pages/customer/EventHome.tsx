@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { rpc, supabase } from '../../lib/supabase'
+import { rpc } from '../../lib/supabase'
 import { useAsync, fmtDateTime, fmtDate, LS } from '../../lib/util'
 import { Alert, Spinner, Badge } from '../../components/ui'
 
@@ -20,11 +20,10 @@ export default function EventHome() {
   const { slug = '' } = useParams()
   const { data, error, loading, reload } = useAsync<EventSummary>(() => rpc('event_summary', { p_slug: slug }), [slug])
   useEffect(() => {
-    const ch = supabase.channel(`event-${slug}`).on('postgres_changes', { event: '*', schema: 'public', table: 'booth_versions' }, () => reload()).subscribe()
-    const iv = setInterval(reload, 12000)
+    const iv = setInterval(() => { if (document.visibilityState === 'visible') reload() }, 20000 + Math.random() * 5000)
     const onVis = () => { if (document.visibilityState === 'visible') reload() }
     document.addEventListener('visibilitychange', onVis)
-    return () => { supabase.removeChannel(ch); clearInterval(iv); document.removeEventListener('visibilitychange', onVis) }
+    return () => { clearInterval(iv); document.removeEventListener('visibilitychange', onVis) }
   }, [slug]) // eslint-disable-line
 
   if (loading) return <Spinner />

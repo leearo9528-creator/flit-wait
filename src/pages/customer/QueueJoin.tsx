@@ -10,7 +10,7 @@ export default function QueueJoin() {
   const { slug = '' } = useParams()
   const nav = useNavigate()
   const { data, error, loading, reload } = useAsync<BoothSummary>(() => rpc('booth_summary', { p_slug: slug }), [slug])
-  useBoothLive(data?.booth.id, reload, 10000)
+  useBoothLive(data?.booth.id, reload, 15000, false)
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
