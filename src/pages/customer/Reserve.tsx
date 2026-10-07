@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { rpc } from '../../lib/supabase'
+import { rpc, cachedRpc } from '../../lib/supabase'
 import { useAsync, useBoothLive, fmtPhone, fmtTime, fmtDate, fmtDateTime, LS } from '../../lib/util'
 import { BoothSummary, SlotPublic } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner, Badge } from '../../components/ui'
@@ -9,7 +9,7 @@ import BoothHeader from '../../components/BoothHeader'
 export default function Reserve() {
   const { slug = '' } = useParams()
   const nav = useNavigate()
-  const { data, error, loading, reload } = useAsync<BoothSummary>(() => rpc('booth_summary', { p_slug: slug }), [slug])
+  const { data, error, loading, reload } = useAsync<BoothSummary>(() => cachedRpc('booth_summary', slug), [slug])
   useBoothLive(data?.booth.id, reload, 20000, false)
 
   const [slotId, setSlotId] = useState<string | null>(null)

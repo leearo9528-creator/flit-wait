@@ -18,3 +18,16 @@ export async function rpc<T = any>(fn: string, args?: Record<string, unknown>): 
 export function cleanError(msg: string) {
   return msg.replace(/^.*?(?=[가-힣])/s, '').trim() || msg
 }
+
+/** 모두에게 같은 공개 읽기 (event_summary / booth_summary / event_board) → 엣지 캐시 경유.
+ *  실패하면 직접 RPC 로 폴백. */
+export async function cachedRpc<T = any>(fn: 'event_summary' | 'booth_summary' | 'event_board', slug: string): Promise<T> {
+  if (import.meta.env.DEV) return rpc<T>(fn, { p_slug: slug })
+  try {
+    const r = await fetch(`/api/public?fn=${fn}&slug=${encodeURIComponent(slug)}`, { cache: 'no-store' })
+    if (!r.ok) throw new Error(String(r.status))
+    return (await r.json()) as T
+  } catch {
+    return rpc<T>(fn, { p_slug: slug })
+  }
+}

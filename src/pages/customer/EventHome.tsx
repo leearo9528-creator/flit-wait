@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { rpc } from '../../lib/supabase'
+import { cachedRpc } from '../../lib/supabase'
 import { useAsync, fmtDateTime, fmtDate, LS } from '../../lib/util'
 import { Alert, Spinner, Badge } from '../../components/ui'
 
@@ -18,7 +18,7 @@ const GRADS = ['from-rose-400 to-orange-300', 'from-sky-400 to-indigo-400', 'fro
 
 export default function EventHome() {
   const { slug = '' } = useParams()
-  const { data, error, loading, reload } = useAsync<EventSummary>(() => rpc('event_summary', { p_slug: slug }), [slug])
+  const { data, error, loading, reload } = useAsync<EventSummary>(() => cachedRpc('event_summary', slug), [slug])
   useEffect(() => {
     const iv = setInterval(() => { if (document.visibilityState === 'visible') reload() }, 20000 + Math.random() * 5000)
     const onVis = () => { if (document.visibilityState === 'visible') reload() }

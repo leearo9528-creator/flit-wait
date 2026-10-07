@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { rpc, supabase } from '../../lib/supabase'
+import { cachedRpc, supabase } from '../../lib/supabase'
 import { useAsync, fmtTime, useTick } from '../../lib/util'
 
 interface B { id: string; name: string; mode: string; is_paused: boolean; waiting_teams: number; called: number[]; last_in: number | null; avg_service_min: number | null; next_slot: { starts_at: string; left: number } | null }
@@ -9,7 +9,7 @@ interface Data { event: { name: string; notice: string | null; status: string };
 /** 안내부스 모니터용 현황판 — 큰 글씨, 다크, 자동 갱신 */
 export default function Board() {
   const { slug = '' } = useParams()
-  const { data, reload } = useAsync<Data>(() => rpc('event_board', { p_slug: slug }), [slug])
+  const { data, reload } = useAsync<Data>(() => cachedRpc('event_board', slug), [slug])
   useTick(1000)
   useEffect(() => {
     const ch = supabase.channel(`board-${slug}`).on('postgres_changes', { event: '*', schema: 'public', table: 'booth_versions' }, () => reload()).subscribe()

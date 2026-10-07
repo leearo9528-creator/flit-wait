@@ -1,0 +1,13 @@
+name: load-test
+on:
+  workflow_dispatch:
+    inputs:
+      vus: { description: '동시 손님 수', default: '1000' }
+      booth: { description: '접수 테스트 부스 slug (테스트 티켓이 생김 — 끝나고 삭제)', default: 'tech-1' }
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6-action@v1
+      - run: k6 run -e BASE=https://wait.flitunion.com -e SB=https://mqrafomyngxsixakbnzu.supabase.co -e KEY=${{ secrets.SUPABASE_ANON_KEY }} -e SLUG=seongnam-2026 -e BOOTH=${{ inputs.booth }} -e VUS=${{ inputs.vus }} loadtest/k6.js
