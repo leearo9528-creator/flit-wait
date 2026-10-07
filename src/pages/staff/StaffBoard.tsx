@@ -32,11 +32,20 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
   const showQueue = booth.mode !== 'slot'
   const activeTab = showQueue && showSlots ? tab : showSlots ? 'slots' : 'queue'
 
-  async function act(id: string, action: string) {
-    setBusyId(id); setErr(null)
-    try { await rpc('staff_update_ticket', { p_booth: sess.booth_id, p_token: sess.staff_token, p_ticket: id, p_action: action }); reload() }
+  const [toast, setToast] = useState<string | null>(null)
+  async function act(id: string | null, action: string) {
+    setBusyId(id ?? action); setErr(null)
+    try {
+      const r = await rpc<{ ok: boolean; message?: string; ticket_no?: number; name?: string; transferred?: number }>('staff_update_ticket', { p_booth: sess.booth_id, p_token: sess.staff_token, p_ticket: id, p_action: action })
+      if (r && r.ok === false) setErr(r.message ?? '처리할 수 없습니다.')
+      else if (action === 'call_next' && r?.ticket_no) flash(`${r.ticket_no}번 ${r.name} 호출`)
+      else if (action === 'recall') flash('재호출 알림 발송')
+      else if (r?.transferred) flash(`빈 자리 ${r.transferred}팀 현장 대기에서 이관 · 호출됨`)
+      reload()
+    }
     catch (e: any) { setErr(e.message) } finally { setBusyId(null) }
   }
+  function flash(m: string) { setToast(m); setTimeout(() => setToast(null), 2500) }
   async function togglePause() {
     try { await rpc('staff_toggle_pause', { p_booth: sess.booth_id, p_token: sess.staff_token, p_paused: !booth.is_paused }); reload() }
     catch (e: any) { setErr(e.message) }
@@ -65,9 +74,13 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
         </div>
       )}
       {err && <div className="mb-4"><Alert kind="error">{err}</Alert></div>}
+      {toast && <div className="fixed inset-x-4 top-4 z-50 rounded-xl bg-gray-900 px-4 py-3 text-center text-sm font-semibold text-white shadow-lg">{toast}</div>}
 
       {activeTab === 'queue' && (
         <div className={big ? 'text-xl' : ''}>
+          <Button size="lg" className="mb-4 !h-16 !text-xl" onClick={() => act(null, 'call_next')} loading={busyId === 'call_next'} disabled={waiting.length === 0}>
+            {waiting.length === 0 ? '대기 없음' : `다음 호출 → ${waiting[0].ticket_no}번 ${waiting[0].name}`}
+          </Button>
           {called.length > 0 && (
             <section className="mb-4">
               <h2 className="mb-2 text-sm font-semibold text-amber-700">호출됨 · 입장 대기</h2>
@@ -83,10 +96,10 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
                           <div className={`text-sm tabular-nums ${left === 0 ? 'text-red-600 font-semibold' : 'text-amber-700'}`}>{left === 0 ? '유효시간 지남' : `남은 시간 ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`}</div>
                         </div>
                       </div>
-                      <div className="mt-3 grid grid-cols-3 gap-2">
-                        <Button size="lg" onClick={() => act(t.id, 'checkin')} loading={busyId === t.id}>입장</Button>
+                      <div className="mt-3 grid grid-cols-4 gap-2">
+                        <Button size="lg" className="col-span-2" onClick={() => act(t.id, 'checkin')} loading={busyId === t.id}>입장</Button>
                         <Button size="lg" variant="danger" onClick={() => act(t.id, 'noshow')} loading={busyId === t.id}>노쇼</Button>
-                        <Button size="lg" variant="secondary" onClick={() => act(t.id, 'restore')} loading={busyId === t.id}>대기로</Button>
+                        <Button size="lg" variant="secondary" onClick={() => act(t.id, 'recall')} loading={busyId === t.id} disabled={!t.phone_tail}>재호출</Button>
                       </div>
                     </Card>
                   )

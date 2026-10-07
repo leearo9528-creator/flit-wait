@@ -13,10 +13,12 @@ import AdminEvent from './pages/admin/AdminEvent'
 import AdminBooth from './pages/admin/AdminBooth'
 import Home from './pages/Home'
 import EventHome from './pages/customer/EventHome'
+import Board from './pages/customer/Board'
 
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/e/:slug', element: <EventHome /> },
+  { path: '/board/:slug', element: <Board /> },
   { path: '/q/:slug', element: <QueueJoin /> },
   { path: '/r/:slug', element: <Reserve /> },
   { path: '/t/:token', element: <MyTicket /> },

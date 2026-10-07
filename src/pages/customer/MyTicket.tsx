@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { rpc } from '../../lib/supabase'
-import { useAsync, fmtTime, fmtDate, STATUS_LABEL, useTick } from '../../lib/util'
+import { useAsync, fmtTime, fmtDate, STATUS_LABEL, useTick, LS } from '../../lib/util'
 import { Ticket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge } from '../../components/ui'
 import { useEffect } from 'react'
@@ -13,6 +13,26 @@ export default function MyTicket() {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   useTick(1000)
+
+  // 호출되면 진동 + 소리 + 브라우저 알림 (알림톡이 늦을 때 보조)
+  const prevStatus = useRef<string | null>(null)
+  const [alertOn, setAlertOn] = useState<boolean>(() => LS.get<boolean>('alert:on') ?? true)
+  useEffect(() => {
+    if (!t) return
+    if (prevStatus.current && prevStatus.current !== 'called' && t.status === 'called') {
+      try { navigator.vibrate?.([300, 100, 300, 100, 600]) } catch {}
+      if (alertOn) { try { beep() } catch {} }
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try { new Notification(`${t.booth.name} 입장하세요`, { body: `대기번호 ${t.ticket_no}번 · ${t.booth.settings.call_valid_min ?? 5}분 안에 부스로 와주세요`, tag: 'flit-call' }) } catch {}
+      }
+    }
+    prevStatus.current = t.status
+  }, [t?.status]) // eslint-disable-line
+  async function enableNotify() {
+    if (!('Notification' in window)) return
+    const p = await Notification.requestPermission(); setAlertOn(true); LS.set('alert:on', true)
+    if (p === 'granted') try { beep() } catch {}
+  }
 
   // 대기 상태 변화 감지: booth_versions 구독 (slug 기준 booth id 를 모르니 폴링 중심 + 전체 테이블 변경 구독)
   useEffect(() => {
@@ -56,6 +76,7 @@ export default function MyTicket() {
               <div className="mt-4 rounded-xl bg-gray-50 py-3">
                 <div className="text-sm text-gray-500">내 앞 대기</div>
                 <div className="text-3xl font-bold tabular-nums">{t.ahead}<span className="ml-1 text-base font-medium text-gray-500">팀</span></div>
+                {t.est_wait_min != null && t.ahead! > 0 && <div className="text-sm text-gray-500">예상 약 {Math.max(1, t.est_wait_min)}분</div>}
                 {t.ahead !== null && t.ahead <= (t.booth.settings.notify_ahead_teams ?? 2) && <div className="mt-1 text-sm font-semibold text-amber-700">곧 차례예요. 부스 근처로 와주세요.</div>}
               </div>
             )}
@@ -90,6 +111,14 @@ export default function MyTicket() {
         {t.booth.location && <div className="mt-3 text-sm text-gray-500">위치 · {t.booth.location}</div>}
       </Card>
 
+      {!isSlot && t.status === 'waiting' && 'Notification' in window && Notification.permission === 'default' && (
+        <div className="mb-4">
+          <button onClick={enableNotify} className="w-full rounded-xl bg-amber-50 px-4 py-3 text-left text-sm text-amber-900 ring-1 ring-amber-200">
+            <b>🔔 이 화면 알림 켜기</b> — 호출되면 소리·진동으로 알려드려요. (알림톡과 별개, 화면을 꺼두면 안 울려요)
+          </button>
+        </div>
+      )}
+
       {(t.status === 'no_show' || t.status === 'cancelled') && (
         <div className="mb-4">
           <Alert kind="info">
@@ -105,4 +134,16 @@ export default function MyTicket() {
       <p className="mt-6 text-center text-xs text-gray-400">이 화면은 자동으로 갱신됩니다 · 운영 플릿 (FLIT)</p>
     </Page>
   )
+}
+
+function beep() {
+  const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext
+  if (!Ctx) return
+  const ctx = new Ctx(); const now = ctx.currentTime
+  ;[0, 0.25, 0.5].forEach((d, i) => {
+    const o = ctx.createOscillator(); const g = ctx.createGain()
+    o.type = 'sine'; o.frequency.value = i === 2 ? 1320 : 880
+    g.gain.setValueAtTime(0.0001, now + d); g.gain.exponentialRampToValueAtTime(0.4, now + d + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, now + d + 0.2)
+    o.connect(g).connect(ctx.destination); o.start(now + d); o.stop(now + d + 0.22)
+  })
 }

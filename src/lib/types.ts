@@ -67,6 +67,8 @@ export interface Ticket {
   created_at: string
   phone_tail: string | null
   ahead: number | null
+  est_wait_min: number | null
+  source?: string
   booth: Pick<Booth, 'name' | 'slug' | 'mode' | 'location' | 'is_paused' | 'settings'>
   event: { name: string; notice: string | null }
   slot: { starts_at: string; ends_at: string; status: string } | null
