@@ -108,11 +108,12 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
                   <div className="flex items-center gap-3">
                     <div className={`${big ? 'text-5xl' : 'text-4xl'} w-20 font-black tabular-nums`}>{t.ticket_no}</div>
                     <div className="flex-1 min-w-0">
-                      <div className="truncate font-semibold">{t.name} <span className="font-normal text-gray-500">{t.party_size}명 {t.phone_tail ? `· ${t.phone_tail}` : '· 대리접수'}</span></div>
-                      <div className="text-sm text-gray-500">{fmtTime(t.created_at)} 접수 · {minutesSince(t.created_at)}분 대기</div>
+                      <div className="truncate font-semibold">{t.name}</div>
+                      <div className="text-sm text-gray-500">{t.party_size}명 {t.phone_tail ? `· ${t.phone_tail}` : '· 대리접수'}</div>
+                      <div className="text-xs text-gray-400">{fmtTime(t.created_at)} 접수 · {minutesSince(t.created_at)}분</div>
                     </div>
-                    <div className="flex w-36 flex-col gap-2">
-                      <Button size="md" onClick={() => act(t.id, i === 0 ? 'call' : 'call')} loading={busyId === t.id}>{t.phone_tail ? '호출' : '입장'}</Button>
+                    <div className="flex w-24 flex-col gap-1.5">
+                      <Button size="md" onClick={() => act(t.id, t.phone_tail ? 'call' : 'checkin')} loading={busyId === t.id}>{t.phone_tail ? '호출' : '입장'}</Button>
                       <Button size="sm" variant="ghost" onClick={() => act(t.id, 'noshow')} loading={busyId === t.id}>삭제</Button>
                     </div>
                   </div>
@@ -154,13 +155,13 @@ function SlotCard({ s, act, busyId, big, sess, onWalkin }: { s: StaffBoard['slot
           {s.tickets.map(t => (
             <div key={t.id} className={`flex items-center gap-3 rounded-xl p-3 ring-1 ${t.status === 'checked_in' || t.status === 'done' ? 'bg-green-50 ring-green-200' : t.status === 'no_show' ? 'bg-gray-50 ring-gray-200 opacity-60' : 'bg-white ring-gray-200'}`}>
               <div className="flex-1 min-w-0">
-                <div className="truncate font-semibold">{t.name} <span className="font-normal text-gray-500">{t.party_size}명 {t.phone_tail ? `· ${t.phone_tail}` : '· 현장'}</span></div>
-                <div className="text-xs text-gray-500">{t.status === 'checked_in' ? `체크인 ${fmtTime(t.checked_in_at!)}` : t.status === 'no_show' ? '노쇼' : '미도착'}</div>
+                <div className="truncate font-semibold">{t.name}</div>
+                <div className="text-xs text-gray-500">{t.party_size}명 {t.phone_tail ? `· ${t.phone_tail}` : '· 현장'} · {t.status === 'checked_in' ? `체크인 ${fmtTime(t.checked_in_at!)}` : t.status === 'no_show' ? '노쇼' : '미도착'}</div>
               </div>
               {t.status === 'waiting' && (
-                <div className="flex gap-2">
-                  <Button size="md" className="!w-24" onClick={() => act(t.id, 'checkin')} loading={busyId === t.id}>체크인</Button>
-                  <Button size="md" variant="danger" className="!w-20" onClick={() => act(t.id, 'noshow')} loading={busyId === t.id}>노쇼</Button>
+                <div className="flex gap-1.5">
+                  <Button size="md" className="!w-20" onClick={() => act(t.id, 'checkin')} loading={busyId === t.id}>체크인</Button>
+                  <Button size="md" variant="danger" className="!w-16" onClick={() => act(t.id, 'noshow')} loading={busyId === t.id}>노쇼</Button>
                 </div>
               )}
               {t.status === 'no_show' && <Button size="sm" variant="secondary" className="!w-24" onClick={() => act(t.id, 'restore')} loading={busyId === t.id}>복구</Button>}
