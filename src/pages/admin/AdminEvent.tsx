@@ -41,6 +41,7 @@ export default function AdminEvent() {
     <Page title={e.name} sub={`/${e.slug} · ${fmtDateTime(e.starts_at)} ~ ${fmtDateTime(e.ends_at)}`} wide>
       <div className="mb-4 flex items-center gap-2">
         <Badge tone={e.status === 'open' ? 'green' : e.status === 'draft' ? 'gray' : 'red'}>{e.status}</Badge>
+        <a className="rounded-lg bg-gray-100 px-2 py-1 text-xs" href={`${PUBLIC_BASE_URL}/e/${e.slug}`} target="_blank" rel="noreferrer">통합 QR 링크 /e/{e.slug}</a>
         <div className="ml-auto flex gap-1 rounded-xl bg-gray-100 p-1 text-sm">
           {(['booths', 'settings', 'notify'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)} className={`rounded-lg px-3 py-1.5 font-semibold ${tab === t ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{{ booths: '부스', settings: '행사 설정', notify: '발송 로그' }[t]}</button>

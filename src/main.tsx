@@ -12,9 +12,11 @@ import AdminEvents from './pages/admin/AdminEvents'
 import AdminEvent from './pages/admin/AdminEvent'
 import AdminBooth from './pages/admin/AdminBooth'
 import Home from './pages/Home'
+import EventHome from './pages/customer/EventHome'
 
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
+  { path: '/e/:slug', element: <EventHome /> },
   { path: '/q/:slug', element: <QueueJoin /> },
   { path: '/r/:slug', element: <Reserve /> },
   { path: '/t/:token', element: <MyTicket /> },
