@@ -46,7 +46,7 @@
 7. 행사 설정 탭에서 **개인정보 동의 문구·보존기간** 확인, 행사 대표 이미지 업로드.
 8. 사전 예약 오픈 전날 상태를 **`open`** 으로 변경 (open 이어야 손님 접수·예약이 됨).
 
-> 처음 한 번만: Supabase Authentication 에서 관리자 이메일 유저 생성 → SQL `insert into admins(user_id, role) select id, 'owner' from auth.users where email='...'`. 행사별 담당자는 `admins(user_id, event_id, 'manager')`.
+> 관리자 로그인은 **접속 코드**. 전체 관리자 코드는 `admin_codes` 테이블(초기 `FLIT-OWNER-2026`), 행사 담당자 코드는 관리자 > 행사 > **접속 코드** 탭에서 발급·비활성화. 이메일 계정 안 만들어도 됨.
 
 ---
 

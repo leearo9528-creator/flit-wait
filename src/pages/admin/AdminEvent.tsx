@@ -34,7 +34,7 @@ export default function AdminEvent() {
   }, [eventId])
   useEffect(() => { const i = setInterval(stats.reload, 10000); return () => clearInterval(i) }, [stats.reload])
 
-  const [tab, setTab] = useState<'booths' | 'stats' | 'settings' | 'notify'>('booths')
+  const [tab, setTab] = useState<'booths' | 'stats' | 'settings' | 'codes' | 'notify'>('booths')
   if (ev.loading || booths.loading) return <Spinner />
   if (ev.error || !ev.data) return <Page><Alert kind="error">{ev.error}</Alert></Page>
   const e = ev.data
@@ -46,8 +46,8 @@ export default function AdminEvent() {
         <a className="rounded-lg bg-gray-100 px-2 py-1 text-xs" href={`${PUBLIC_BASE_URL}/e/${e.slug}`} target="_blank" rel="noreferrer">통합 QR 링크 /e/{e.slug}</a>
         <a className="rounded-lg bg-gray-100 px-2 py-1 text-xs" href={`${PUBLIC_BASE_URL}/board/${e.slug}`} target="_blank" rel="noreferrer">현황판 /board/{e.slug}</a>
         <div className="ml-auto flex gap-1 rounded-xl bg-gray-100 p-1 text-sm">
-          {(['booths', 'stats', 'settings', 'notify'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)} className={`rounded-lg px-3 py-1.5 font-semibold ${tab === t ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{{ booths: '부스', stats: '통계', settings: '행사 설정', notify: '발송 로그' }[t]}</button>
+          {(['booths', 'stats', 'settings', 'codes', 'notify'] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)} className={`rounded-lg px-3 py-1.5 font-semibold ${tab === t ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{{ booths: '부스', stats: '통계', settings: '행사 설정', codes: '접속 코드', notify: '발송 로그' }[t]}</button>
           ))}
         </div>
       </div>
@@ -85,6 +85,7 @@ export default function AdminEvent() {
       )}
       {tab === 'stats' && <AdminStats eventId={eventId} eventName={e.name} />}
       {tab === 'settings' && <EventSettings e={e} onSaved={ev.reload} />}
+      {tab === 'codes' && <AdminCodes eventId={eventId} />}
       {tab === 'notify' && <NotifyLog eventId={eventId} />}
     </Page>
   )
@@ -188,3 +189,35 @@ function NotifyLog({ eventId }: { eventId: string }) {
 }
 
 export { STATUS_LABEL }
+
+function AdminCodes({ eventId }: { eventId: string }) {
+  const q = useAsync<any[]>(async () => {
+    const { data, error } = await supabase.from('admin_codes').select('*').eq('event_id', eventId).order('created_at', { ascending: false }); if (error) throw error; return data
+  }, [eventId])
+  const [label, setLabel] = useState('')
+  const [msg, setMsg] = useState<string | null>(null)
+  async function issue() {
+    const { data: code, error: ge } = await supabase.rpc('gen_admin_code', { p_prefix: 'FLIT' })
+    if (ge) { setMsg(ge.message); return }
+    const { error } = await supabase.from('admin_codes').insert({ code, label: label || '담당자', event_id: eventId, role: 'manager' })
+    setMsg(error ? error.message : `발급: ${code}`); setLabel(''); q.reload()
+  }
+  async function toggle(code: string, active: boolean) { await supabase.from('admin_codes').update({ active: !active }).eq('code', code); q.reload() }
+  return (
+    <Card>
+      <h3 className="mb-1 font-bold">이 행사 관리자 접속 코드</h3>
+      <p className="mb-3 text-xs text-gray-500">주최 측 담당자에게 코드를 주면 /admin 에서 이 행사만 보고 수정할 수 있어요. 끝나면 비활성화.</p>
+      <div className="flex gap-2"><Input value={label} onChange={e => setLabel(e.target.value)} placeholder="누구에게 (예: 성남문화재단 김OO)" /><Button className="!w-auto px-5" onClick={issue}>코드 발급</Button></div>
+      {msg && <div className="mt-3"><Alert kind={msg.startsWith('발급') ? 'success' : 'error'}>{msg}</Alert></div>}
+      <div className="mt-4 space-y-2">
+        {q.data?.map(c => (
+          <div key={c.code} className={`flex items-center justify-between rounded-xl p-3 ring-1 ${c.active ? 'ring-gray-200' : 'bg-gray-50 opacity-60 ring-gray-200'}`}>
+            <div><div className="font-mono text-base font-bold tracking-wider">{c.code}</div><div className="text-xs text-gray-500">{c.label} · {c.last_used_at ? `최근 사용 ${fmtDateTime(c.last_used_at)}` : '미사용'}</div></div>
+            <Button variant={c.active ? 'secondary' : 'primary'} size="sm" className="!w-auto" onClick={() => toggle(c.code, c.active)}>{c.active ? '비활성화' : '다시 활성화'}</Button>
+          </div>
+        ))}
+        {q.data?.length === 0 && <Empty>발급된 코드가 없습니다.</Empty>}
+      </div>
+    </Card>
+  )
+}

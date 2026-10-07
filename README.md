@@ -15,7 +15,7 @@
 | `/r/:slug` | 손님 | 회차 사전 예약 |
 | `/t/:token` | 손님 | 내 대기/예약 상태 (알림톡 버튼 링크), 취소 |
 | `/s/:slug` | 스태프 | PIN 로그인 → `/s/:slug/board` 대기열·회차 체크인 |
-| `/admin` | 관리자 | 이메일 로그인, 행사·부스·회차·설정·PIN·QR·발송 로그 |
+| `/admin` | 관리자 | **접속 코드** 로그인 (admin_codes · Edge Function admin-login), 행사·부스·회차·설정·PIN·QR·통계·코드 발급·발송 로그 |
 
 ## 구조
 
@@ -80,9 +80,6 @@ cross join unnest(array['2026-10-24','2026-10-25']::date[]) d
 cross join unnest(array['11:00','13:00','14:30','16:00','17:30']::time[]) tm
 where b.mode = 'hybrid';
 
--- 관리자 등록: Authentication 에서 이메일 유저를 먼저 만든 뒤
-insert into admins(user_id, event_id, role)
-select id, null, 'owner' from auth.users where email = 'leearo9528@gmail.com';
 
 -- 테스트로 넣은 대기표 3건 삭제
 delete from tickets where name in ('테스트','둘째','셋째');
@@ -90,6 +87,11 @@ delete from tickets where name in ('테스트','둘째','셋째');
 
 ### 2. 스태프 PIN
 `/admin/booths/:id` 화면에서 부스마다 PIN 설정 (또는 SQL `select admin_set_pin('<booth uuid>', '1234')` — 관리자 로그인 상태에서).
+
+### 2-1. 관리자 로그인
+이메일 계정 없음. `/admin` 에서 접속 코드 입력 → Edge Function `admin-login` 이 코드 검증 후 세션 발급.
+- 전체 관리자(아로): `FLIT-OWNER-2026` (`admin_codes` 테이블에서 변경 가능)
+- 행사 담당자: 관리자 > 행사 > **접속 코드** 탭에서 발급/비활성화 (해당 행사만 보임)
 
 ### 3. Edge Function secrets (Supabase 대시보드 > Edge Functions > notify > Secrets)
 ```

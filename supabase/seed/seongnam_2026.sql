@@ -37,9 +37,6 @@ where b.mode = 'hybrid' and b.event_id = (select id from events where slug = 'se
 update booths set pin_hash = extensions.crypt('1234', extensions.gen_salt('bf'))
 where event_id = (select id from events where slug = 'seongnam-2026');
 
--- 4) 관리자 등록 — Authentication 에서 이메일 유저를 먼저 만든 뒤 실행
-insert into admins(user_id, event_id, role)
-select id, null, 'owner' from auth.users where email = 'leearo9528@gmail.com'
-on conflict do nothing;
+-- 4) 관리자: 이메일 계정 불필요. /admin 에서 접속 코드 FLIT-OWNER-2026 (admin_codes 테이블) 로 입장.
 
 select b.name, b.slug, b.mode, (select count(*) from slots s where s.booth_id = b.id) slots from booths b order by sort_order;
