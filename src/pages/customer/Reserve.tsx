@@ -4,6 +4,7 @@ import { rpc } from '../../lib/supabase'
 import { useAsync, useBoothLive, fmtPhone, fmtTime, fmtDate, fmtDateTime, LS } from '../../lib/util'
 import { BoothSummary, SlotPublic } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner, Badge } from '../../components/ui'
+import BoothHeader from '../../components/BoothHeader'
 
 export default function Reserve() {
   const { slug = '' } = useParams()
@@ -56,7 +57,8 @@ export default function Reserve() {
   }
 
   return (
-    <Page title={booth.name} sub={`${event.name} · 사전 예약`}>
+    <Page>
+      <BoothHeader booth={booth} event={event} tag="사전 예약" />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
       {notYet && <div className="mb-4"><Alert kind="info">예약은 <b>{fmtDateTime(openAt!.toISOString())}</b>부터 열립니다.</Alert></div>}
       {existing && Date.now() - existing.at < 7 * 86400_000 && (

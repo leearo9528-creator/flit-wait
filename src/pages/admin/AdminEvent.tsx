@@ -5,6 +5,7 @@ import { useAsync, fmtDateTime, STATUS_LABEL } from '../../lib/util'
 import { EventRow, Booth } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Alert, Spinner, Badge, Empty } from '../../components/ui'
 import AdminStats from './AdminStats'
+import ImageUpload from '../../components/ImageUpload'
 
 interface Stats { booth_id: string; waiting: number; called: number; done: number; no_show: number; reserved: number }
 
@@ -121,7 +122,7 @@ function NewBooth({ eventId, next, onDone }: { eventId: string; next: number; on
 }
 
 function EventSettings({ e, onSaved }: { e: EventRow; onSaved: () => void }) {
-  const [f, setF] = useState({ name: e.name, status: e.status, notice: e.notice ?? '', privacy_text: e.privacy_text, data_retention_days: e.data_retention_days })
+  const [f, setF] = useState({ name: e.name, status: e.status, notice: e.notice ?? '', privacy_text: e.privacy_text, data_retention_days: e.data_retention_days, image_url: e.image_url ?? null as string | null })
   const [msg, setMsg] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   async function save() {
@@ -136,6 +137,7 @@ function EventSettings({ e, onSaved }: { e: EventRow; onSaved: () => void }) {
   }
   return (
     <Card>
+      <div className="mb-4"><Field label="행사 대표 이미지 (체험 QR 진입 화면 상단)"><ImageUpload value={f.image_url} folder={`events/${e.id}`} onChange={u => setF({ ...f, image_url: u })} aspect="aspect-[21/9]" /></Field></div>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="행사명"><Input value={f.name} onChange={x => setF({ ...f, name: x.target.value })} /></Field>
         <Field label="상태" hint="open 일 때만 손님 접수·예약이 됩니다.">

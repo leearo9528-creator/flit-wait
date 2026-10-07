@@ -27,6 +27,8 @@ export interface Booth {
   sort_order?: number
   settings: BoothSettings
   pin_hash?: string | null
+  image_url?: string | null
+  description?: string | null
 }
 
 export interface EventRow {
@@ -39,6 +41,7 @@ export interface EventRow {
   privacy_text: string
   data_retention_days: number
   notice: string | null
+  image_url?: string | null
 }
 
 export interface SlotPublic {
@@ -54,6 +57,7 @@ export interface BoothSummary {
   booth: Booth
   event: Pick<EventRow, 'id' | 'name' | 'status' | 'privacy_text' | 'notice' | 'starts_at' | 'ends_at'>
   waiting_teams: number
+  avg_service_min?: number | null
   slots: SlotPublic[]
 }
 

@@ -4,6 +4,7 @@ import { rpc } from '../../lib/supabase'
 import { useAsync, useBoothLive, fmtPhone, LS } from '../../lib/util'
 import { BoothSummary } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner, Badge } from '../../components/ui'
+import BoothHeader from '../../components/BoothHeader'
 
 export default function QueueJoin() {
   const { slug = '' } = useParams()
@@ -39,7 +40,8 @@ export default function QueueJoin() {
   }
 
   return (
-    <Page title={booth.name} sub={event.name}>
+    <Page>
+      <BoothHeader booth={booth} event={event} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
 
       <Card className="mb-4">
@@ -47,6 +49,7 @@ export default function QueueJoin() {
           <div>
             <div className="text-sm text-gray-500">현재 대기</div>
             <div className="text-4xl font-bold tabular-nums">{waiting_teams}<span className="ml-1 text-lg font-medium text-gray-500">팀</span></div>
+            {data.avg_service_min && waiting_teams > 0 && <div className="text-sm text-gray-500">예상 약 {Math.max(1, Math.round(waiting_teams * data.avg_service_min))}분</div>}
           </div>
           {booth.is_paused ? <Badge tone="red">접수 일시중단</Badge> : closed ? <Badge tone="gray">운영 종료</Badge> : <Badge tone="green">접수 중</Badge>}
         </div>

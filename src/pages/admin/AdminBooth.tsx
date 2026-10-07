@@ -5,6 +5,7 @@ import { supabase, PUBLIC_BASE_URL } from '../../lib/supabase'
 import { useAsync, fmtDate, fmtTime } from '../../lib/util'
 import { Booth, BoothSettings } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Alert, Spinner, Badge, Empty } from '../../components/ui'
+import ImageUpload from '../../components/ImageUpload'
 
 export default function AdminBooth() {
   const { boothId = '' } = useParams()
@@ -25,16 +26,18 @@ export default function AdminBooth() {
 }
 
 function Basic({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
-  const [f, setF] = useState({ name: booth.name, location: booth.location ?? '', mode: booth.mode, is_paused: booth.is_paused, sort_order: booth.sort_order ?? 0 })
+  const [f, setF] = useState({ name: booth.name, location: booth.location ?? '', mode: booth.mode, is_paused: booth.is_paused, sort_order: booth.sort_order ?? 0, image_url: booth.image_url ?? null as string | null, description: booth.description ?? '' })
   const [msg, setMsg] = useState<string | null>(null)
   async function save() {
-    const { error } = await supabase.from('booths').update(f).eq('id', booth.id)
+    const { error } = await supabase.from('booths').update({ ...f, description: f.description || null }).eq('id', booth.id)
     setMsg(error ? error.message : '저장했습니다.'); onSaved()
   }
   return (
     <Card>
       <h2 className="mb-3 font-bold">기본 정보</h2>
+      <div className="mb-3"><ImageUpload value={f.image_url} folder={`booths/${booth.id}`} onChange={u => setF({ ...f, image_url: u })} /></div>
       <div className="grid gap-3 md:grid-cols-2">
+        <div className="md:col-span-2"><Field label="소개 (손님 화면에 표시)"><textarea value={f.description} onChange={e => setF({ ...f, description: e.target.value })} rows={2} className="w-full rounded-xl border border-gray-300 p-3 text-sm" placeholder="예: 또띠아 반죽부터 토핑까지 직접 만들어 바로 먹어요 · 소요 50분 · 7세 이상" /></Field></div>
         <Field label="부스명"><Input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} /></Field>
         <Field label="위치"><Input value={f.location} onChange={e => setF({ ...f, location: e.target.value })} /></Field>
         <Field label="모드">
