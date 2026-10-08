@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
   if (CRON_SECRET && req.headers.get('x-cron-secret') !== CRON_SECRET) return new Response('forbidden', { status: 403 })
 
   const { data: rows, error } = await sb.from('notifications')
-    .select('id, template_code, tickets!inner(id, token, name, phone, party_size, ticket_no, status, booths!inner(name, location, settings), events!inner(name), slots(starts_at))')
+    .select('id, template_code, tickets!inner(id, token, name, phone, party_size, ticket_no, status, booths!inner(name, slug, location, settings), events!inner(name), slots(starts_at))')
     .eq('status', 'pending').lte('scheduled_at', new Date().toISOString()).order('scheduled_at').limit(100)
   if (error) return Response.json({ error: error.message }, { status: 500 })
   if (!rows?.length) return Response.json({ sent: 0 })
@@ -66,10 +66,11 @@ Deno.serve(async (req) => {
       '#{대기번호}': String(t.ticket_no ?? ''), '#{앞대기수}': ahead,
       '#{유효시간}': String(t.booths.settings?.call_valid_min ?? 5),
       '#{일시}': t.slots ? fmtKST(t.slots.starts_at) : '', '#{장소}': t.booths.location ?? '',
-      '#{인원}': String(t.party_size), '#{링크}': `${BASE_URL}/t/${t.token}`, '#{token}': t.token,
+      '#{인원}': String(t.party_size), '#{링크}': `${BASE_URL}/t/${t.token}`, '#{token}': t.token, '#{부스slug}': t.booths.slug,
     }
-    const smsText = fill(tpl.sms_fallback_text ?? '', vars)
     const link = fill(tpl.button_link ?? `${BASE_URL}/t/#{token}`, vars)
+    vars['#{링크}'] = link
+    const smsText = fill(tpl.sms_fallback_text ?? '', vars)
     const useAlimtalk = !!(tpl.ncp_template_code && tpl.alimtalk_content && AT_SVC && PF_ID)
     const smsFallback = t.booths.settings?.sms_fallback ?? true
     const payload = { to: t.phone.slice(0, 3) + '****' + t.phone.slice(-4), channel: useAlimtalk ? 'alimtalk' : 'sms', text: useAlimtalk ? fill(tpl.alimtalk_content, vars) : smsText }
