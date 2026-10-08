@@ -40,8 +40,13 @@ export default function MyTicket() {
     let timer: number
     const tick = () => {
       if (document.visibilityState === 'visible') reload()
-      const hot = t?.status === 'called' || (t?.ahead != null && t.ahead <= 2)
-      const base = hot ? 6000 : 15000
+      // 순서가 멀수록 느리게: 호출됨/앞 2팀 이하 6s · 앞 10팀 이하 15s · 그 외 30s · 끝난 티켓 60s
+      const ahead = t?.ahead ?? 0
+      const final = t && ['checked_in', 'done', 'no_show', 'cancelled'].includes(t.status)
+      const base = final ? 60000
+        : t?.status === 'called' ? 6000
+        : t?.slot ? 30000                       // 사전 예약은 호출 개념이 없어 느리게
+        : ahead <= 2 ? 6000 : ahead <= 10 ? 15000 : 30000
       timer = window.setTimeout(tick, base + Math.random() * 3000)
     }
     timer = window.setTimeout(tick, 8000)
