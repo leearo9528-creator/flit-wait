@@ -1,5 +1,4 @@
 import { Page, Card } from '../components/ui'
-import BizFooter from '../components/BizFooter'
 
 export default function Home() {
   return (
@@ -10,7 +9,6 @@ export default function Home() {
         </p>
         <p className="mt-4 text-xs text-gray-400">운영: 플릿 (FLIT) · 문의는 현장 운영본부</p>
       </Card>
-      <BizFooter />
     </Page>
   )
 }
