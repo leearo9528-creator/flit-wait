@@ -97,12 +97,9 @@ delete from tickets where name in ('테스트','둘째','셋째');
 ```
 CRON_SECRET=822b2df12e404747dc589c28b21e6decf0d3dfdcaff34a29   # Vault 의 cron_secret 과 동일, 이미 cron 에 들어있음
 PUBLIC_BASE_URL=https://wait.flitunion.com
-SOLAPI_API_KEY=...        # 솔라피 가입 후
-SOLAPI_API_SECRET=...
 SOLAPI_SENDER=010XXXXXXXX # 등록한 발신번호 (숫자만)
-SOLAPI_PF_ID=...          # '플릿' 카카오 채널 발신프로필 pfId
 ```
-알림톡 템플릿 승인되면 `templates.solapi_template_id` 에 템플릿 ID 입력 → 그때부터 알림톡, 전에는 SMS.
+알림톡 템플릿 승인되면 `templates.ncp_template_code` 에 NCP 템플릿 코드 입력 → 그때부터 알림톡, 전에는 SMS.
 
 ### 4. Vercel ↔ GitHub 연결
 Vercel 프로젝트 `flit-wait` 를 이 레포(`leearo9528-creator/FLIT`)에 연결하고 **Root Directory = `flit-wait`** 로 설정. (Settings > Git)

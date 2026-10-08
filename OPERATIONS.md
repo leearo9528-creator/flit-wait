@@ -11,10 +11,10 @@
 | 프론트 | Vercel `flit-wait` → `wait.flitunion.com` | 손님·스태프·관리자·현황판 화면 (정적 SPA) |
 | DB / API | Supabase `flit-wait` (`mqrafomyngxsixakbnzu`, 서울) | Postgres + RPC + RLS + Realtime |
 | 스케줄러 | Supabase pg_cron (매분) | 순서 임박 알림 적재 · 노쇼 처리 · 노쇼 좌석 이관 · 개인정보 파기 |
-| 발송 | Supabase Edge Function `notify` (매분 cron 호출) | 알림톡 → 실패 시 SMS (솔라피) |
+| 발송 | Supabase Edge Function `notify` (매분 cron 호출) | 알림톡 → 실패 시 SMS (네이버 클라우드 SENS) |
 | 소스 | GitHub `leearo9528-creator/flit-wait` | `main` 푸시 = 자동 배포 |
 
-비용: Vercel Hobby 무료, Supabase Free(500MB·Edge 500K 호출/월), 솔라피 알림톡 건당 ~8원·SMS ~20원. 행사 1회(3일, 수천 건)면 알림 비용 몇만 원.
+비용: Vercel Hobby 무료, Supabase Free(500MB·Edge 500K 호출/월), NCP 알림톡 건당 ~8원·SMS ~9원·LMS ~27원. 행사 1회(3일, 수천 건)면 알림 비용 몇만 원.
 
 ---
 
@@ -52,19 +52,21 @@
 
 ## 3. 알림톡 세팅 (처음 한 번)
 
-1. 카카오 비즈니스 채널(플릿) → 솔라피 콘솔에서 **발신프로필 등록**, **발신번호 등록**(SMS 대체용).
-2. 템플릿 6종 검수 신청 (`README.md` 템플릿 표 / 문안은 `templates.sms_fallback_text` 와 동일 취지). 변수명 `#{행사명} #{부스명} #{이름} #{대기번호} #{앞대기수} #{유효시간} #{일시} #{인원}`, 버튼 WL 링크 `https://wait.flitunion.com/t/#{token}`.
-3. 승인되면 Supabase SQL: `update templates set solapi_template_id='KA01TP...' where code='Q01';` (6개).
+1. 네이버 클라우드 콘솔 > Simple & Easy Notification Service(SENS) > **Biz Message** 프로젝트 생성 → 카카오 채널(@플릿) 연동(채널 관리자 폰 인증). SMS 프로젝트도 만들고 **발신번호 등록**(사업자 서류).
+2. Biz Message > 템플릿 등록 6종 — 본문은 `templates.alimtalk_content` 그대로, 버튼은 `button_name`(웹링크, `https://wait.flitunion.com/t/#{token}`). 변수는 `#{행사명} #{부스명} #{이름} #{대기번호} #{앞대기수} #{유효시간} #{일시} #{인원} #{장소}`. 검수 1~3 영업일.
+3. 승인되면 Supabase SQL: `update templates set ncp_template_code='Q01' where code='Q01';` (NCP 에 등록한 템플릿 코드, 6개). ⚠️ NCP 는 **치환된 본문을 함께 보내고 승인 본문과 글자 단위로 대조**하므로, 콘솔에서 템플릿 문구를 고치면 `alimtalk_content` 도 똑같이 바꿔야 함.
 4. Edge Function secrets (대시보드 > Edge Functions > notify > Secrets):
    ```
-   CRON_SECRET          Vault 'cron_secret' 와 동일
-   PUBLIC_BASE_URL      https://wait.flitunion.com
-   SOLAPI_API_KEY / SOLAPI_API_SECRET
-   SOLAPI_SENDER        발신번호 숫자만
-   SOLAPI_PF_ID         발신프로필 pfId
-   NOTIFY_DRY_RUN       테스트 중엔 1, 실발송 때 삭제
+   CRON_SECRET               Vault 'cron_secret' 와 동일
+   PUBLIC_BASE_URL           https://wait.flitunion.com
+   NCP_ACCESS_KEY / NCP_SECRET_KEY   NCP 콘솔 > 마이페이지 > 인증키 관리
+   NCP_ALIMTALK_SERVICE_ID   SENS > Biz Message 서비스 ID
+   NCP_PLUS_FRIEND_ID        카카오 채널 ID (@플릿)
+   NCP_SMS_SERVICE_ID        SENS > SMS 서비스 ID
+   NCP_SMS_FROM              SENS 에 등록한 발신번호 (숫자만)
+   NOTIFY_DRY_RUN            테스트 중엔 1, 실발송 때 삭제
    ```
-5. **동작 규칙**: 템플릿 ID 없으면 SMS 로, `SOLAPI_API_KEY` 없거나 `NOTIFY_DRY_RUN=1` 이면 발송 안 하고 `sent(DRY_RUN)` 처리.
+5. **동작 규칙**: `ncp_template_code` 없으면 SMS 로, `NCP_ACCESS_KEY` 없거나 `NOTIFY_DRY_RUN=1` 이면 발송 안 하고 `sent(DRY_RUN)` 처리.
 6. 테스트: 내 번호로 `/q/...` 접수 → 1분 내 알림톡 수신 확인 → 관리자 > 발송 로그에서 `sent`.
 
 ---
@@ -109,7 +111,7 @@
 
 ## 6. 모니터링·장애
 
-- **발송 실패**: 관리자 > 발송 로그 `failed` + 오류 메시지 (솔라피 잔액 부족, 템플릿 불일치, 번호 오류가 대부분). 솔라피 콘솔 잔액 확인.
+- **발송 실패**: 관리자 > 발송 로그 `failed` + 오류 메시지 (템플릿 본문 불일치·버튼 불일치·번호 오류가 대부분). NCP 콘솔 > SENS > 발송 결과에서 상세 코드 확인.
 - **cron 동작 확인** (Supabase SQL):
   ```sql
   select jobname, schedule, active from cron.job;
