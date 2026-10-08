@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { rpc } from '../../lib/supabase'
 import { LS, useAsync, useBoothLive, useTick, fmtTime, minutesSince } from '../../lib/util'
@@ -9,7 +9,8 @@ export default function StaffBoardPage() {
   const { slug = '' } = useParams()
   const nav = useNavigate()
   const sess = LS.get<StaffSession>(`staff:${slug}`)
-  if (!sess) { nav(`/s/${slug}`, { replace: true }); return null }
+  useEffect(() => { if (!sess) nav(`/s/${slug}`, { replace: true }) }, [sess, slug, nav])
+  if (!sess) return null
   return <Board sess={sess} slug={slug} />
 }
 
@@ -23,8 +24,10 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
   const [busyId, setBusyId] = useState<string | null>(null)
   const [walkin, setWalkin] = useState(false)
   const [big, setBig] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
 
-  if (error?.includes('인증')) { LS.del(`staff:${slug}`); nav(`/s/${slug}`, { replace: true }); return null }
+  useEffect(() => { if (error?.includes('인증')) { LS.del(`staff:${slug}`); nav(`/s/${slug}`, { replace: true }) } }, [error, slug, nav])
+  if (error && !error.includes('인증')) return <Page><Alert kind="error">{error}</Alert></Page>
   if (loading || !data) return <Spinner />
 
   const { booth, queue, slots } = data
@@ -32,7 +35,6 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
   const showQueue = booth.mode !== 'slot'
   const activeTab = showQueue && showSlots ? tab : showSlots ? 'slots' : 'queue'
 
-  const [toast, setToast] = useState<string | null>(null)
   async function act(id: string | null, action: string) {
     setBusyId(id ?? action); setErr(null)
     try {
