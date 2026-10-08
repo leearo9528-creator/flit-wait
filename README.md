@@ -5,7 +5,7 @@
 
 - 프론트: React + Vite + Tailwind → Vercel (`wait.flitunion.com`)
 - 백엔드: Supabase 프로젝트 `flit-wait` (`mqrafomyngxsixakbnzu`, 서울) — Postgres RPC + RLS + Realtime + Edge Function + pg_cron
-- 발송: 솔라피 (Edge Function `notify`)
+- 발송: 네이버 클라우드 SENS 알림톡 + SMS failover (Edge Function `notify`)
 
 ## 라우트
 
@@ -27,7 +27,7 @@ tickets(slot_id null = 대기표, 있으면 예약)   notifications(발송 큐+�
 - 손님·스태프는 테이블을 직접 읽지 않고 **SECURITY DEFINER RPC** 만 호출 (`join_queue`, `reserve_slot`, `get_ticket`, `cancel_ticket`, `staff_login`, `staff_board`, `staff_update_ticket`, `staff_add_walkin`, `staff_toggle_pause`)
 - 실시간 갱신: `booth_versions` 공개 테이블을 트리거로 bump → 클라이언트가 구독 후 RPC 재조회 (+ 폴링 fallback)
 - 스케줄러 `run_scheduler()` (pg_cron 매분): 순서 임박 알림(Q02) 적재, 호출 후 유효시간 경과 노쇼, 회차 시작 N분 후 미체크인 노쇼, 보존기간 경과 개인정보 파기
-- Edge Function `notify` (pg_cron 매분 호출): `notifications.pending` → 솔라피 발송. 템플릿 ID 없으면 SMS, `SOLAPI_API_KEY` 없으면 dry-run
+- Edge Function `notify` (pg_cron 매분 호출): `notifications.pending` → NCP SENS 발송. `ncp_template_code` 없으면 SMS, `NCP_ACCESS_KEY` 없으면 dry-run
 
 ## 관리자 설정값 (`booths.settings`)
 
