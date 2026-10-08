@@ -55,7 +55,7 @@ export interface SlotPublic {
 
 export interface BoothSummary {
   booth: Booth
-  event: Pick<EventRow, 'id' | 'name' | 'status' | 'privacy_text' | 'notice' | 'starts_at' | 'ends_at'>
+  event: Pick<EventRow, 'id' | 'name' | 'slug' | 'status' | 'privacy_text' | 'notice' | 'starts_at' | 'ends_at'>
   waiting_teams: number
   avg_service_min?: number | null
   slots: SlotPublic[]
@@ -74,7 +74,7 @@ export interface Ticket {
   est_wait_min: number | null
   source?: string
   booth: Pick<Booth, 'name' | 'slug' | 'mode' | 'location' | 'is_paused' | 'settings'>
-  event: { name: string; notice: string | null }
+  event: { name: string; slug?: string; notice: string | null }
   slot: { starts_at: string; ends_at: string; status: string } | null
   can_cancel: boolean
 }

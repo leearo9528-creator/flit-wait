@@ -5,6 +5,7 @@ import { useAsync, useBoothLive, fmtPhone, fmtTime, fmtDate, fmtDateTime, LS } f
 import { BoothSummary, SlotPublic } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner, Badge } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
+import CustomerNav from '../../components/CustomerNav'
 
 export default function Reserve() {
   const { slug = '' } = useParams()
@@ -121,6 +122,7 @@ export default function Reserve() {
         </form>
       </Card>
       <p className="mt-4 text-center text-xs text-gray-400">운영 · 플릿 (FLIT)</p>
+      <CustomerNav slug={(event as any).slug} />
     </Page>
   )
 }

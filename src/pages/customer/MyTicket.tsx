@@ -4,6 +4,7 @@ import { rpc } from '../../lib/supabase'
 import { useAsync, fmtTime, fmtDate, STATUS_LABEL, useTick, LS } from '../../lib/util'
 import { Ticket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge } from '../../components/ui'
+import CustomerNav from '../../components/CustomerNav'
 import { useEffect } from 'react'
 
 export default function MyTicket() {
@@ -67,6 +68,7 @@ export default function MyTicket() {
 
   return (
     <Page title={t.booth.name} sub={t.event.name}>
+      {(t.event as any).slug && <Link to={`/e/${(t.event as any).slug}`} className="-mt-3 mb-3 inline-block text-sm font-semibold text-gray-600 underline">← 체험부스 전체</Link>}
       {t.event.notice && <div className="mb-4"><Alert kind="warn">{t.event.notice}</Alert></div>}
 
       <Card className="mb-4 text-center">
@@ -142,6 +144,7 @@ export default function MyTicket() {
       {t.can_cancel && <Button variant="secondary" onClick={cancel} loading={busy}>{isSlot ? '예약 취소' : '대기 취소'}</Button>}
 
       <p className="mt-6 text-center text-xs text-gray-400">이 화면은 자동으로 갱신됩니다 · 운영 플릿 (FLIT)</p>
+      <CustomerNav slug={(t.event as any).slug} active="my" />
     </Page>
   )
 }
