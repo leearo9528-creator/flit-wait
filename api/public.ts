@@ -1,5 +1,5 @@
 // 공개 읽기 RPC 엣지 캐시 — 모두에게 같은 응답(event_summary / booth_summary / event_board)을
-// Vercel Edge 에서 3초 캐시해 DB 호출을 "접속자 수"가 아니라 "초당 1회"로 묶는다.
+// Vercel Edge 에서 5초 캐시(+60초 stale 허용)해 DB 호출을 "접속자 수"가 아니라 "초당 1회"로 묶는다.
 // 손님 1,000명이 폴링해도 DB 는 부스당 ~0.3 qps.
 export const config = { runtime: 'edge' }
 
@@ -24,7 +24,7 @@ export default async function handler(req: Request) {
     status: r.status,
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': r.ok ? 'public, s-maxage=3, stale-while-revalidate=15' : 'no-store',
+      'Cache-Control': r.ok ? 'public, s-maxage=5, stale-while-revalidate=60' : 'no-store',
       'Access-Control-Allow-Origin': '*',
     },
   })

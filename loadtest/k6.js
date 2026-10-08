@@ -13,9 +13,10 @@ const H = { headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Typ
 export const options = {
   scenarios: {
     // 1) 손님 VUS명이 부스 목록/부스 화면을 켜두고 폴링 (Vercel 엣지 캐시 경유)
-    viewers: { executor: 'constant-vus', vus: VUS, duration: DUR, exec: 'viewer' },
+    // 실제처럼 20초에 걸쳐 들어온다 (동시 0초 진입은 빈 캐시 스탬피드만 측정하게 됨)
+    viewers: { executor: 'ramping-vus', startVUs: 0, stages: [{ duration: '20s', target: VUS }, { duration: DUR, target: VUS }], exec: 'viewer' },
     // 2) 손님 VUS명이 '내 대기표'를 켜두고 폴링 — 캐시 불가, 접속자에 비례하는 유일한 DB 부하. 최악 가정으로 6~10초 간격
-    pollers: { executor: 'constant-vus', vus: VUS, duration: DUR, exec: 'poller', startTime: '10s' },
+    pollers: { executor: 'ramping-vus', startVUs: 0, stages: [{ duration: '20s', target: VUS }, { duration: DUR, target: VUS }], exec: 'poller', startTime: '10s' },
     // 3) 접수 러시: 30초 동안 초당 20건 (대기번호 발급 락 경합)
     joiners: { executor: 'constant-arrival-rate', rate: 20, timeUnit: '1s', duration: '30s', preAllocatedVUs: 60, exec: 'joiner', startTime: '30s' },
     // 4) 쿠킹(hybrid): 예약 러시 초당 10건 30초 + 현장 대기 초당 5건 30초 — 같은 부스에 동시에

@@ -26,10 +26,10 @@ export default function AdminBooth() {
 }
 
 function Basic({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
-  const [f, setF] = useState({ name: booth.name, location: booth.location ?? '', mode: booth.mode, is_paused: booth.is_paused, sort_order: booth.sort_order ?? 0, image_url: booth.image_url ?? null as string | null, description: booth.description ?? '' })
+  const [f, setF] = useState({ name: booth.name, location: booth.location ?? '', mode: booth.mode, is_paused: booth.is_paused, sort_order: booth.sort_order ?? 0, image_url: booth.image_url ?? null as string | null, description: booth.description ?? '', group_name: (booth as any).group_name ?? '' })
   const [msg, setMsg] = useState<string | null>(null)
   async function save() {
-    const { error } = await supabase.from('booths').update({ ...f, description: f.description || null }).eq('id', booth.id)
+    const { error } = await supabase.from('booths').update({ ...f, description: f.description || null, group_name: f.group_name.trim() || null }).eq('id', booth.id)
     setMsg(error ? error.message : '저장했습니다.'); onSaved()
   }
   return (
@@ -40,6 +40,7 @@ function Basic({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
         <div className="md:col-span-2"><Field label="소개 (손님 화면에 표시)"><textarea value={f.description} onChange={e => setF({ ...f, description: e.target.value })} rows={2} className="w-full rounded-xl border border-gray-300 p-3 text-sm" placeholder="예: 또띠아 반죽부터 토핑까지 직접 만들어 바로 먹어요 · 소요 50분 · 7세 이상" /></Field></div>
         <Field label="부스명"><Input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} /></Field>
         <Field label="위치"><Input value={f.location} onChange={e => setF({ ...f, location: e.target.value })} /></Field>
+        <Field label="대분류 (손님 목록에서 묶어서 표시)" hint="같은 이름끼리 한 그룹으로 접힙니다. 비우면 그룹 없이 바로 표시"><Input value={f.group_name} onChange={e => setF({ ...f, group_name: e.target.value })} placeholder="예: 테크놀이터 / 쿠킹 클래스" /></Field>
         <Field label="모드">
           <select value={f.mode} onChange={e => setF({ ...f, mode: e.target.value as any })} className="h-12 w-full rounded-xl border border-gray-300 bg-white px-3">
             <option value="queue">queue · 대기표</option><option value="slot">slot · 예약만</option><option value="hybrid">hybrid · 예약+현장대기</option>

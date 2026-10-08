@@ -29,6 +29,7 @@ export interface Booth {
   pin_hash?: string | null
   image_url?: string | null
   description?: string | null
+  group_name?: string | null
 }
 
 export interface EventRow {
