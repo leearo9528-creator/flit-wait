@@ -40,7 +40,11 @@ jobs:
       - name: commit results
         run: |
           git config user.name 'loadtest-bot'; git config user.email 'bot@flitunion.com'
-          cp loadtest/results/latest.json "loadtest/results/$(date -u +%Y%m%dT%H%M)Z.json" || true
+          # 결과를 잠시 치워두고 최신 main 으로 맞춘 뒤 다시 올린다 (이전 결과 커밋과 충돌 방지)
+          mkdir -p /tmp/res && cp loadtest/results/latest.* /tmp/res/
+          git fetch origin main && git reset --hard origin/main
+          mkdir -p loadtest/results && cp /tmp/res/latest.* loadtest/results/
+          cp loadtest/results/latest.json "loadtest/results/$(date -u +%Y%m%dT%H%M)Z.json"
           git add loadtest/results
           git commit -m "loadtest: results (vus=${{ steps.p.outputs.vus }})" || echo "no changes"
-          git pull --rebase origin main && git push
+          git push

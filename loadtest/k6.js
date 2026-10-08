@@ -44,7 +44,7 @@ export function setup() {
   // 폴링용 티켓 50장 + 스태프 세션
   const tokens = []
   for (let i = 0; i < 50; i++) {
-    const phone = '0105' + String(1000000 + i).padStart(7, '0')
+    const phone = '0105' + String(1000000 + (Date.now() % 1000000) * 50 % 9000000 + i).padStart(7, '0') // 실행마다 다른 번호 (중복 접수 거부 회피)
     const r = http.post(`${SB}/rest/v1/rpc/join_queue`, JSON.stringify({ p_slug: BOOTH, p_name: 'k6p' + i, p_phone: phone, p_party: 1, p_consent: true }), H)
     if (r.status === 200) tokens.push(r.json('token'))
   }
