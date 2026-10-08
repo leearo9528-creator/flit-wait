@@ -1,9 +1,10 @@
 -- 2026-10-08: 성남 테스트 데이터 삭제 + 쿠킹 회차 재생성(10/23~25 × 14/15/16/17시 · 30분 · 정원 20) + 예약 오픈 10/20 10:00 복구 + 테스트 행사(slug test) 생성
 -- Supabase 대시보드 > SQL Editor 에 통째로 붙여넣고 Run. 여러 번 실행해도 안전(멱등).
 begin;
-delete from notifications where ticket_id in (select id from tickets where event_id = (select id from events where slug='seongnam-2026'));
-delete from tickets where event_id = (select id from events where slug='seongnam-2026');
-delete from slots where booth_id in (select id from booths where event_id = (select id from events where slug='seongnam-2026'));
+-- (적용본) DELETE 대신 소프트 취소 — 2026-10-08 Supabase 적용 완료. 테스트 티켓은 ticket_date=10/08 이라 행사일 화면엔 안 나온다
+update notifications set status='skipped' where status in ('pending','sending') and ticket_id in (select id from tickets where event_id = (select id from events where slug='seongnam-2026'));
+update tickets set status='cancelled' where event_id = (select id from events where slug='seongnam-2026') and status <> 'cancelled';
+update slots set status='cancelled' where booth_id in (select id from booths where event_id = (select id from events where slug='seongnam-2026')) and status <> 'cancelled';
 
 insert into slots(booth_id, starts_at, ends_at, capacity)
 select b.id, (d + tm) at time zone 'Asia/Seoul', (d + tm + interval '30 min') at time zone 'Asia/Seoul', 20

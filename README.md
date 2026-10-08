@@ -72,12 +72,12 @@ update booths set settings = '{
   "noshow_after_start_min": 10, "transfer_noshow_to_queue": true, "cancel_until_before_min": 120, "sms_fallback": true
 }'::jsonb || settings;
 
--- 쿠킹 회차: 10/24(토)·10/25(일) 11:00 13:00 14:30 16:00 17:30, 60분, 8명
+-- 쿠킹 회차: 10/23(금)~10/25(일) 14:00 15:00 16:00 17:00, 30분, 20명
 insert into slots(booth_id, starts_at, ends_at, capacity)
-select b.id, (d + tm) at time zone 'Asia/Seoul', ((d + tm) at time zone 'Asia/Seoul') + interval '60 minutes', 8
+select b.id, (d + tm) at time zone 'Asia/Seoul', ((d + tm) at time zone 'Asia/Seoul') + interval '30 minutes', 20
 from booths b
-cross join unnest(array['2026-10-24','2026-10-25']::date[]) d
-cross join unnest(array['11:00','13:00','14:30','16:00','17:30']::time[]) tm
+cross join unnest(array['2026-10-23','2026-10-24','2026-10-25']::date[]) d
+cross join unnest(array['14:00','15:00','16:00','17:00']::time[]) tm
 where b.mode = 'hybrid';
 
 
