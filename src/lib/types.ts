@@ -90,6 +90,7 @@ export interface StaffTicket {
   created_at: string
   source: string
   checked_in_at?: string | null
+  updated_at?: string | null
 }
 
 export interface StaffBoard {
@@ -97,6 +98,7 @@ export interface StaffBoard {
   date?: string
   dates?: string[]
   queue: StaffTicket[]
+  history?: StaffTicket[]
   done_today: number
   noshow_today: number
   slots: Array<{

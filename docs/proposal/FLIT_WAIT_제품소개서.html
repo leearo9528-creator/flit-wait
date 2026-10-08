@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>FLIT WAIT 제품 소개서</title>
+<link rel="stylesheet" href="style.css"></head>
+<body>
+
+<div class="cover">
+  <div class="top">FLIT WAIT · 제품 소개서 · 2026. 10</div>
+  <div class="mid">
+    <h1>축제·행사 체험부스<br>대기표 · 사전 예약 시스템</h1>
+    <div class="sub">QR 접수 → 카카오 알림톡 호출 → 스태프 원터치 입장 처리<br>관람객은 줄을 서지 않고, 운영진은 종이 번호표 없이 부스를 운영합니다.</div>
+    <span class="tag">FLIT WAIT</span>
+  </div>
+  <div class="bot">
+    <div><b>플릿 (FLIT)</b><br>행사 셀러 네트워크 · 운영 솔루션<br>운영 애즈셉 · 대표 이아로</div>
+    <div style="text-align:right">wait.flitunion.com<br>hello@flitunion.com · 010-8018-8492</div>
+  </div>
+</div>
+
+<section>
+  <h2>1. 개요</h2>
+  <p>FLIT WAIT는 축제·박람회·지역 행사의 <b>체험부스 대기와 사전 예약을 하나의 웹 서비스</b>로 운영하는 시스템입니다. 관람객은 앱 설치 없이 QR 스캔만으로 대기표를 받거나 회차를 예약하고, 차례가 되면 카카오 알림톡으로 호출을 받습니다. 운영 스태프는 스마트폰 화면에서 호출·입장·노쇼 처리를 버튼 하나로 수행하며, 운영 관리자는 전 부스의 현황과 통계를 실시간으로 확인합니다.</p>
+  <div class="kv" style="margin-top:8px">
+    <div class="card"><div class="t">도입 전</div><ul><li>부스 앞 장시간 대기 줄 → 관람객 불만, 동선 혼잡</li><li>종이 번호표·육성 호출 → 놓침, 분쟁, 스태프 피로</li><li>인기 체험은 선착순 마감 → 늦게 온 관람객 이탈</li><li>운영 데이터 없음 → 다음 회차 기획 근거 부재</li></ul></div>
+    <div class="card"><div class="t">도입 후</div><ul><li>QR 접수 후 자유 관람, 차례가 오면 알림톡 호출</li><li>호출·입장·노쇼가 자동 기록, 미도착 시 자동 순번 이월</li><li>인기 체험은 사전 시간 예약, 노쇼 좌석은 현장 대기자에게 자동 이관</li><li>부스별 처리 인원·대기시간·노쇼율 통계 및 CSV 제공</li></ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>2. 운영 방식 — 두 가지 트랙</h2>
+  <table>
+    <tr><th style="width:18%">트랙</th><th>적합한 부스</th><th>관람객 흐름</th><th>운영 포인트</th></tr>
+    <tr><td><b>A. 현장 대기표</b></td><td>회전이 빠른 체험(로봇·VR·만들기 등), 상시 운영 부스</td><td>QR 스캔 → 이름·연락처·인원 입력 → 대기번호 발급 → 앞 N팀 남으면 사전 알림 → 호출 알림톡 → 부스 방문</td><td>호출 유효시간(기본 5분) 경과 시 자동 노쇼 처리 후 다음 팀 호출. 예상 대기시간 자동 산출</td></tr>
+    <tr><td><b>B. 사전 시간 예약</b></td><td>정원이 있는 클래스형 체험(쿠킹·공예·강연 등)</td><td>예약 오픈 일시에 QR/링크 접속 → 날짜·회차 선택 → 예약 확정 알림톡 → 전날·시작 전 리마인드 → 현장 체크인</td><td>회차별 정원·시작 전 예약 마감·취소 가능 시한을 부스별 설정. 노쇼 좌석은 현장 대기자에게 자동 이관(하이브리드)</td></tr>
+  </table>
+  <p class="small">두 트랙은 한 행사 안에서 부스별로 혼용할 수 있으며, 모든 운영값(팀당 최대 인원, 호출 유효시간, 사전 알림 시점, 예약 오픈 일시, 노쇼 기준 등)은 관리자 화면에서 행사·부스 단위로 조정합니다.</p>
+</section>
+
+<section class="pb">
+  <h2>3. 화면 구성</h2>
+  <h3>3-1. 관람객 화면 (모바일 웹 · 앱 설치 불필요)</h3>
+  <div class="shots">
+    <div class="shot"><img src="img/c-home.png">행사 체험부스 목록 · 실시간 대기 팀 수 / 잔여석</div>
+    <div class="shot"><img src="img/c-queue.png">대기 접수 · 현재 대기·예상 시간 안내</div>
+    <div class="shot"><img src="img/c-reserve.png">사전 예약 · 날짜·회차 선택</div>
+    <div class="shot"><img src="img/c-ticket-waiting.png">내 대기표 · 앞 대기 팀 수, 자동 갱신</div>
+  </div>
+  <div class="shots">
+    <div class="shot"><img src="img/c-ticket-called.png">호출 · 남은 입장 시간 카운트다운, 진동·소리 알림</div>
+    <div class="shot"><img src="img/c-ticket-checked.png">입장 완료</div>
+    <div class="shot"><img src="img/c-ticket-resv.png">예약 확인 · 취소 가능 시한 내 셀프 취소</div>
+    <div class="shot"><img src="img/c-my.png">내 대기·예약 모아보기 · 이름/전화로 찾기</div>
+  </div>
+  <p class="small">모든 화면 하단에 「전체 체험부스」·「내 대기·예약」 이동 바가 고정되어 관람객이 길을 잃지 않습니다. 개인정보 수집 동의 문구는 행사별로 설정합니다.</p>
+</section>
+
+<section>
+  <h3>3-2. 스태프 화면 (부스별 PIN 로그인)</h3>
+  <div class="shots three">
+    <div class="shot"><img src="img/s-login.png">부스 PIN 입력 — 계정·앱 설치 없이 즉시 사용</div>
+    <div class="shot"><img src="img/s-queue.png">현장 대기 보드 · 「다음 호출」 원터치, 입장/노쇼/재호출, 대리 접수, 접수 일시중단</div>
+    <div class="shot"><img src="img/s-slots.png">예약 보드 · 회차별 예약자 체크인, 날짜 탭, 현장 대기 탭</div>
+  </div>
+  <h3>3-3. 현황판 (대형 모니터용 · 선택)</h3>
+  <div class="wide"><img src="img/board.png"></div>
+  <p class="small">부스 입구 또는 안내소 모니터에 띄우는 전광판 화면. 현재 호출 번호·대기 팀 수·다음 회차·잔여석을 실시간 표시합니다.</p>
+</section>
+
+<section class="pb">
+  <h3>3-4. 운영 관리자 화면 (접속 코드 로그인)</h3>
+  <table>
+    <tr><th style="width:22%">메뉴</th><th>기능</th></tr>
+    <tr><td>행사 관리</td><td>행사 생성·운영 기간·공지·개인정보 동의 문구·데이터 보존 기간, 통합 QR·현황판 링크</td></tr>
+    <tr><td>부스 관리</td><td>부스 추가, 운영 트랙(대기/예약/혼합), 대표 사진·소개, 운영 설정(팀당 최대 인원, 호출 유효시간, 사전 알림 시점, 예약 오픈 일시, 예약 마감·취소 시한, 노쇼 기준, 노쇼 좌석 이관 여부), 스태프 PIN, 부스 QR, 회차 일괄 생성·취소</td></tr>
+    <tr><td>통계</td><td>행사·부스·일자별 접수/입장/노쇼 건수, 평균 대기시간, 시간대별 분포, 접수 채널(QR/현장 대리 접수) 비중, CSV 내려받기</td></tr>
+    <tr><td>발송 로그</td><td>알림톡 발송 내역·채널·실패 사유 조회</td></tr>
+    <tr><td>접속 코드</td><td>주최 측 담당자용 관리자 접속 코드 발급·회수 (이메일 계정 불필요)</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>4. 알림 (카카오 알림톡)</h2>
+  <p>관람객 상태가 바뀔 때마다 카카오 알림톡이 발송됩니다. 발신 채널은 <b>「플릿」 카카오톡 채널</b>이며, 각 메시지에는 내 대기표 화면으로 바로 이동하는 버튼이 포함됩니다.</p>
+  <table>
+    <tr><th style="width:16%">구분</th><th>시점</th><th>내용</th></tr>
+    <tr><td rowspan="6">현장 대기</td><td>접수 완료</td><td>대기번호 · 현재 앞 대기 팀 수 · 내 대기표 링크</td></tr>
+    <tr><td>차례 임박</td><td>앞 N팀 이하 남음(부스별 설정) — 부스 근처로 이동 안내</td></tr>
+    <tr><td>호출</td><td>지금 입장 · 유효시간 내 미도착 시 순서 이월 안내</td></tr>
+    <tr><td>입장 완료</td><td>입장 처리 확인</td></tr>
+    <tr><td>순서 지남(노쇼)</td><td>재접수 안내</td></tr>
+    <tr><td>취소</td><td>본인 취소 확인</td></tr>
+    <tr><td rowspan="4">사전 예약</td><td>예약 확정</td><td>일시 · 장소 · 인원 · 도착 안내</td></tr>
+    <tr><td>리마인드</td><td>전날 지정 시각 / 시작 N분 전 (부스별 설정)</td></tr>
+    <tr><td>체크인 완료 · 노쇼</td><td>체크인 확인 / 미도착 자동 취소 안내</td></tr>
+    <tr><td>취소</td><td>본인 취소 확인</td></tr>
+  </table>
+  <p class="small">발송 수수료는 실비(알림톡 건당 약 8원)로 정산됩니다. 카카오톡 미사용자를 위한 문자 대체 발송은 선택 옵션입니다.</p>
+</section>
+
+<section class="pb">
+  <h2>5. 운영 안정성</h2>
+  <div class="kv">
+    <div class="card"><div class="t">동시 접속</div><p>관람객이 많이 보는 화면(부스 목록·부스 페이지·현황판)은 엣지 캐시로 제공되어 <b>접속자 수와 무관하게</b> 서버 부하가 일정합니다. 동시 접속 3,000명 기준으로 설계·부하 테스트를 수행하며, 행사 기간에는 데이터베이스 사양을 상향 운영합니다.</p></div>
+    <div class="card"><div class="t">정합성</div><p>대기번호 발급과 좌석 예약은 데이터베이스 수준에서 직렬화되어 <b>번호 중복·정원 초과가 발생하지 않습니다.</b> 노쇼 처리·좌석 이관·리마인드 발송은 서버 스케줄러가 매분 자동 수행합니다.</p></div>
+    <div class="card"><div class="t">장애 대응</div><p>서비스 상태를 상시 모니터링하며, 관람객 화면 장애 시에도 알림 발송은 독립적으로 동작합니다. 스태프 화면 장애 시에는 종이 번호표·육성 호출로 즉시 전환하고 복구 후 대리 접수로 반영하는 비상 절차를 매뉴얼로 제공합니다.</p></div>
+    <div class="card"><div class="t">개인정보</div><p>수집 항목은 이름·휴대폰번호·인원으로 최소화하고, 관람객 화면에는 연락처 뒷자리만 표시합니다. 행사 종료 후 설정한 보존 기간(기본 7일)이 지나면 개인정보를 자동 파기하며, 동의 문구는 행사별로 설정합니다.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>6. 도입 절차</h2>
+  <table>
+    <tr><th style="width:16%">시점</th><th style="width:22%">단계</th><th>내용</th><th style="width:16%">담당</th></tr>
+    <tr><td>D-14</td><td>요구사항 확정</td><td>부스 목록·운영 트랙·운영 시간·회차·정원·예약 오픈 일시 확정</td><td>주최 ↔ 플릿</td></tr>
+    <tr><td>D-10</td><td>행사 세팅</td><td>행사·부스 등록, 운영값 설정, 관리자 접속 코드 발급, QR 이미지 전달</td><td>플릿</td></tr>
+    <tr><td>D-7</td><td>사인물 제작</td><td>통합 QR·부스별 QR 사인물 디자인·출력 (QR 이미지는 플릿 제공)</td><td>주최</td></tr>
+    <tr><td>D-3</td><td>리허설·교육</td><td>스태프 매뉴얼(1장) 배포, 접수→호출→입장→노쇼 시연, 알림톡 수신 확인</td><td>플릿 + 주최</td></tr>
+    <tr><td>D-day</td><td>현장 운영</td><td>스태프는 부스 PIN으로 로그인 후 운영, 플릿은 원격 모니터링·즉시 대응</td><td>주최 + 플릿</td></tr>
+    <tr><td>D+1 ~</td><td>결과 보고</td><td>부스별 운영 통계·CSV 전달, 보존 기간 경과 후 개인정보 파기</td><td>플릿</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>7. 제공 범위 및 준비 사항</h2>
+  <div class="kv">
+    <div class="card"><div class="t">플릿 제공</div><ul><li>관람객·스태프·관리자·현황판 전 화면 (행사 전용 주소 wait.flitunion.com/e/행사코드)</li><li>카카오 알림톡 발송(플릿 채널) 및 발송 로그</li><li>통합 QR·부스별 QR 이미지, 스태프 매뉴얼, 운영 가이드</li><li>행사 기간 원격 모니터링 및 장애 대응</li><li>종료 후 운영 통계 보고서</li></ul></div>
+    <div class="card"><div class="t">주최 측 준비</div><ul><li>부스별 스태프용 스마트폰 1대 이상 (보조배터리 권장)</li><li>QR 사인물 출력·설치 (부스 앞, 안내소)</li><li>현황판 운영 시 모니터·인터넷 연결 PC 또는 태블릿 (선택)</li><li>관람객 안내 문구·개인정보 동의 문구 확인</li></ul></div>
+  </div>
+  <div class="note" style="margin-top:10px">이용 조건·비용은 행사 규모(부스 수·운영 일수·예상 접수 건수)에 따라 별도 협의합니다. 알림톡 발송 수수료는 실비 정산입니다.</div>
+</section>
+
+<section>
+  <h2>8. 문의</h2>
+  <table>
+    <tr><th style="width:22%">운영사</th><td>애즈셉 (ASSAP) · 브랜드 플릿 (FLIT) / 플릿유니온</td></tr>
+    <tr><th>대표자</th><td>이아로</td></tr>
+    <tr><th>사업자등록번호</th><td>655-26-02147</td></tr>
+    <tr><th>주소</th><td>서울특별시 도봉구 마들로 724, 213호</td></tr>
+    <tr><th>연락처</th><td>010-8018-8492 · hello@flitunion.com · www.flitunion.com</td></tr>
+  </table>
+  <div class="foot"><span>FLIT WAIT 제품 소개서</span><span>© 2026 FLIT. 본 문서의 내용은 사전 협의 없이 변경될 수 있습니다.</span></div>
+</section>
+
+</body></html>

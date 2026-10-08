@@ -1,0 +1,2 @@
+-- 스태프 보드 '오늘 처리 내역'(입장/노쇼/취소) + 회차 티켓에 취소 포함, restore 시 checked_in_at 초기화 (Supabase 적용 완료 2026-10-08)
+-- 본문은 Supabase 에 적용된 staff_board(p_booth,p_token,p_date) / staff_update_ticket 참고 (history 키 추가, limit 300)

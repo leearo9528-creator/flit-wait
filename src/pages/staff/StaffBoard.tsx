@@ -137,6 +137,8 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
               ))}
             </div>
           </section>
+
+          <History items={data.history ?? []} act={act} busyId={busyId} big={big} />
         </div>
       )}
 
@@ -178,10 +180,10 @@ function SlotCard({ s, act, busyId, big, sess, onWalkin }: { s: StaffBoard['slot
       {open && (
         <div className="mt-3 space-y-2">
           {s.tickets.map(t => (
-            <div key={t.id} className={`flex items-center gap-3 rounded-xl p-3 ring-1 ${t.status === 'checked_in' || t.status === 'done' ? 'bg-green-50 ring-green-200' : t.status === 'no_show' ? 'bg-gray-50 ring-gray-200 opacity-60' : 'bg-white ring-gray-200'}`}>
+            <div key={t.id} className={`flex items-center gap-3 rounded-xl p-3 ring-1 ${t.status === 'checked_in' || t.status === 'done' ? 'bg-green-50 ring-green-200' : t.status === 'no_show' || t.status === 'cancelled' ? 'bg-gray-50 ring-gray-200 opacity-70' : 'bg-white ring-gray-200'}`}>
               <div className="flex-1 min-w-0">
                 <div className="truncate font-semibold">{t.name}</div>
-                <div className="text-xs text-gray-500">{t.party_size}명 {t.phone_tail ? `· ${t.phone_tail}` : '· 현장'} · {t.status === 'checked_in' ? `체크인 ${fmtTime(t.checked_in_at!)}` : t.status === 'no_show' ? '노쇼' : '미도착'}</div>
+                <div className="text-xs text-gray-500">{t.party_size}명 {t.phone_tail ? `· ${t.phone_tail}` : '· 현장'} · {t.status === 'checked_in' || t.status === 'done' ? `체크인 ${fmtTime(t.checked_in_at ?? t.created_at)}` : t.status === 'no_show' ? '노쇼' : t.status === 'cancelled' ? '예약 취소' : '미도착'}</div>
               </div>
               {t.status === 'waiting' && (
                 <div className="flex gap-1.5">
@@ -189,7 +191,14 @@ function SlotCard({ s, act, busyId, big, sess, onWalkin }: { s: StaffBoard['slot
                   <Button size="md" variant="danger" className="!w-16" onClick={() => act(t.id, 'noshow')} loading={busyId === t.id}>노쇼</Button>
                 </div>
               )}
-              {t.status === 'no_show' && <Button size="sm" variant="secondary" className="!w-24" onClick={() => act(t.id, 'restore')} loading={busyId === t.id}>복구</Button>}
+              {t.status === 'no_show' && (
+                <div className="flex gap-1.5">
+                  <Button size="sm" className="!w-16" onClick={() => act(t.id, 'checkin')} loading={busyId === t.id}>체크인</Button>
+                  <Button size="sm" variant="secondary" className="!w-16" onClick={() => act(t.id, 'restore')} loading={busyId === t.id}>복구</Button>
+                </div>
+              )}
+              {t.status === 'cancelled' && <Button size="sm" variant="secondary" className="!w-24" onClick={() => { if (confirm('취소된 예약을 되살릴까요?')) act(t.id, 'restore') }} loading={busyId === t.id}>예약 복구</Button>}
+              {(t.status === 'checked_in' || t.status === 'done') && <Button size="sm" variant="ghost" className="!w-20" onClick={() => { if (confirm('입장 처리를 취소하고 미도착으로 되돌릴까요?')) act(t.id, 'restore') }} loading={busyId === t.id}>되돌리기</Button>}
             </div>
           ))}
           {seats < s.capacity && (
@@ -199,6 +208,52 @@ function SlotCard({ s, act, busyId, big, sess, onWalkin }: { s: StaffBoard['slot
         </div>
       )}
     </Card>
+  )
+}
+
+/** 오늘 처리 내역 — 늦게 온 손님 입장, 실수 복구 (복구하면 원래 접수 시각 기준으로 대기 맨 앞에 선다) */
+function History({ items, act, busyId, big }: { items: StaffTicket[]; act: (id: string, a: string) => void; busyId: string | null; big: boolean }) {
+  const [open, setOpen] = useState(false)
+  const [filter, setFilter] = useState<'all' | 'checked_in' | 'no_show' | 'cancelled'>('all')
+  const [q, setQ] = useState('')
+  const norm = (t: StaffTicket) => t.status === 'done' ? 'checked_in' : t.status
+  const shown = items.filter(t => (filter === 'all' || norm(t) === filter) && (!q || t.name.includes(q) || String(t.ticket_no ?? '').includes(q) || (t.phone_tail ?? '').includes(q)))
+  const counts = { checked_in: items.filter(t => norm(t) === 'checked_in').length, no_show: items.filter(t => t.status === 'no_show').length, cancelled: items.filter(t => t.status === 'cancelled').length }
+  const label: Record<string, string> = { checked_in: '입장 완료', done: '입장 완료', no_show: '노쇼', cancelled: '취소' }
+  const tone: Record<string, 'green' | 'red' | 'gray'> = { checked_in: 'green', done: 'green', no_show: 'red', cancelled: 'gray' }
+  return (
+    <section className="mt-6">
+      <button onClick={() => setOpen(o => !o)} className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3 text-left ring-1 ring-gray-200">
+        <span className="text-sm font-semibold text-gray-700">오늘 처리 내역 <span className="font-normal text-gray-500">입장 {counts.checked_in} · 노쇼 {counts.no_show} · 취소 {counts.cancelled}</span></span>
+        <span className="text-gray-400">{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div className="mt-2 space-y-2">
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
+            {([['all', '전체'], ['checked_in', '입장 완료'], ['no_show', '노쇼'], ['cancelled', '취소']] as const).map(([k, l]) => (
+              <button key={k} onClick={() => setFilter(k)} className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold ring-1 ${filter === k ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white ring-gray-300'}`}>{l}</button>
+            ))}
+            <input value={q} onChange={e => setQ(e.target.value)} placeholder="번호·이름 검색" className="ml-auto h-8 w-32 rounded-lg px-2 text-xs ring-1 ring-gray-300" />
+          </div>
+          {shown.length === 0 && <Empty>내역이 없습니다.</Empty>}
+          {shown.map(t => (
+            <Card key={t.id} className="!p-3">
+              <div className="flex items-center gap-3">
+                <div className={`${big ? 'text-4xl' : 'text-3xl'} w-16 font-black tabular-nums text-gray-700`}>{t.ticket_no}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="truncate font-semibold">{t.name} <span className="font-normal text-gray-500">{t.party_size}명 {t.phone_tail && `· ${t.phone_tail}`}</span></div>
+                  <div className="text-xs text-gray-500"><Badge tone={tone[t.status]}>{label[t.status]}</Badge> <span className="ml-1">{fmtTime(t.updated_at ?? t.checked_in_at ?? t.called_at ?? t.created_at)}</span></div>
+                </div>
+                <div className="flex w-28 flex-col gap-1.5">
+                  {(t.status === 'no_show' || t.status === 'cancelled') && <Button size="sm" onClick={() => act(t.id, 'checkin')} loading={busyId === t.id}>지금 입장</Button>}
+                  <Button size="sm" variant="secondary" onClick={() => { if (confirm(`${t.ticket_no}번 ${t.name} — 대기 목록으로 되돌릴까요? (원래 순서대로 맨 앞에 섭니다)`)) act(t.id, 'restore') }} loading={busyId === t.id}>대기로 복구</Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </section>
   )
 }
 
