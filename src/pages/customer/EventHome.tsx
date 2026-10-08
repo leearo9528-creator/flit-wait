@@ -4,6 +4,7 @@ import { cachedRpc } from '../../lib/supabase'
 import { useAsync, fmtDateTime, fmtDate, LS } from '../../lib/util'
 import { Alert, Spinner, Badge } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
+import BizFooter from '../../components/BizFooter'
 
 interface BoothCard {
   id: string; name: string; slug: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; location: string | null
@@ -90,6 +91,7 @@ export default function EventHome() {
         )}
 
         <p className="pt-2 text-center text-xs text-gray-400">이 화면은 자동으로 갱신됩니다 · 운영 플릿 (FLIT)</p>
+        <BizFooter className="!mt-2" />
       </div>
       <CustomerNav slug={event.slug} active="home" />
     </div>
