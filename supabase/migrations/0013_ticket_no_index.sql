@@ -4,3 +4,4 @@ create index if not exists tickets_booth_date_status_created_idx on tickets (boo
 alter function public.kst_today() stable;
 -- booths.group_name (손님 목록 대분류 접기/펼치기) 는 booth_group_name 마이그레이션으로 추가됨
 alter table booths add column if not exists group_name text;
+alter table notifications add column if not exists attempts int not null default 0; -- 발송 실패 자동 재시도 3회 (notify v5)

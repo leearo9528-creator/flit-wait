@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
   if (CRON_SECRET && req.headers.get('x-cron-secret') !== CRON_SECRET) return new Response('forbidden', { status: 403 })
 
   const { data: rows, error } = await sb.from('notifications')
-    .select('id, template_code, tickets!inner(id, token, name, phone, party_size, ticket_no, status, booths!inner(name, slug, location, settings), events!inner(name), slots(starts_at))')
+    .select('id, template_code, attempts, tickets!inner(id, token, name, phone, party_size, ticket_no, status, booths!inner(name, slug, location, settings), events!inner(name), slots(starts_at))')
     .eq('status', 'pending').lte('scheduled_at', new Date().toISOString()).order('scheduled_at').limit(100)
   if (error) return Response.json({ error: error.message }, { status: 500 })
   if (!rows?.length) return Response.json({ sent: 0 })
@@ -97,9 +97,14 @@ Deno.serve(async (req) => {
     } catch (e) { r = { ok: false, status: 0, json: { error: String(e) } } } // 네트워크 예외도 failed 로 기록 (sending 에 갇히지 않게)
     const id = r.json?.requestId ?? r.json?.messages?.[0]?.messageId ?? null
     const fail = !r.ok || (r.json?.messages?.[0]?.requestStatusCode && r.json.messages[0].requestStatusCode !== 'A000')
+    // 실패 시 자동 재시도: 2분·4분 뒤 두 번 더 (총 3회). 호출 알림(5분 유효)도 2분 뒤 재시도는 아직 의미 있음
+    const attempts = (n.attempts ?? 0) + 1
+    const retry = fail && attempts < 3
     await sb.from('notifications').update({
-      status: fail ? 'failed' : 'sent', channel: payload.channel, sent_at: fail ? null : new Date().toISOString(),
-      provider_msg_id: id, error: fail ? JSON.stringify(r.json).slice(0, 500) : null, payload,
+      status: retry ? 'pending' : fail ? 'failed' : 'sent', attempts, channel: payload.channel,
+      sent_at: fail ? null : new Date().toISOString(),
+      scheduled_at: retry ? new Date(Date.now() + attempts * 120_000).toISOString() : undefined,
+      provider_msg_id: id, error: fail ? `[${attempts}회] ` + JSON.stringify(r.json).slice(0, 480) : null, payload,
     }).eq('id', n.id)
     fail ? failed++ : sent++
   }
