@@ -50,11 +50,18 @@ Deno.serve(async (req) => {
   if (error) return Response.json({ error: error.message }, { status: 500 })
   if (!rows?.length) return Response.json({ sent: 0 })
 
+  // 원자적 선점: 직전 실행이 60초를 넘겨 cron 이 겹쳐도 같은 행을 두 번 보내지 않는다 (pending → sending 전이는 한 쪽만 성공)
+  const { data: claimed } = await sb.from('notifications').update({ status: 'sending', sent_at: new Date().toISOString() })
+    .in('id', rows.map((r: any) => r.id)).eq('status', 'pending').select('id')
+  const mine = new Set((claimed ?? []).map((c: any) => c.id))
+  const work = (rows as any[]).filter(r => mine.has(r.id))
+  if (!work.length) return Response.json({ sent: 0, note: 'claimed by another run' })
+
   const { data: tpls } = await sb.from('templates').select('*')
   const tplMap = Object.fromEntries((tpls ?? []).map((t: any) => [t.code, t]))
 
   let sent = 0, failed = 0, skipped = 0
-  for (const n of rows as any[]) {
+  for (const n of work) {
     const t = n.tickets, tpl = tplMap[n.template_code]
     const stale = (n.template_code === 'R02' || n.template_code === 'Q02') && t.status !== 'waiting'
     if (!t?.phone || !tpl?.enabled || stale) { await sb.from('notifications').update({ status: 'skipped' }).eq('id', n.id); skipped++; continue }
@@ -77,7 +84,8 @@ Deno.serve(async (req) => {
 
     if (DRY_RUN) { await sb.from('notifications').update({ status: 'sent', channel: payload.channel, sent_at: new Date().toISOString(), payload, provider_msg_id: 'DRY_RUN' }).eq('id', n.id); sent++; continue }
 
-    let r
+    let r: Awaited<ReturnType<typeof ncp>>
+    try {
     if (useAlimtalk) {
       const msg: any = { to: t.phone, content: fill(tpl.alimtalk_content, vars), useSmsFailover: smsFallback }
       if (tpl.button_name) msg.buttons = [{ type: 'WL', name: tpl.button_name, linkMobile: link, linkPc: link }]
@@ -86,6 +94,7 @@ Deno.serve(async (req) => {
     } else {
       r = await ncp(`/sms/v2/services/${SMS_SVC}/messages`, { type: smsText.length > 80 ? 'LMS' : 'SMS', from: SMS_FROM, subject: `[${t.events.name}]`, content: smsText, messages: [{ to: t.phone }] })
     }
+    } catch (e) { r = { ok: false, status: 0, json: { error: String(e) } } } // 네트워크 예외도 failed 로 기록 (sending 에 갇히지 않게)
     const id = r.json?.requestId ?? r.json?.messages?.[0]?.messageId ?? null
     const fail = !r.ok || (r.json?.messages?.[0]?.requestStatusCode && r.json.messages[0].requestStatusCode !== 'A000')
     await sb.from('notifications').update({
