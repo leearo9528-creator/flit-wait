@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { rpc } from '../../lib/supabase'
-import { LS, useAsync, useBoothLive, useTick, fmtTime, minutesSince } from '../../lib/util'
+import { LS, useAsync, useBoothLive, useTick, fmtTime, fmtDate, minutesSince } from '../../lib/util'
 import { StaffBoard, StaffSession, StaffTicket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge, Empty, Input, Stepper } from '../../components/ui'
 
@@ -16,7 +16,8 @@ export default function StaffBoardPage() {
 
 function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
   const nav = useNavigate()
-  const { data, error, loading, reload } = useAsync<StaffBoard>(() => rpc('staff_board', { p_booth: sess.booth_id, p_token: sess.staff_token }), [sess.booth_id])
+  const [date, setDate] = useState<string | null>(null)
+  const { data, error, loading, reload } = useAsync<StaffBoard>(() => rpc('staff_board', { p_booth: sess.booth_id, p_token: sess.staff_token, p_date: date }), [sess.booth_id, date])
   useBoothLive(sess.booth_id, reload, 5000)
   useTick(1000)
   const [tab, setTab] = useState<'queue' | 'slots'>('queue')
@@ -141,7 +142,16 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
 
       {activeTab === 'slots' && (
         <div className={`space-y-3 ${big ? 'text-xl' : ''}`}>
-          {slots.length === 0 && <Empty>오늘 회차가 없습니다.</Empty>}
+          {(data.dates?.length ?? 0) > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {data.dates!.map(d => (
+                <button key={d} onClick={() => setDate(d)} className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 ${d === data.date ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white ring-gray-300'}`}>
+                  {fmtDate(d + 'T00:00:00+09:00')}{d === todayKst() ? ' (오늘)' : ''}
+                </button>
+              ))}
+            </div>
+          )}
+          {slots.length === 0 && <Empty>이 날짜에 회차가 없습니다.</Empty>}
           {slots.map(s => <SlotCard key={s.id} s={s} act={act} busyId={busyId} big={big} sess={sess} onWalkin={reload} />)}
         </div>
       )}
@@ -214,3 +224,5 @@ function WalkinForm({ sess, slotId, onDone }: { sess: StaffSession; slotId?: str
 }
 
 export type { StaffTicket }
+
+function todayKst() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10) }

@@ -94,6 +94,8 @@ export interface StaffTicket {
 
 export interface StaffBoard {
   booth: Booth
+  date?: string
+  dates?: string[]
   queue: StaffTicket[]
   done_today: number
   noshow_today: number
