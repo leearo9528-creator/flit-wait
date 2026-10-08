@@ -21,7 +21,7 @@ export const minutesSince = (iso: string) => Math.floor((Date.now() - new Date(i
 export const STATUS_LABEL: Record<string, string> = {
   waiting: '대기 중',
   called: '호출됨',
-  checked_in: '입장',
+  checked_in: '입장 완료',
   done: '완료',
   no_show: '노쇼',
   cancelled: '취소',

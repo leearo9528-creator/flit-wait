@@ -72,6 +72,12 @@ export default function MyTicket() {
       <Card className="mb-4 text-center">
         <div className="mb-2"><Badge tone={tone}>{STATUS_LABEL[t.status]}</Badge></div>
 
+        {(t.status === 'checked_in' || t.status === 'done') && (
+          <div className="mb-4 rounded-xl bg-green-50 py-4 ring-1 ring-green-200">
+            <div className="text-lg font-bold text-green-900">입장 완료 · 즐거운 체험 되세요</div>
+            <div className="mt-1 text-sm text-green-800">{isSlot ? '체크인이 확인되었습니다.' : '대기가 끝났습니다. 이 화면은 닫으셔도 돼요.'}</div>
+          </div>
+        )}
         {!isSlot && (
           <>
             <div className="text-sm text-gray-500">대기번호</div>
