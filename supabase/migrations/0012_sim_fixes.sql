@@ -1,0 +1,5 @@
+-- 2026-10-08 100건 시뮬레이션 후 보완 (Supabase 적용 완료)
+-- 결과: 접수 100/100 번호 유니크·연속, ahead_count 불일치 0, 정원 20 회차에 100건 몰아도 초과 0, 노쇼 자동처리·좌석 이관·취소 알림 전부 정상
+-- 1) transfer_freed_seats 이관 순서에 ticket_no 타이브레이크
+-- 2) run_scheduler: 이관돼 '호출'된 현장 대기자(source=transfer)도 유효시간 지나면 자동 노쇼 + 빈 자리 재이관 (noshow_transfer 카운트)
+-- 본문은 Supabase 적용본 참조

@@ -106,9 +106,15 @@ export default function MyTicket() {
           </>
         )}
 
+        {isSlot && t.status === 'called' && (
+          <div className="mb-4 rounded-xl bg-amber-50 py-4 ring-1 ring-amber-200">
+            <div className="text-lg font-bold text-amber-900">자리가 났어요 · 지금 입장해 주세요</div>
+            <div className="mt-1 text-sm text-amber-800">{Math.floor(callLeft / 60)}:{String(callLeft % 60).padStart(2, '0')} 안에 부스로 오지 않으면 다음 대기자에게 넘어갑니다.</div>
+          </div>
+        )}
         {isSlot && (
           <>
-            <div className="text-sm text-gray-500">예약 회차</div>
+            <div className="text-sm text-gray-500">{t.source === 'transfer' ? '배정된 회차' : '예약 회차'}</div>
             <div className="text-3xl font-bold">{fmtDate(t.slot!.starts_at)}</div>
             <div className="text-5xl font-black tabular-nums tracking-tight">{fmtTime(t.slot!.starts_at)}</div>
             <div className="mt-1 text-sm text-gray-500">~ {fmtTime(t.slot!.ends_at)}</div>
