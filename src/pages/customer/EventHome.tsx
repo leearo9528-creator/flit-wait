@@ -27,6 +27,7 @@ export default function EventHome() {
     return () => { clearInterval(iv); document.removeEventListener('visibilitychange', onVis) }
   }, [slug]) // eslint-disable-line
 
+
   // 대분류(group_name)로 묶어 접었다 편다. 그룹 없는 부스는 각자 한 줄
   const groups = useMemo(() => {
     const out: Array<{ key: string; title: string; booths: BoothCard[]; single: boolean }> = []
