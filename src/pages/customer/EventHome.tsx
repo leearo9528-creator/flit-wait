@@ -127,7 +127,9 @@ function BoothRow({ b, grad, index, group, standalone }: { b: BoothCard; grad: s
       : <Big n={left} unit="석" label={b.today_slots > 0 ? '오늘 잔여' : '잔여'} />)
   const to = isQueue ? `/q/${b.slug}` : `/r/${b.slug}`
   // 그룹명이 이름 앞에 붙어 있으면(쿠킹 클래스 · 또띠아 만들기) 그룹 안에서는 뒷부분만
-  const label = group && b.name.startsWith(group) ? b.name.slice(group.length).replace(/^[\s·\-:]+/, '') || b.name : b.name
+  // 그룹명이 이름 앞에 붙어 있으면(쿠킹 클래스 · 또띠아 만들기) 뒷부분만. 남는 게 숫자뿐이면(테크놀이터 1) 원래 이름 유지
+  const stripped = group && b.name.startsWith(group) ? b.name.slice(group.length).replace(/^[\s·\-:]+/, '') : ''
+  const label = stripped && !/^\d+$/.test(stripped) ? stripped : b.name
   if (standalone) return <BoothTile b={b} to={to} grad={grad} right={right} foot={!isQueue && b.waiting_teams > 0 ? `현장 대기 ${b.waiting_teams}팀` : undefined} />
   return (
     <Link to={to} className="flex items-center gap-3 rounded-xl px-3 py-3 ring-1 ring-gray-100 transition active:bg-gray-50">
