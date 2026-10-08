@@ -1,13 +1,46 @@
 name: load-test
+# 실행 방법 ① Actions 탭 > load-test > Run workflow  ② loadtest/trigger 파일을 수정해서 push (API 없이 트리거)
+# 결과는 loadtest/results/latest.json 으로 커밋된다 (git pull 로 확인)
 on:
   workflow_dispatch:
     inputs:
-      vus: { description: '동시 손님 수', default: '1000' }
-      booth: { description: '접수 테스트 부스 slug (테스트 티켓이 생김 — 끝나고 삭제)', default: 'tech-1' }
+      vus: { description: '동시 손님 수', default: '200' }
+      booth: { description: '접수 테스트 부스 slug (테스트 행사 부스만!)', default: 't-tech-2' }
+      slug: { description: '행사 slug', default: 'test' }
+  push:
+    paths: ['loadtest/trigger']
+permissions:
+  contents: write
+concurrency: loadtest
 jobs:
   k6:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: grafana/setup-k6-action@v1
-      - run: k6 run -e BASE=https://wait.flitunion.com -e SB=https://mqrafomyngxsixakbnzu.supabase.co -e KEY=${{ secrets.SUPABASE_ANON_KEY }} -e SLUG=seongnam-2026 -e BOOTH=${{ inputs.booth }} -e VUS=${{ inputs.vus }} loadtest/k6.js
+      - name: read trigger params (push)
+        id: p
+        run: |
+          VUS="${{ inputs.vus }}"; BOOTH="${{ inputs.booth }}"; SLUG="${{ inputs.slug }}"
+          if [ -f loadtest/trigger ]; then
+            [ -z "$VUS" ] && VUS=$(grep -E '^vus=' loadtest/trigger | cut -d= -f2)
+            [ -z "$BOOTH" ] && BOOTH=$(grep -E '^booth=' loadtest/trigger | cut -d= -f2)
+            [ -z "$SLUG" ] && SLUG=$(grep -E '^slug=' loadtest/trigger | cut -d= -f2)
+          fi
+          echo "vus=${VUS:-200}" >> $GITHUB_OUTPUT; echo "booth=${BOOTH:-t-tech-2}" >> $GITHUB_OUTPUT; echo "slug=${SLUG:-test}" >> $GITHUB_OUTPUT
+      - name: k6
+        continue-on-error: true
+        env:
+          # anon(publishable) 키는 클라이언트 번들에 공개되는 값이라 secret 불필요. secret 이 있으면 우선 사용
+          KEY: ${{ secrets.SUPABASE_ANON_KEY || 'sb_publishable_3qQAKwuNVFQellrOrjoB0g_qK9dz5Il' }}
+        run: |
+          mkdir -p loadtest/results
+          k6 run -e BASE=https://wait.flitunion.com -e SB=https://mqrafomyngxsixakbnzu.supabase.co -e KEY=$KEY \
+            -e SLUG=${{ steps.p.outputs.slug }} -e BOOTH=${{ steps.p.outputs.booth }} -e VUS=${{ steps.p.outputs.vus }} loadtest/k6.js | tee loadtest/results/latest.txt
+      - name: commit results
+        run: |
+          git config user.name 'loadtest-bot'; git config user.email 'bot@flitunion.com'
+          cp loadtest/results/latest.json "loadtest/results/$(date -u +%Y%m%dT%H%M)Z.json" || true
+          git add loadtest/results
+          git commit -m "loadtest: results (vus=${{ steps.p.outputs.vus }})" || echo "no changes"
+          git pull --rebase origin main && git push
