@@ -1,4 +1,4 @@
--- 2026-10-08: 성남 테스트 데이터 삭제 + 쿠킹 회차 재생성(14/15/16/17시 · 30분 · 정원 20) + 예약 오픈 10/20 10:00 복구 + 테스트 행사(slug test) 생성
+-- 2026-10-08: 성남 테스트 데이터 삭제 + 쿠킹 회차 재생성(10/23~25 × 14/15/16/17시 · 30분 · 정원 20) + 예약 오픈 10/20 10:00 복구 + 테스트 행사(slug test) 생성
 -- Supabase 대시보드 > SQL Editor 에 통째로 붙여넣고 Run. 여러 번 실행해도 안전(멱등).
 begin;
 delete from notifications where ticket_id in (select id from tickets where event_id = (select id from events where slug='seongnam-2026'));
@@ -8,7 +8,7 @@ delete from slots where booth_id in (select id from booths where event_id = (sel
 insert into slots(booth_id, starts_at, ends_at, capacity)
 select b.id, (d + tm) at time zone 'Asia/Seoul', (d + tm + interval '30 min') at time zone 'Asia/Seoul', 20
 from booths b
-cross join unnest(array['2026-10-24','2026-10-25']::date[]) d
+cross join unnest(array['2026-10-23','2026-10-24','2026-10-25']::date[]) d
 cross join unnest(array['14:00','15:00','16:00','17:00']::time[]) tm
 where b.mode='hybrid' and b.event_id=(select id from events where slug='seongnam-2026');
 
