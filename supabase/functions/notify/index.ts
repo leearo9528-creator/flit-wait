@@ -87,8 +87,9 @@ Deno.serve(async (req) => {
     let r: Awaited<ReturnType<typeof ncp>>
     try {
     if (useAlimtalk) {
-      const msg: any = { to: t.phone, content: fill(tpl.alimtalk_content, vars), useSmsFailover: smsFallback }
-      if (tpl.button_name) msg.buttons = [{ type: 'WL', name: tpl.button_name, linkMobile: link, linkPc: link }]
+      const msg: any = { to: t.phone, content: fill(tpl.alimtalk_content, vars), useSmsFailover: !!(smsFallback && SMS_FROM) } // 발신번호 없으면 failover 끔
+      // 템플릿에 등록된 버튼과 글자 하나라도 다르면 카카오가 거절한다 — PC 링크는 템플릿에 없으므로 Mobile 만
+      if (tpl.button_name) msg.buttons = [{ type: 'WL', name: tpl.button_name, linkMobile: link }]
       if (smsFallback && SMS_FROM) msg.failoverConfig = { type: smsText.length > 80 ? 'LMS' : 'SMS', from: SMS_FROM, subject: `[${t.events.name}]`, content: smsText }
       r = await ncp(`/alimtalk/v2/services/${AT_SVC}/messages`, { plusFriendId: PF_ID, templateCode: tpl.ncp_template_code, messages: [msg] })
     } else {
