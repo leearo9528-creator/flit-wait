@@ -120,7 +120,8 @@
   ```
 - **Edge Function 로그**: 대시보드 > Edge Functions > notify > Logs.
 - **수동 스케줄러 실행**: `select run_scheduler();` / 수동 발송: `curl -H "x-cron-secret: ..." https://mqrafomyngxsixakbnzu.supabase.co/functions/v1/notify`
-- **Supabase Free 일시정지**: 7일간 요청 없으면 프로젝트가 멈춤. 행사 전주에 대시보드 한 번 열기.
+- **Supabase Free 일시정지**: 7일간 요청 없으면 프로젝트가 멈춤 → Vercel 크론 `/api/keepalive` 가 매일 12:17 KST 에 한 번 호출해 깨워둔다 (vercel.json crons). 그래도 행사 전주엔 대시보드 한 번 열어 확인.
+- **비용 구조**: 평소 0원 (Vercel Hobby + Supabase Free + 알림톡 실비). 행사 주간만 Pro+Small $40 → 종료 후 다운그레이드. 행사 1건 원가 ≈ 10만 원(서버 5만 + 알림톡 4~5만). 월 3건 이상이면 Pro 상시가 더 싸다. 한 프로젝트가 모든 행사를 받으므로 행사 수가 늘어도 서버비는 고정
 - **Vercel 배포 실패**: Vercel > Deployments 로그. 롤백은 이전 배포 `Promote to Production`.
 
 ### 6-1. 용량 플랜 (동시접속 3,000명 기준 · 행사 주간만 유료)
