@@ -12,6 +12,9 @@ interface Stats { booth_id: string; waiting: number; called: number; done: numbe
 export default function AdminEvent() {
   const { eventId = '' } = useParams()
   const ev = useAsync<EventRow>(async () => {
+    // events 는 공개 읽기라 URL 만 알면 열린다 → 내 관리 범위인지 먼저 확인
+    const { data: scope, error: se } = await supabase.rpc('my_admin_scope'); if (se) throw se
+    if (!scope.owner && !(scope.event_ids as string[]).includes(eventId)) throw new Error('이 행사에 대한 관리 권한이 없습니다.')
     const { data, error } = await supabase.from('events').select('*').eq('id', eventId).single(); if (error) throw error; return data
   }, [eventId])
   const booths = useAsync<Booth[]>(async () => {
