@@ -127,8 +127,8 @@ function PinQr({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
     <Card>
       <h2 className="mb-3 font-bold">스태프 PIN · QR</h2>
       <div className="flex items-end gap-2">
-        <Field label={booth.pin_hash ? 'PIN 변경 (숫자 4~6자리)' : 'PIN 설정 (숫자 4~6자리)'}><Input value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" /></Field>
-        <Button onClick={setPinNow} disabled={pin.length < 4} className="!w-auto px-5">{booth.pin_hash ? '변경' : '설정'}</Button>
+        <Field label={booth.pin_hash ? 'PIN 변경 (숫자 4자리)' : 'PIN 설정 (숫자 4자리)'}><Input value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))} inputMode="numeric" maxLength={4} /></Field>
+        <Button onClick={setPinNow} disabled={pin.length !== 4} className="!w-auto px-5">{booth.pin_hash ? '변경' : '설정'}</Button>
       </div>
       {!booth.pin_hash && <div className="mt-2"><Badge tone="amber">PIN 미설정 — 스태프 로그인 불가</Badge></div>}
       {msg && <div className="mt-3"><Alert kind={msg.includes('완료') ? 'success' : 'error'}>{msg}</Alert></div>}
