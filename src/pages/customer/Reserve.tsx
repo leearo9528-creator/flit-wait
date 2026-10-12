@@ -62,6 +62,7 @@ export default function Reserve() {
       <BoothHeader booth={booth} event={event} tag="사전 예약" />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
       {notYet && <div className="mb-4"><Alert kind="info">예약은 <b>{fmtDateTime(openAt!.toISOString())}</b>부터 열립니다.</Alert></div>}
+      {booth.is_paused && <div className="mb-4"><Alert kind="warn">현장 대기 접수는 잠시 중단된 상태입니다. 사전 예약은 계속 가능해요.</Alert></div>}
       {existing && Date.now() - existing.at < 7 * 86400_000 && (
         <div className="mb-4"><Alert kind="info">이미 예약하신 내역이 있어요. <Link to={`/t/${existing.token}`} className="font-semibold underline">예약 확인</Link></Alert></div>
       )}

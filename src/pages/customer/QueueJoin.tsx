@@ -44,6 +44,13 @@ export default function QueueJoin() {
     <Page>
       <BoothHeader booth={booth} event={event} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
+      {booth.is_paused && (
+        <div className="mb-4 rounded-2xl bg-red-50 p-5 text-center ring-1 ring-red-200">
+          <div className="text-2xl">⏸️</div>
+          <div className="mt-1 text-lg font-bold text-red-800">지금은 접수를 잠시 멈췄어요</div>
+          <div className="mt-1 text-sm text-red-700">대기 인원이 많아 운영진이 접수를 일시 중단했습니다.<br />잠시 후 이 화면에서 다시 접수할 수 있어요. (자동으로 갱신됩니다)</div>
+        </div>
+      )}
 
       <Card className="mb-4">
         <div className="flex items-end justify-between">
@@ -71,7 +78,7 @@ export default function QueueJoin() {
         </div>
       )}
 
-      <Card>
+      {!booth.is_paused && <Card>
         <form onSubmit={submit} className="space-y-4">
           <Field label="이름 (대표자)">
             <Input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" required maxLength={20} autoComplete="name" />
@@ -94,7 +101,7 @@ export default function QueueJoin() {
             {booth.is_paused ? '접수 일시중단' : closed ? '운영 시간이 아닙니다' : '대기 접수하기'}
           </Button>
         </form>
-      </Card>
+      </Card>}
       <p className="mt-4 text-center text-xs text-gray-400">운영 · 플릿 (FLIT)</p>
       <CustomerNav slug={(event as any).slug} />
     </Page>

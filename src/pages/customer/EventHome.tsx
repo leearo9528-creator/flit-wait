@@ -99,7 +99,7 @@ function GroupSection({ g, gi, open, onToggle }: { g: { key: string; title: stri
         <div>
           <div className="text-2xl font-black tracking-tight">{g.title}</div>
           <div className="mt-0.5 text-xs text-white/80">
-            {g.booths.length}개 체험 · {isQueueGroup ? `현재 대기 ${totalWait}팀` : `잔여 ${totalLeft}석`}{!isQueueGroup && totalWait > 0 ? ` · 현장 대기 ${totalWait}팀` : ''}
+            {g.booths.length}개 체험 · {isQueueGroup ? `현재 대기 ${totalWait}팀` : `잔여 ${totalLeft}석`}{!isQueueGroup && totalWait > 0 ? ` · 현장 대기 ${totalWait}팀` : ''}{g.booths.some(b => b.is_paused) ? ` · ⏸ 접수 중단 ${g.booths.filter(b => b.is_paused).length}곳` : ''}
           </div>
         </div>
         <span className={`text-xl transition-transform ${open ? 'rotate-180' : ''}`}>▾</span>
