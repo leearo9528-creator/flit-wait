@@ -276,9 +276,11 @@
 
 ## 등록 후
 
-1. DB 매핑: `update templates set ncp_template_code = 'FLIT' || code;` (승인 전에 넣어도 무방)
+**아로가 할 일**: 11개 체크 → 검수 요청 → 승인/반려 결과 알려주기 (반려면 사유 캡쳐)
+
+**클로드가 할 일** (Supabase SQL):
+1. DB 매핑: `update templates set ncp_template_code = 'FLIT' || code;` — 2026-10-13 적용 완료
 2. 승인 후 테스트: `select join_queue('t-tech-1','아로','010-2244-3585',1,true);` → 1분 내 발송 → NCP 발송 결과 수신 코드 확인
-3. 반려 시 사유 그대로 공유
 
 ## 이력
 - 2026-10-12: BrandMessage Template에 11종 등록(해시 코드) → 발송 3015. 알림톡 템플릿이 아니었음
