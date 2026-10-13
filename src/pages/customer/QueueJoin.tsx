@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { rpc, cachedRpc } from '../../lib/supabase'
 import { useAsync, useBoothLive, fmtPhone, LS } from '../../lib/util'
 import { BoothSummary } from '../../lib/types'
-import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner, Badge } from '../../components/ui'
+import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
 import CustomerNav from '../../components/CustomerNav'
 
@@ -42,7 +42,8 @@ export default function QueueJoin() {
 
   return (
     <Page>
-      <BoothHeader booth={booth} event={event} />
+      <BoothHeader booth={booth} event={event} closed={closed}
+        live={<>대기손님 현황 <b className="tabular-nums">{waiting_teams}팀</b>{data.avg_service_min && waiting_teams > 0 ? <span className="ml-1 font-normal text-gray-500">· 예상 약 {Math.max(1, Math.round(waiting_teams * data.avg_service_min))}분</span> : null}</>} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
       {booth.is_paused && (
         <div className="mb-4 rounded-2xl bg-red-50 p-5 text-center ring-1 ring-red-200">
@@ -52,23 +53,12 @@ export default function QueueJoin() {
         </div>
       )}
 
-      <Card className="mb-4">
-        <div className="flex items-end justify-between">
-          <div>
-            <div className="text-sm text-gray-500">현재 대기</div>
-            <div className="text-4xl font-bold tabular-nums">{waiting_teams}<span className="ml-1 text-lg font-medium text-gray-500">팀</span></div>
-            {data.avg_service_min && waiting_teams > 0 && <div className="text-sm text-gray-500">예상 약 {Math.max(1, Math.round(waiting_teams * data.avg_service_min))}분</div>}
-          </div>
-          {booth.is_paused ? <Badge tone="red">접수 일시중단</Badge> : closed ? <Badge tone="gray">운영 종료</Badge> : <Badge tone="green">접수 중</Badge>}
-        </div>
-        {booth.location && <div className="mt-2 text-sm text-gray-500">위치 · {booth.location}</div>}
-        {cookingLike && (
-          <div className="mt-3 text-sm text-gray-600">
-            이 부스는 사전 예약제로 운영됩니다. 현장 대기는 예약 취소·노쇼 자리가 생길 때 순서대로 안내됩니다.
-            <Link to={`/r/${slug}`} className="ml-1 font-semibold underline">사전 예약하기</Link>
-          </div>
-        )}
-      </Card>
+      {cookingLike && (
+        <div className="mb-4"><Alert kind="info">
+          이 부스는 사전 예약제로 운영됩니다. 현장 대기는 예약 취소·노쇼 자리가 생길 때 순서대로 안내됩니다.
+          <Link to={`/r/${slug}`} className="ml-1 font-semibold underline">사전 예약하기</Link>
+        </Alert></div>
+      )}
 
       {existing && Date.now() - existing.at < 6 * 3600_000 && (
         <div className="mb-4">
@@ -83,7 +73,7 @@ export default function QueueJoin() {
           <Field label="이름 (대표자)">
             <Input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" required maxLength={20} autoComplete="name" />
           </Field>
-          <Field label="휴대폰번호" hint="호출 알림을 카카오 알림톡(또는 문자)으로 보내드립니다.">
+          <Field label="휴대폰번호" hint="호출 알림을 카카오 알림톡으로 보내드립니다.">
             <Input value={phone} onChange={e => setPhone(fmtPhone(e.target.value))} placeholder="010-0000-0000" inputMode="numeric" required autoComplete="tel" />
           </Field>
           <Field label={`인원 (최대 ${maxParty}명)`}>

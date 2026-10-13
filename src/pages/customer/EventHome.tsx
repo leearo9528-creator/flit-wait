@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { cachedRpc } from '../../lib/supabase'
-import { useAsync, fmtDateTime, fmtDate, LS } from '../../lib/util'
-import { Alert, Spinner, Badge } from '../../components/ui'
+import { useAsync, fmtDateTime, LS } from '../../lib/util'
+import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
+import { BoothThumb, StatusBadge, boothStatus } from '../../components/BoothCard'
 
-interface BoothCard {
+export interface BoothCard {
   id: string; name: string; slug: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; location: string | null
-  image_url: string | null; description: string | null; max_party_size: string | null; reserve_open_at: string | null; group_name?: string | null
+  image_url: string | null; description: string | null; max_party_size: string | null; reserve_open_at: string | null
+  group_name?: string | null; category?: string | null
   waiting_teams: number; today_slots: number; today_left: number; total_left: number
 }
 interface EventSummary {
@@ -15,8 +17,13 @@ interface EventSummary {
   booths: BoothCard[]
 }
 
-const GRADS = ['from-rose-400 to-orange-300', 'from-sky-400 to-indigo-400', 'from-emerald-400 to-teal-300', 'from-violet-400 to-fuchsia-300', 'from-amber-400 to-yellow-300']
+type Sort = 'order' | 'name' | 'wait'
+const SORT_LABEL: Record<Sort, string> = { order: '기본순', name: '이름순', wait: '대기 적은순' }
 
+/**
+ * 행사 홈 — 주문 앱(PAMP)과 같은 구조로 맞춘 목록 화면.
+ * 상단: 존(대분류) 칩 탭 + 정렬 / 본문: 사진 썸네일 + 상태 뱃지 + 카테고리 + 이름 + 대기 현황 한 줄
+ */
 export default function EventHome() {
   const { slug = '' } = useParams()
   const { data, error, loading, reload } = useAsync<EventSummary>(() => cachedRpc('event_summary', slug), [slug])
@@ -27,20 +34,23 @@ export default function EventHome() {
     return () => { clearInterval(iv); document.removeEventListener('visibilitychange', onVis) }
   }, [slug]) // eslint-disable-line
 
-
-  // 대분류(group_name)로 묶어 접었다 편다. 그룹 없는 부스는 각자 한 줄
-  const groups = useMemo(() => {
-    const out: Array<{ key: string; title: string; booths: BoothCard[]; single: boolean }> = []
-    for (const b of data?.booths ?? []) {
-      const key = b.group_name?.trim() || `__${b.id}`
-      let g = out.find(x => x.key === key)
-      if (!g) { g = { key, title: b.group_name?.trim() || b.name, booths: [], single: !b.group_name?.trim() }; out.push(g) }
-      g.booths.push(b)
-    }
+  const zones = useMemo(() => {
+    const out: string[] = []
+    for (const b of data?.booths ?? []) { const z = b.group_name?.trim(); if (z && !out.includes(z)) out.push(z) }
     return out
   }, [data?.booths])
-  const [openMap, setOpenMap] = useState<Record<string, boolean>>(() => LS.get<Record<string, boolean>>(`groups:${slug}`) ?? {})
-  const toggle = (k: string) => setOpenMap(m => { const n = { ...m, [k]: !m[k] }; LS.set(`groups:${slug}`, n); return n })
+  const [zone, setZone] = useState<string>(() => LS.get<string>(`zone:${slug}`) ?? '')
+  const [sort, setSort] = useState<Sort>(() => LS.get<Sort>(`sort:${slug}`) ?? 'order')
+  const [sortOpen, setSortOpen] = useState(false)
+  const pickZone = (z: string) => { setZone(z); LS.set(`zone:${slug}`, z) }
+  const pickSort = (s: Sort) => { setSort(s); LS.set(`sort:${slug}`, s); setSortOpen(false) }
+
+  const list = useMemo(() => {
+    let arr = (data?.booths ?? []).filter(b => !zone || (b.group_name?.trim() || '') === zone)
+    if (sort === 'name') arr = [...arr].sort((a, b) => a.name.localeCompare(b.name, 'ko'))
+    if (sort === 'wait') arr = [...arr].sort((a, b) => a.waiting_teams - b.waiting_teams)
+    return arr
+  }, [data?.booths, zone, sort])
 
   if (loading) return <Spinner />
   if (error || !data?.event) return <div className="p-6"><Alert kind="error">{error ?? '행사를 찾을 수 없습니다.'}</Alert></div>
@@ -51,126 +61,97 @@ export default function EventHome() {
     .filter((x): x is { token: string; at: number } => !!x && Date.now() - x.at < 7 * 86400_000)
 
   return (
-    <div className="mx-auto min-h-dvh max-w-md bg-gray-50 pb-24">
-      {/* 히어로 */}
-      <div className="relative h-56 overflow-hidden bg-gray-900">
-        {event.image_url
-          ? <img src={event.image_url} alt="" className="h-full w-full object-cover" />
-          : <div className="h-full w-full bg-[radial-gradient(ellipse_at_top_left,_#f59e0b_0%,_#111827_55%)]" />}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-gray-950/20 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 p-5 text-white">
-          <div className="text-xs font-medium text-white/70">{fmtDate(event.starts_at)} ~ {fmtDate(event.ends_at)}</div>
-          <h1 className="text-3xl font-black leading-tight">체험부스</h1>
-          <div className="text-sm text-white/80">{event.name}</div>
+    <div className="mx-auto min-h-dvh max-w-md bg-white pb-24">
+      {/* 상단 바 */}
+      <header className="sticky top-0 z-10 bg-white/95 backdrop-blur">
+        <div className="flex h-14 items-center justify-between px-4">
+          <h1 className="text-xl font-bold">체험 신청하기</h1>
+          <Link to={`/e/${event.slug}/my`} aria-label="내 대기·예약" className="rounded-full p-2 text-2xl leading-none active:bg-gray-100">🎫</Link>
         </div>
-      </div>
+        {/* 존 탭 + 정렬 */}
+        <div className="flex items-center gap-2 px-4 pb-3">
+          <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {zones.length > 1 && <Chip on={zone === ''} onClick={() => pickZone('')}>전체</Chip>}
+            {zones.map(z => <Chip key={z} on={zone === z} onClick={() => pickZone(z)}>{z}</Chip>)}
+            {zones.length === 0 && <Chip on>{event.name}</Chip>}
+          </div>
+          <div className="relative shrink-0">
+            <button type="button" onClick={() => setSortOpen(o => !o)} className="flex items-center gap-1 py-2 pl-2 text-sm font-medium text-gray-700">
+              {SORT_LABEL[sort]} <span className={`text-xs transition-transform ${sortOpen ? 'rotate-180' : ''}`}>⌄</span>
+            </button>
+            {sortOpen && (
+              <div className="absolute right-0 top-full z-20 mt-1 w-32 overflow-hidden rounded-xl bg-white py-1 shadow-lg ring-1 ring-gray-200">
+                {(Object.keys(SORT_LABEL) as Sort[]).map(s => (
+                  <button key={s} type="button" onClick={() => pickSort(s)} className={`block w-full px-4 py-2.5 text-left text-sm ${s === sort ? 'font-bold text-gray-900' : 'text-gray-600'} active:bg-gray-50`}>{SORT_LABEL[s]}</button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
 
-      <div className="space-y-5 px-4 pt-4">
-        {event.notice && <Alert kind="warn">{event.notice}</Alert>}
-        {closed && <Alert kind="info">지금은 운영 시간이 아닙니다. 운영: {fmtDateTime(event.starts_at)} ~ {fmtDateTime(event.ends_at)}</Alert>}
-        {mine.length > 0 && <Alert kind="info">접수한 대기·예약이 있어요. <Link to={`/t/${mine[0].token}`} className="font-semibold underline">내 현황 보기</Link></Alert>}
+      <div className="px-4">
+        {event.notice && <div className="mb-3"><Alert kind="warn">{event.notice}</Alert></div>}
+        {closed && <div className="mb-3"><Alert kind="info">지금은 운영 시간이 아닙니다. 운영: {fmtDateTime(event.starts_at)} ~ {fmtDateTime(event.ends_at)}</Alert></div>}
+        {mine.length > 0 && <div className="mb-3"><Alert kind="info">접수한 대기·예약이 있어요. <Link to={`/t/${mine[0].token}`} className="font-semibold underline">내 현황 보기</Link></Alert></div>}
 
-        {groups.map((g, gi) => (
-          <GroupSection key={g.key} g={g} gi={gi} open={!!openMap[g.key]} onToggle={() => toggle(g.key)} />
-        ))}
+        <ul className="divide-y divide-gray-100">
+          {list.map(b => <BoothListItem key={b.id} b={b} closed={closed} />)}
+        </ul>
+        {list.length === 0 && <p className="py-16 text-center text-sm text-gray-400">표시할 체험부스가 없어요.</p>}
 
-        <p className="pt-2 text-center text-xs text-gray-400">이 화면은 자동으로 갱신됩니다 · 운영 플릿 (FLIT)</p>
+        <p className="pt-6 text-center text-xs text-gray-400">이 화면은 자동으로 갱신됩니다 · 운영 플릿 (FLIT)</p>
       </div>
       <CustomerNav slug={event.slug} active="home" />
     </div>
   )
 }
 
-const GROUP_COLORS = ['bg-indigo-600', 'bg-rose-500', 'bg-emerald-600', 'bg-amber-500', 'bg-sky-600']
-
-function GroupSection({ g, gi, open, onToggle }: { g: { key: string; title: string; booths: BoothCard[]; single: boolean }; gi: number; open: boolean; onToggle: () => void }) {
-  const isQueueGroup = g.booths.every(b => b.mode === 'queue')
-  const totalWait = g.booths.reduce((a, b) => a + b.waiting_teams, 0)
-  const totalLeft = g.booths.reduce((a, b) => a + (b.today_slots > 0 ? b.today_left : b.total_left), 0)
-  // 그룹 없는 단일 부스는 기존 타일 그대로
-  if (g.single) {
-    const b = g.booths[0]
-    return <BoothRow b={b} grad={GRADS[gi % GRADS.length]} standalone />
-  }
+function Chip({ on, onClick, children }: { on?: boolean; onClick?: () => void; children: React.ReactNode }) {
   return (
-    <section>
-      <button type="button" onClick={onToggle}
-        className={`flex w-full items-center justify-between rounded-2xl px-5 py-5 text-left text-white shadow-sm transition active:scale-[0.99] ${GROUP_COLORS[gi % GROUP_COLORS.length]}`}>
-        <div>
-          <div className="text-2xl font-black tracking-tight">{g.title}</div>
-          <div className="mt-0.5 text-xs text-white/80">
-            {g.booths.length}개 체험 · {isQueueGroup ? `현재 대기 ${totalWait}팀` : `잔여 ${totalLeft}석`}{!isQueueGroup && totalWait > 0 ? ` · 현장 대기 ${totalWait}팀` : ''}{g.booths.some(b => b.is_paused) ? ` · ⏸ 접수 중단 ${g.booths.filter(b => b.is_paused).length}곳` : ''}
-          </div>
-        </div>
-        <span className={`text-xl transition-transform ${open ? 'rotate-180' : ''}`}>▾</span>
-      </button>
-      {open && (
-        <div className="mt-2 space-y-2 rounded-2xl bg-white p-2 ring-1 ring-gray-200">
-          <p className="px-3 pt-1 text-xs text-gray-500">{isQueueGroup ? 'QR로 줄 서고, 차례가 오면 카카오 알림톡으로 불러드려요' : '회차를 골라 자리를 확보하세요 · 노쇼 자리는 현장 대기 순으로'}</p>
-          {g.booths.map((b, i) => <BoothRow key={b.id} b={b} grad={GRADS[(gi * 3 + i) % GRADS.length]} index={i + 1} group={g.title} />)}
-        </div>
-      )}
-    </section>
+    <button type="button" onClick={onClick}
+      className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[15px] font-semibold ring-1 transition ${on ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 active:bg-gray-50'}`}>
+      {children}
+    </button>
   )
 }
 
-/** 그룹 안의 한 줄 (번호 + 이름 + 실시간 숫자). standalone 이면 큰 타일 */
-function BoothRow({ b, grad, index, group, standalone }: { b: BoothCard; grad: string; index?: number; group?: string; standalone?: boolean }) {
+/** 한 줄 = 사진(좌) + [상태 뱃지 · 존 · 카테고리] / 이름 / 대기 현황 */
+function BoothListItem({ b, closed }: { b: BoothCard; closed: boolean }) {
   const isQueue = b.mode === 'queue'
+  const st = boothStatus(b, closed)
+  const dim = st.kind === 'closed' || st.kind === 'paused' || st.kind === 'soldout'
+  const to = isQueue ? `/q/${b.slug}` : `/r/${b.slug}`
+  const left = b.today_slots > 0 ? b.today_left : b.total_left
   const openAt = b.reserve_open_at ? new Date(b.reserve_open_at) : null
   const notYet = !!openAt && openAt.getTime() > Date.now()
-  const left = b.today_slots > 0 ? b.today_left : b.total_left
-  const right = isQueue
-    ? (b.is_paused ? <Badge tone="red">일시중단</Badge> : <Big n={b.waiting_teams} unit="팀" label="현재 대기" />)
-    : (notYet ? <Badge tone="gray">{fmtDateTime(openAt!.toISOString())} 오픈</Badge>
-      : b.total_left <= 0 ? <Badge tone="red">매진</Badge>
-      : <Big n={left} unit="석" label={b.today_slots > 0 ? '오늘 잔여' : '잔여'} />)
-  const to = isQueue ? `/q/${b.slug}` : `/r/${b.slug}`
-  // 그룹명이 이름 앞에 붙어 있으면(쿠킹 클래스 · 또띠아 만들기) 그룹 안에서는 뒷부분만
-  // 그룹명이 이름 앞에 붙어 있으면(쿠킹 클래스 · 또띠아 만들기) 뒷부분만. 남는 게 숫자뿐이면(테크놀이터 1) 원래 이름 유지
-  const stripped = group && b.name.startsWith(group) ? b.name.slice(group.length).replace(/^[\s·\-:]+/, '') : ''
+  // 그룹명이 이름 앞에 붙어 있으면(쿠킹 클래스 · 또띠아 만들기) 뒷부분만
+  const g = b.group_name?.trim()
+  const stripped = g && b.name.startsWith(g) ? b.name.slice(g.length).replace(/^[\s·\-:]+/, '') : ''
   const label = stripped && !/^\d+$/.test(stripped) ? stripped : b.name
-  if (standalone) return <BoothTile b={b} to={to} grad={grad} right={right} foot={!isQueue && b.waiting_teams > 0 ? `현장 대기 ${b.waiting_teams}팀` : undefined} />
+
+  const live = isQueue
+    ? <>대기손님 현황 <b className="tabular-nums">{b.waiting_teams}팀</b></>
+    : notYet ? <>예약 오픈 {fmtDateTime(openAt!.toISOString())}</>
+    : b.total_left <= 0 ? <>전 회차 매진{b.waiting_teams > 0 ? ` · 현장 대기 ${b.waiting_teams}팀` : ''}</>
+    : <>{b.today_slots > 0 ? '오늘 잔여' : '잔여'} <b className="tabular-nums">{left}석</b>{b.waiting_teams > 0 ? ` · 현장 대기 ${b.waiting_teams}팀` : ''}</>
+
   return (
-    <Link to={to} className="flex items-center gap-3 rounded-xl px-3 py-3 ring-1 ring-gray-100 transition active:bg-gray-50">
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-sm font-black text-white ${grad}`}>{index}</div>
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-[15px] font-bold">{label}</div>
-        {b.description ? <div className="truncate text-xs text-gray-500">{b.description}</div> : b.location && <div className="text-xs text-gray-500">{b.location}</div>}
-        {!isQueue && b.waiting_teams > 0 && <div className="text-[11px] text-gray-400">현장 대기 {b.waiting_teams}팀</div>}
-      </div>
-      <div className="shrink-0">{right}</div>
-    </Link>
-  )
-}
-
-function SectionTitle({ title, sub }: { title: string; sub: string }) {
-  return <div className="mb-2.5"><h2 className="text-lg font-bold">{title}</h2><p className="text-xs text-gray-500">{sub}</p></div>
-}
-
-function Big({ n, unit, label }: { n: number; unit: string; label: string }) {
-  return <div className="text-right"><div className="text-3xl font-black tabular-nums leading-none">{n}<span className="ml-0.5 text-sm font-semibold text-gray-500">{unit}</span></div><div className="mt-0.5 text-[11px] text-gray-500">{label}</div></div>
-}
-
-function BoothTile({ b, to, grad, right, foot }: { b: BoothCard; to: string; grad: string; right: React.ReactNode; foot?: string }) {
-  return (
-    <Link to={to} className="block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition active:scale-[0.99]">
-      <div className="flex">
-        <div className={`relative h-28 w-28 shrink-0 overflow-hidden bg-gradient-to-br ${grad}`}>
-          {b.image_url
-            ? <img src={b.image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
-            : <div className="flex h-full items-center justify-center text-4xl font-black text-white/80">{b.name.replace(/^쿠킹 클래스\s*·\s*/, '').slice(0, 1)}</div>}
-        </div>
-        <div className="flex min-w-0 flex-1 items-center justify-between gap-3 p-3.5">
-          <div className="min-w-0">
-            <div className="line-clamp-2 text-[15px] font-bold leading-tight">{b.name}</div>
-            {b.description ? <div className="mt-1 line-clamp-2 text-xs leading-snug text-gray-500">{b.description}</div>
-              : b.location && <div className="mt-1 text-xs text-gray-500">{b.location}</div>}
-            {foot && <div className="mt-1 text-[11px] text-gray-400">{foot}</div>}
+    <li>
+      <Link to={to} className={`flex gap-4 py-4 active:bg-gray-50 ${dim ? 'opacity-60' : ''}`}>
+        <BoothThumb b={b} dim={dim} label={st.kind === 'closed' ? '운영 종료' : st.kind === 'paused' ? '접수 중단' : st.kind === 'soldout' ? '매진' : undefined} />
+        <div className="min-w-0 flex-1 py-0.5">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+            <StatusBadge st={st} />
+            {g && <span>{g}</span>}
+            {b.category && <span>{b.category}</span>}
           </div>
-          <div className="shrink-0">{right}</div>
+          <div className={`mt-1.5 text-[20px] font-bold leading-tight ${dim ? 'text-gray-500' : 'text-gray-900'}`}>{label}</div>
+          <div className={`mt-2 flex items-center gap-1.5 text-[15px] font-semibold ${dim ? 'text-gray-400' : 'text-orange-500'}`}>
+            <span aria-hidden>👤</span><span>{live}</span>
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </li>
   )
 }

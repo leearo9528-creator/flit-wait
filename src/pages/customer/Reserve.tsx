@@ -45,6 +45,10 @@ export default function Reserve() {
   const closeBefore = (booth.settings.reserve_close_before_min ?? 60) * 60000
   const selected = data.slots.find(s => s.id === slotId) ?? null
   const existing = LS.get<{ token: string; at: number }>(`resv:${slug}`)
+  const closed = event.status !== 'open'
+  const todayKey = fmtDate(new Date().toISOString())
+  const todaySlots = data.slots.filter(s => fmtDate(s.starts_at) === todayKey && s.status === 'open' && new Date(s.ends_at).getTime() > Date.now())
+  const todayLeft = todaySlots.length ? todaySlots.reduce((a, s) => a + Math.max(0, s.capacity - s.reserved), 0) : null
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -59,7 +63,8 @@ export default function Reserve() {
 
   return (
     <Page>
-      <BoothHeader booth={booth} event={event} tag="사전 예약" />
+      <BoothHeader booth={booth} event={event} closed={closed}
+        live={<>{todayLeft != null ? <>오늘 잔여 <b className="tabular-nums">{todayLeft}석</b></> : <>사전 예약</>}{data.waiting_teams > 0 ? <span className="ml-1 font-normal text-gray-500">· 현장 대기 {data.waiting_teams}팀</span> : null}</>} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
       {notYet && <div className="mb-4"><Alert kind="info">예약은 <b>{fmtDateTime(openAt!.toISOString())}</b>부터 열립니다.</Alert></div>}
       {booth.is_paused && <div className="mb-4"><Alert kind="warn">현장 대기 접수는 잠시 중단된 상태입니다. 사전 예약은 계속 가능해요.</Alert></div>}

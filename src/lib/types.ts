@@ -30,6 +30,7 @@ export interface Booth {
   image_url?: string | null
   description?: string | null
   group_name?: string | null
+  category?: string | null
 }
 
 export interface EventRow {

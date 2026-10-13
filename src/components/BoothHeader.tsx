@@ -1,19 +1,47 @@
 import { Link } from 'react-router-dom'
 import type { Booth } from '../lib/types'
+import { StatusBadge, boothStatus } from './BoothCard'
 
-export default function BoothHeader({ booth, event, tag }: { booth: Pick<Booth, 'name' | 'image_url' | 'description' | 'location'>; event: { name: string; slug?: string }; tag?: string }) {
+/**
+ * 부스 상세 상단 — 주문 앱(PAMP) 상세와 같은 순서:
+ * 큰 사진(뒤로가기 오버레이) → [상태 뱃지 · 존 · 카테고리] → 이름 → 대기 현황(주황) → 안내문 박스
+ */
+export default function BoothHeader({ booth, event, live, closed }: {
+  booth: Pick<Booth, 'id' | 'name' | 'mode' | 'is_paused' | 'image_url' | 'description' | 'location' | 'group_name' | 'category'>
+  event: { name: string; slug?: string; status?: string }
+  live?: React.ReactNode
+  closed?: boolean
+}) {
+  const st = boothStatus({ ...booth, image_url: booth.image_url ?? null }, closed ?? event.status === 'closed')
+  const g = booth.group_name?.trim()
   return (
     <header className="-mx-4 -mt-6 mb-4">
-      <div className="relative h-44 overflow-hidden bg-gray-900">
-        {booth.image_url ? <img src={booth.image_url} alt="" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-[radial-gradient(ellipse_at_top_right,_#38bdf8_0%,_#111827_60%)]" />}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950/85 via-gray-950/20 to-transparent" />
-        {event.slug && <Link to={`/e/${event.slug}`} className="absolute left-4 top-4 rounded-full bg-black/40 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">← 체험부스 전체</Link>}
-        <div className="absolute inset-x-0 bottom-0 p-4 text-white">
-          <div className="text-xs text-white/70">{event.name}{tag ? ` · ${tag}` : ''}</div>
-          <h1 className="text-2xl font-black leading-tight">{booth.name}</h1>
-        </div>
+      <div className="relative h-60 overflow-hidden bg-gray-200">
+        {booth.image_url
+          ? <img src={booth.image_url} alt="" className="h-full w-full object-cover" />
+          : <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(ellipse_at_top_right,_#fdba74_0%,_#f1f5f9_65%)] text-7xl font-black text-white drop-shadow">{booth.name.replace(/^.+?·\s*/, '').slice(0, 1)}</div>}
+        {event.slug && (
+          <Link to={`/e/${event.slug}`} aria-label="목록으로" className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-2xl text-white backdrop-blur">‹</Link>
+        )}
       </div>
-      {booth.description && <p className="mt-3 px-4 text-sm leading-relaxed text-gray-600">{booth.description}</p>}
+      <div className="px-4 pt-5">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+          <StatusBadge st={st} />
+          {g && <span>{g}</span>}
+          {booth.category && <span>{booth.category}</span>}
+        </div>
+        <h1 className="mt-2 text-[26px] font-bold leading-tight tracking-tight">{booth.name}</h1>
+        {live && <div className="mt-3 flex items-center gap-1.5 text-[16px] font-semibold text-orange-500"><span aria-hidden>👤</span>{live}</div>}
+        {(booth.description || booth.location) && (
+          <div className="mt-3 flex items-start gap-3 rounded-xl px-4 py-3.5 ring-1 ring-gray-200">
+            <span className="mt-0.5 text-lg" aria-hidden>🏪</span>
+            <div className="min-w-0 text-[15px] leading-relaxed text-gray-700">
+              {booth.description && <div>{booth.description}</div>}
+              {booth.location && <div className="text-sm text-gray-500">위치 · {booth.location}</div>}
+            </div>
+          </div>
+        )}
+      </div>
     </header>
   )
 }
