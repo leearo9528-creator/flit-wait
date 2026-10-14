@@ -1,7 +1,8 @@
 // 공개 읽기 RPC 엣지 캐시 — 모두에게 같은 응답(event_summary / booth_summary / event_board)을
 // Vercel Edge 에서 5초 캐시(+60초 stale 허용)해 DB 호출을 "접속자 수"가 아니라 "초당 1회"로 묶는다.
 // 손님 1,000명이 폴링해도 DB 는 부스당 ~0.3 qps.
-export const config = { runtime: 'edge' }
+// regions: 기본값이면 싱가포르(sin1)에서 실행돼 서울 Supabase 왕복이 매번 국외 경유 → 서울(icn1) 고정
+export const config = { runtime: 'edge', regions: ['icn1'] }
 
 const ALLOWED: Record<string, string> = { event_summary: 'p_slug', booth_summary: 'p_slug', event_board: 'p_slug' }
 

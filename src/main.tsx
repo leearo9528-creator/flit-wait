@@ -1,19 +1,19 @@
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import './index.css'
 import QueueJoin from './pages/customer/QueueJoin'
 import Reserve from './pages/customer/Reserve'
 import MyTicket from './pages/customer/MyTicket'
-import StaffLogin from './pages/staff/StaffLogin'
-import StaffBoardPage from './pages/staff/StaffBoard'
-import AdminLayout from './pages/admin/AdminLayout'
-import AdminEvents from './pages/admin/AdminEvents'
-import AdminEvent from './pages/admin/AdminEvent'
-import AdminBooth from './pages/admin/AdminBooth'
+const StaffLogin = lazy(() => import('./pages/staff/StaffLogin'))
+const StaffBoardPage = lazy(() => import('./pages/staff/StaffBoard'))
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
+const AdminEvents = lazy(() => import('./pages/admin/AdminEvents'))
+const AdminEvent = lazy(() => import('./pages/admin/AdminEvent'))
+const AdminBooth = lazy(() => import('./pages/admin/AdminBooth'))
 import Home from './pages/Home'
 import EventHome from './pages/customer/EventHome'
-import Board from './pages/customer/Board'
+const Board = lazy(() => import('./pages/customer/Board'))
 import MyTickets from './pages/customer/MyTickets'
 
 const router = createBrowserRouter([
@@ -39,6 +39,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <Suspense fallback={null}>
+      <RouterProvider router={router} />
+    </Suspense>
   </React.StrictMode>,
 )
