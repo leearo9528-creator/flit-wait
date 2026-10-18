@@ -1,0 +1,7 @@
+-- 2026-10-18 프로덕션 적용 완료 (행사 전 스태프 시나리오 점검)
+-- staff_update_ticket 가드:
+--  call    : waiting 에서만 (입장·완료 손님 재호출 방지)
+--  checkin : 이미 checked_in/done 이면 멱등 반환 (R05/Q04 알림 중복 발송 방지, 'already': true)
+--            노쇼·취소 손님의 늦은 입장은 회차 정원 검증 (그 사이 현장 손님이 자리를 채웠을 수 있음)
+--  noshow  : waiting·called 에서만 (입장 손님에게 노쇼 오조작 방지 → "먼저 되돌리기")
+-- 본문 전체는 Supabase 적용본 참조 (0002 의 staff_update_ticket + 위 가드).
