@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="fur" gradientUnits="userSpaceOnUse" x1="0" y1="40" x2="0" y2="176">
+      <stop offset="0" stop-color="#e3b27a"/>
+      <stop offset="1" stop-color="#c48a4e"/>
+    </linearGradient>
+    <linearGradient id="muzzle" gradientUnits="userSpaceOnUse" x1="0" y1="84" x2="0" y2="112">
+      <stop offset="0" stop-color="#fff3e2"/>
+      <stop offset="1" stop-color="#f3d9b6"/>
+    </linearGradient>
+  </defs>
+  <!-- 흰 배경 + 검정 윤곽 네모 -->
+  <rect width="200" height="200" fill="#ffffff"/>
+  <rect x="5" y="5" width="190" height="190" rx="30" fill="#ffffff" stroke="#111111" stroke-width="6"/>
+  <!-- 귀 -->
+  <circle cx="60" cy="56" r="18" fill="url(#fur)" stroke="#111111" stroke-width="5"/>
+  <circle cx="140" cy="56" r="18" fill="url(#fur)" stroke="#111111" stroke-width="5"/>
+  <circle cx="60" cy="56" r="8" fill="#f3d9b6"/>
+  <circle cx="140" cy="56" r="8" fill="#f3d9b6"/>
+  <!-- 팔 -->
+  <ellipse cx="46" cy="138" rx="15" ry="22" fill="url(#fur)" stroke="#111111" stroke-width="5" transform="rotate(20 46 138)"/>
+  <ellipse cx="154" cy="138" rx="15" ry="22" fill="url(#fur)" stroke="#111111" stroke-width="5" transform="rotate(-20 154 138)"/>
+  <!-- 발 -->
+  <ellipse cx="76" cy="168" rx="17" ry="12" fill="url(#fur)" stroke="#111111" stroke-width="5"/>
+  <ellipse cx="124" cy="168" rx="17" ry="12" fill="url(#fur)" stroke="#111111" stroke-width="5"/>
+  <ellipse cx="76" cy="170" rx="8" ry="5" fill="#f3d9b6"/>
+  <ellipse cx="124" cy="170" rx="8" ry="5" fill="#f3d9b6"/>
+  <!-- 몸통 -->
+  <ellipse cx="100" cy="138" rx="42" ry="36" fill="url(#fur)" stroke="#111111" stroke-width="5"/>
+  <ellipse cx="100" cy="144" rx="22" ry="20" fill="#f3d9b6"/>
+  <!-- 머리 -->
+  <circle cx="100" cy="82" r="44" fill="url(#fur)" stroke="#111111" stroke-width="5"/>
+  <!-- 주둥이 -->
+  <ellipse cx="100" cy="98" rx="20" ry="14" fill="url(#muzzle)" stroke="#111111" stroke-width="3"/>
+  <ellipse cx="100" cy="92" rx="7" ry="5" fill="#111111"/>
+  <path d="M100 97 v6 M94 106 q6 5 12 0" fill="none" stroke="#111111" stroke-width="3" stroke-linecap="round"/>
+  <!-- 눈 -->
+  <circle cx="84" cy="78" r="4.5" fill="#111111"/>
+  <circle cx="116" cy="78" r="4.5" fill="#111111"/>
+  <circle cx="85.5" cy="76.5" r="1.5" fill="#ffffff"/>
+  <circle cx="117.5" cy="76.5" r="1.5" fill="#ffffff"/>
+  <!-- 볼 터치 -->
+  <ellipse cx="72" cy="94" rx="7" ry="4" fill="#f29a8e" opacity="0.75"/>
+  <ellipse cx="128" cy="94" rx="7" ry="4" fill="#f29a8e" opacity="0.75"/>
+  <!-- 하이라이트 -->
+  <ellipse cx="76" cy="54" rx="9" ry="3.5" fill="#ffffff" opacity="0.8" transform="rotate(-25 76 54)"/>
+</svg>
