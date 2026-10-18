@@ -1,0 +1,5 @@
+-- 2026-10-18 프로덕션 적용 완료
+-- event_summary 에 'next_slot_at' (다음 열린 회차 시작 시각) 추가.
+-- 손님 목록의 "예약 오픈 예정 / 예약 오픈 MM.DD HH:MM" 판정을 오늘 날짜가 아니라
+-- 다음 회차 날짜 기준 openAtFor() 로 계산 → 테스트 회차가 지나가도 "예약 오픈 10.23 12:00" 으로 정확히 표시.
+-- 본문은 0020 과 동일 + 'next_slot_at', (select min(s.starts_at) from slots s where s.booth_id=b.id and s.status='open' and s.ends_at>now())

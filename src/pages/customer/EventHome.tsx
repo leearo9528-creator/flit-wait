@@ -4,11 +4,11 @@ import { cachedRpc } from '../../lib/supabase'
 import { useAsync, fmtDateTime, LS } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
-import { BoothThumb, StatusBadge, boothStatus, openAtFor, kstYmd, showGroupTag } from '../../components/BoothCard'
+import { BoothThumb, StatusBadge, boothStatus, nextOpenAt, showGroupTag } from '../../components/BoothCard'
 
 export interface BoothCard {
   id: string; name: string; slug: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; location: string | null
-  image_url: string | null; icon_url?: string | null; description: string | null; max_party_size: string | null; reserve_open_at: string | null; reserve_open_daily_time?: string | null
+  image_url: string | null; icon_url?: string | null; description: string | null; max_party_size: string | null; reserve_open_at: string | null; reserve_open_daily_time?: string | null; next_slot_at?: string | null
   group_name?: string | null; category?: string | null
   waiting_teams: number; today_slots: number; today_left: number; total_left: number
 }
@@ -123,8 +123,8 @@ function BoothListItem({ b, closed }: { b: BoothCard; closed: boolean }) {
   const dim = st.kind === 'closed' || st.kind === 'paused' || st.kind === 'soldout'
   const to = isQueue ? `/q/${b.slug}` : `/r/${b.slug}`
   const left = b.today_slots > 0 ? b.today_left : b.total_left
-  // 오늘(KST) 기준 오픈 시각 — 일별 오픈(매일 12:00)이 있으면 그것까지 반영
-  const openAt = openAtFor(b, kstYmd(new Date()))
+  // 다음 회차 날짜 기준 오픈 시각 — 일별 오픈(매일 12:00)이면 그 날짜 12:00
+  const openAt = nextOpenAt(b)
   const notYet = !!openAt && openAt.getTime() > Date.now()
   const g = showGroupTag(b.group_name, b.category)
   const label = b.name
