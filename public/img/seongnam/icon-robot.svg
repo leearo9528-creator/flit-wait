@@ -1,56 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#f7f8fa"/>
-      <stop offset="1" stop-color="#e9edf2"/>
-    </linearGradient>
-    <linearGradient id="white" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="white" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="176">
       <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="1" stop-color="#dfe5ea"/>
+      <stop offset="1" stop-color="#dde4ea"/>
     </linearGradient>
     <linearGradient id="face" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#3d5566"/>
-      <stop offset="1" stop-color="#22343f"/>
+      <stop offset="0" stop-color="#3b5364"/>
+      <stop offset="1" stop-color="#1f303a"/>
     </linearGradient>
-    <linearGradient id="mint" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#bfeadc"/>
-      <stop offset="1" stop-color="#7fcbb0"/>
-    </linearGradient>
-    <radialGradient id="shadow" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#3a4a55" stop-opacity="0.3"/>
-      <stop offset="1" stop-color="#3a4a55" stop-opacity="0"/>
+    <radialGradient id="mint" cx="0.4" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#d2f3e6"/>
+      <stop offset="1" stop-color="#7cc9ad"/>
     </radialGradient>
   </defs>
-  <rect width="200" height="200" fill="url(#bg)"/>
-  <ellipse cx="100" cy="176" rx="46" ry="9" fill="url(#shadow)"/>
+  <!-- 흰 배경 + 검정 윤곽 네모 -->
+  <rect width="200" height="200" fill="#ffffff"/>
+  <rect x="5" y="5" width="190" height="190" rx="30" fill="#ffffff" stroke="#111111" stroke-width="6"/>
   <!-- 안테나 -->
-  <line x1="100" y1="36" x2="100" y2="22" stroke="#b9c4cc" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="100" cy="18" r="7" fill="#ef4a4a"/>
-  <circle cx="98" cy="16" r="2" fill="#ffffff" opacity="0.8"/>
+  <line x1="100" y1="38" x2="100" y2="26" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="100" cy="22" r="7" fill="#ee4b4b" stroke="#111111" stroke-width="3"/>
   <!-- 귀 -->
-  <ellipse cx="50" cy="66" rx="9" ry="13" fill="url(#mint)" stroke="#6fb99d" stroke-width="2"/>
-  <ellipse cx="150" cy="66" rx="9" ry="13" fill="url(#mint)" stroke="#6fb99d" stroke-width="2"/>
-  <!-- 머리 -->
-  <rect x="54" y="34" width="92" height="66" rx="26" fill="url(#white)" stroke="#c9d2d9" stroke-width="2"/>
-  <!-- 얼굴 화면 -->
-  <rect x="66" y="46" width="68" height="42" rx="16" fill="url(#face)"/>
-  <ellipse cx="86" cy="66" rx="7" ry="8" fill="#7ee8ff"/>
-  <ellipse cx="114" cy="66" rx="7" ry="8" fill="#7ee8ff"/>
-  <circle cx="84" cy="63" r="2.2" fill="#ffffff"/>
-  <circle cx="112" cy="63" r="2.2" fill="#ffffff"/>
-  <path d="M92 78 q8 5 16 0" fill="none" stroke="#7ee8ff" stroke-width="3" stroke-linecap="round"/>
-  <!-- 목 -->
-  <rect x="88" y="100" width="24" height="10" fill="#c9d2d9"/>
+  <ellipse cx="54" cy="70" rx="9" ry="13" fill="url(#mint)" stroke="#111111" stroke-width="4"/>
+  <ellipse cx="146" cy="70" rx="9" ry="13" fill="url(#mint)" stroke="#111111" stroke-width="4"/>
   <!-- 팔 -->
-  <rect x="34" y="114" width="20" height="40" rx="10" fill="url(#white)" stroke="#c9d2d9" stroke-width="2"/>
-  <rect x="146" y="114" width="20" height="40" rx="10" fill="url(#white)" stroke="#c9d2d9" stroke-width="2"/>
-  <!-- 몸통 -->
-  <rect x="58" y="108" width="84" height="60" rx="22" fill="url(#white)" stroke="#c9d2d9" stroke-width="2"/>
-  <circle cx="100" cy="138" r="15" fill="url(#mint)" stroke="#6fb99d" stroke-width="2"/>
-  <circle cx="100" cy="138" r="6" fill="#ef4a4a"/>
+  <rect x="38" y="112" width="20" height="42" rx="10" fill="url(#white)" stroke="#111111" stroke-width="4"/>
+  <rect x="142" y="112" width="20" height="42" rx="10" fill="url(#white)" stroke="#111111" stroke-width="4"/>
   <!-- 발 -->
-  <rect x="68" y="164" width="24" height="12" rx="6" fill="#c9d2d9"/>
-  <rect x="108" y="164" width="24" height="12" rx="6" fill="#c9d2d9"/>
+  <rect x="68" y="160" width="24" height="14" rx="7" fill="#c5cfd7" stroke="#111111" stroke-width="4"/>
+  <rect x="108" y="160" width="24" height="14" rx="7" fill="#c5cfd7" stroke="#111111" stroke-width="4"/>
+  <!-- 몸통 -->
+  <rect x="60" y="104" width="80" height="60" rx="24" fill="url(#white)" stroke="#111111" stroke-width="5"/>
+  <circle cx="100" cy="134" r="15" fill="url(#mint)" stroke="#111111" stroke-width="4"/>
+  <circle cx="100" cy="134" r="6" fill="#ee4b4b"/>
+  <!-- 머리 -->
+  <rect x="58" y="38" width="84" height="64" rx="28" fill="url(#white)" stroke="#111111" stroke-width="5"/>
+  <rect x="70" y="50" width="60" height="40" rx="16" fill="url(#face)" stroke="#111111" stroke-width="3"/>
+  <ellipse cx="88" cy="70" rx="7" ry="8" fill="#7fe9ff"/>
+  <ellipse cx="112" cy="70" rx="7" ry="8" fill="#7fe9ff"/>
+  <circle cx="85.5" cy="67" r="2.2" fill="#ffffff"/>
+  <circle cx="109.5" cy="67" r="2.2" fill="#ffffff"/>
+  <path d="M93 81 q7 5 14 0" fill="none" stroke="#7fe9ff" stroke-width="3" stroke-linecap="round"/>
   <!-- 하이라이트 -->
-  <ellipse cx="72" cy="42" rx="10" ry="4" fill="#ffffff" opacity="0.9" transform="rotate(-20 72 42)"/>
+  <ellipse cx="74" cy="46" rx="9" ry="3.5" fill="#ffffff" transform="rotate(-20 74 46)"/>
 </svg>
