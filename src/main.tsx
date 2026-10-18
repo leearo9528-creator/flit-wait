@@ -5,16 +5,19 @@ import './index.css'
 import QueueJoin from './pages/customer/QueueJoin'
 import Reserve from './pages/customer/Reserve'
 import MyTicket from './pages/customer/MyTicket'
-const StaffLogin = lazy(() => import('./pages/staff/StaffLogin'))
-const StaffBoardPage = lazy(() => import('./pages/staff/StaffBoard'))
-const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
+import Home from './pages/Home'
+import EventHome from './pages/customer/EventHome'
+import MyTickets from './pages/customer/MyTickets'
+import Board from './pages/customer/Board'
+import { Spinner } from './components/ui'
+// 스태프·현황판은 그 주소로 바로 들어오므로 지연 로딩이 왕복만 늘린다 → 메인 번들에 포함 (합쳐서 ~16KB)
+import StaffLogin from './pages/staff/StaffLogin'
+import StaffBoardPage from './pages/staff/StaffBoard'
+// 관리자는 손님 번들을 키우지 않도록 지연 로딩 유지. 레이아웃(로그인 화면)은 즉시, 하위 화면은 레이아웃이 뜨면 미리 받아둔다 (AdminLayout 참고)
+import AdminLayout from './pages/admin/AdminLayout'
 const AdminEvents = lazy(() => import('./pages/admin/AdminEvents'))
 const AdminEvent = lazy(() => import('./pages/admin/AdminEvent'))
 const AdminBooth = lazy(() => import('./pages/admin/AdminBooth'))
-import Home from './pages/Home'
-import EventHome from './pages/customer/EventHome'
-const Board = lazy(() => import('./pages/customer/Board'))
-import MyTickets from './pages/customer/MyTickets'
 
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
@@ -39,7 +42,7 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Suspense fallback={null}>
+    <Suspense fallback={<Spinner />}>
       <RouterProvider router={router} />
     </Suspense>
   </React.StrictMode>,

@@ -9,6 +9,9 @@ export default function AdminLayout() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+    // 로그인 화면이 떠 있는 동안 하위 화면 청크를 미리 받아둔다 → 입장 직후 화면 전환이 즉시
+    const idle = (cb: () => void) => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(cb) : setTimeout(cb, 300))
+    idle(() => { import('./AdminEvents'); import('./AdminEvent'); import('./AdminBooth') })
     return () => sub.subscription.unsubscribe()
   }, [])
   if (session === undefined) return <Spinner />
