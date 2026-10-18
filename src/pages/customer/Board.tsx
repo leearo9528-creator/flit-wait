@@ -62,11 +62,11 @@ export default function Board() {
               <>
                 <div className="text-sm text-gray-400">다음 회차</div>
                 <div className="text-6xl font-black tabular-nums text-sky-300">{fmtTime(b.next_slot.starts_at)}</div>
-                <div className="mt-3 grid grid-cols-2 gap-3 text-center">
+                <div className={`mt-3 grid gap-3 text-center ${b.mode === 'hybrid' ? 'grid-cols-2' : 'grid-cols-1'}`}>
                   <Stat label="잔여석" v={b.next_slot.left > 0 ? `${b.next_slot.left}석` : '매진'} />
-                  <Stat label="현장 대기" v={`${b.waiting_teams}팀`} />
+                  {b.mode === 'hybrid' && <Stat label="현장 대기" v={`${b.waiting_teams}팀`} />}
                 </div>
-                <div className="mt-3 text-sm text-gray-500">사전 예약제 · 노쇼 자리는 현장 대기 순으로 안내</div>
+                <div className="mt-3 text-sm text-gray-500">{b.mode === 'hybrid' ? '사전 예약제 · 노쇼 자리는 현장 대기 순으로 안내' : '사전 예약제 · 빈자리는 부스에서 현장 안내'}</div>
               </>
             ) : <div className="py-8 text-center text-2xl text-gray-600">오늘 회차 종료</div>}
           </div>
