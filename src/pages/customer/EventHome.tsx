@@ -4,11 +4,11 @@ import { cachedRpc } from '../../lib/supabase'
 import { useAsync, fmtDateTime, LS } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
-import { BoothThumb, StatusBadge, boothStatus } from '../../components/BoothCard'
+import { BoothThumb, StatusBadge, boothStatus, openAtFor, kstYmd, showGroupTag } from '../../components/BoothCard'
 
 export interface BoothCard {
   id: string; name: string; slug: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; location: string | null
-  image_url: string | null; description: string | null; max_party_size: string | null; reserve_open_at: string | null
+  image_url: string | null; description: string | null; max_party_size: string | null; reserve_open_at: string | null; reserve_open_daily_time?: string | null
   group_name?: string | null; category?: string | null
   waiting_teams: number; today_slots: number; today_left: number; total_left: number
 }
@@ -65,7 +65,7 @@ export default function EventHome() {
       {/* 상단 바 */}
       <header className="sticky top-0 z-10 bg-white/95 backdrop-blur">
         <div className="flex h-14 items-center justify-between px-4">
-          <h1 className="text-xl font-bold">체험 신청하기</h1>
+          <h1 className="text-xl font-bold">체험부스 신청</h1>
           <Link to={`/e/${event.slug}/my`} aria-label="내 대기·예약" className="rounded-full p-2 text-2xl leading-none active:bg-gray-100">🎫</Link>
         </div>
         {/* 존 탭 + 정렬 */}
@@ -123,12 +123,11 @@ function BoothListItem({ b, closed }: { b: BoothCard; closed: boolean }) {
   const dim = st.kind === 'closed' || st.kind === 'paused' || st.kind === 'soldout'
   const to = isQueue ? `/q/${b.slug}` : `/r/${b.slug}`
   const left = b.today_slots > 0 ? b.today_left : b.total_left
-  const openAt = b.reserve_open_at ? new Date(b.reserve_open_at) : null
+  // 오늘(KST) 기준 오픈 시각 — 일별 오픈(매일 12:00)이 있으면 그것까지 반영
+  const openAt = openAtFor(b, kstYmd(new Date()))
   const notYet = !!openAt && openAt.getTime() > Date.now()
-  // 그룹명이 이름 앞에 붙어 있으면(쿠킹 클래스 · 또띠아 만들기) 뒷부분만
-  const g = b.group_name?.trim()
-  const stripped = g && b.name.startsWith(g) ? b.name.slice(g.length).replace(/^[\s·\-:]+/, '') : ''
-  const label = stripped && !/^\d+$/.test(stripped) ? stripped : b.name
+  const g = showGroupTag(b.group_name, b.category)
+  const label = b.name
 
   const live = isQueue
     ? <>대기손님 현황 <b className="tabular-nums">{b.waiting_teams}팀</b></>

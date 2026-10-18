@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { Booth } from '../lib/types'
-import { StatusBadge, boothStatus } from './BoothCard'
+import { StatusBadge, boothStatus, showGroupTag } from './BoothCard'
 
 /**
  * 부스 상세 상단 — 주문 앱(PAMP) 상세와 같은 순서:
@@ -13,13 +13,13 @@ export default function BoothHeader({ booth, event, live, closed }: {
   closed?: boolean
 }) {
   const st = boothStatus({ ...booth, image_url: booth.image_url ?? null }, closed ?? event.status === 'closed')
-  const g = booth.group_name?.trim()
+  const g = showGroupTag(booth.group_name, booth.category)
   return (
     <header className="-mx-4 -mt-6 mb-4">
       <div className="relative h-60 overflow-hidden bg-gray-200">
         {booth.image_url
           ? <img src={booth.image_url} alt="" className="h-full w-full object-cover" />
-          : <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(ellipse_at_top_right,_#fdba74_0%,_#f1f5f9_65%)] text-7xl font-black text-white drop-shadow">{booth.name.replace(/^.+?·\s*/, '').slice(0, 1)}</div>}
+          : <div className="h-full w-full bg-[radial-gradient(ellipse_at_top_right,_#fdba74_0%,_#f1f5f9_65%)]" />}
         {event.slug && (
           <Link to={`/e/${event.slug}`} aria-label="목록으로" className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-2xl text-white backdrop-blur">‹</Link>
         )}

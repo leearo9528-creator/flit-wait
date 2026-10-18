@@ -16,23 +16,17 @@ export default function MyTicket() {
 
   // 호출되면 진동 + 소리 + 브라우저 알림 (알림톡이 늦을 때 보조)
   const prevStatus = useRef<string | null>(null)
-  const [alertOn, setAlertOn] = useState<boolean>(() => LS.get<boolean>('alert:on') ?? true)
   useEffect(() => {
     if (!t) return
     if (prevStatus.current && prevStatus.current !== 'called' && t.status === 'called') {
       try { navigator.vibrate?.([300, 100, 300, 100, 600]) } catch {}
-      if (alertOn) { try { beep() } catch {} }
+      try { beep() } catch {}
       if ('Notification' in window && Notification.permission === 'granted') {
         try { new Notification(`${t.booth.name} 입장하세요`, { body: `대기번호 ${t.ticket_no}번 · ${t.booth.settings.call_valid_min ?? 5}분 안에 부스로 와주세요`, tag: 'flit-call' }) } catch {}
       }
     }
     prevStatus.current = t.status
   }, [t?.status]) // eslint-disable-line
-  async function enableNotify() {
-    if (!('Notification' in window)) return
-    const p = await Notification.requestPermission(); setAlertOn(true); LS.set('alert:on', true)
-    if (p === 'granted') try { beep() } catch {}
-  }
 
   // 대기 상태 변화 감지: booth_versions 구독 (slug 기준 booth id 를 모르니 폴링 중심 + 전체 테이블 변경 구독)
   // 손님 화면은 Realtime 대신 폴링 (동시접속 수천 명 대비 — Realtime 연결 수 한도 보호). 호출 임박/호출 상태면 더 자주.
@@ -133,14 +127,6 @@ export default function MyTicket() {
         </div>
         {t.booth.location && <div className="mt-3 text-sm text-gray-500">위치 · {t.booth.location}</div>}
       </Card>
-
-      {!isSlot && t.status === 'waiting' && 'Notification' in window && Notification.permission === 'default' && (
-        <div className="mb-4">
-          <button onClick={enableNotify} className="w-full rounded-xl bg-amber-50 px-4 py-3 text-left text-sm text-amber-900 ring-1 ring-amber-200">
-            <b>🔔 이 화면 알림 켜기</b> — 호출되면 소리·진동으로 알려드려요. (알림톡과 별개, 화면을 꺼두면 안 울려요)
-          </button>
-        </div>
-      )}
 
       {(t.status === 'no_show' || t.status === 'cancelled') && (
         <div className="mb-4">

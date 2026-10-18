@@ -69,6 +69,7 @@ const NUM: Array<[keyof BoothSettings, string, string]> = [
 function Settings({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
   const [s, setS] = useState<BoothSettings>({ ...booth.settings })
   const [openAt, setOpenAt] = useState(booth.settings.reserve_open_at ? toLocalInput(booth.settings.reserve_open_at) : '')
+  const [dailyTime, setDailyTime] = useState(booth.settings.reserve_open_daily_time ?? '')
   const [dayBefore, setDayBefore] = useState(() => { const r = booth.settings.reminders?.find(r => r.type === 'day_before') as any; return r ? String(r.hour) : '' })
   const [beforeMin, setBeforeMin] = useState(() => { const r = booth.settings.reminders?.find(r => r.type === 'before_min') as any; return r ? String(r.min) : '' })
   const [msg, setMsg] = useState<string | null>(null)
@@ -76,7 +77,9 @@ function Settings({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
     const reminders: BoothSettings['reminders'] = []
     if (dayBefore !== '') reminders.push({ type: 'day_before', hour: +dayBefore })
     if (beforeMin !== '') reminders.push({ type: 'before_min', min: +beforeMin })
-    const settings = { ...s, reminders, reserve_open_at: openAt ? new Date(openAt).toISOString() : null }
+    const dt = dailyTime.trim()
+    if (dt && !/^\d{1,2}:\d{2}$/.test(dt)) { setMsg('일별 예약 오픈 시각은 12:00 형식으로 입력하세요.'); return }
+    const settings = { ...s, reminders, reserve_open_at: openAt ? new Date(openAt).toISOString() : null, reserve_open_daily_time: dt ? dt.padStart(5, '0') : null }
     const { error } = await supabase.from('booths').update({ settings }).eq('id', booth.id)
     setMsg(error ? error.message : '저장했습니다.'); onSaved()
   }
@@ -88,6 +91,7 @@ function Settings({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
           <Field key={k} label={`${label} (${unit})`}><Input type="number" value={(s[k] as number) ?? ''} onChange={e => setS({ ...s, [k]: +e.target.value })} /></Field>
         ))}
         <Field label="사전 예약 오픈 일시 (비우면 즉시)"><Input type="datetime-local" value={openAt} onChange={e => setOpenAt(e.target.value)} /></Field>
+        <Field label="일별 예약 오픈 시각 (매일 HH:MM, 비우면 없음)" hint="설정하면 각 날짜 회차는 그날 이 시각부터 예약 가능. 위 오픈 일시와 둘 중 늦은 쪽 적용"><Input value={dailyTime} onChange={e => setDailyTime(e.target.value)} placeholder="12:00" /></Field>
         <Field label="리마인드 ① 전날 N시 (비우면 안 보냄)"><Input type="number" value={dayBefore} onChange={e => setDayBefore(e.target.value)} placeholder="19" /></Field>
         <Field label="리마인드 ② 시작 N분 전 (비우면 안 보냄)"><Input type="number" value={beforeMin} onChange={e => setBeforeMin(e.target.value)} placeholder="30" /></Field>
         <div className="space-y-2 text-sm md:col-span-2">

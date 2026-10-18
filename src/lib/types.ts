@@ -8,6 +8,8 @@ export interface BoothSettings {
   notify_ahead_teams: number
   call_valid_min: number
   reserve_open_at: string | null
+  /** 'HH:MM' — 설정하면 그 날짜 회차는 매일 이 시각에 오픈 (reserve_open_at 과 둘 중 늦은 쪽) */
+  reserve_open_daily_time?: string | null
   reserve_close_before_min: number
   reminders: Array<{ type: 'day_before'; hour: number } | { type: 'before_min'; min: number }>
   noshow_after_start_min: number

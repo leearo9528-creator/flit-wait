@@ -6,6 +6,7 @@ import { BoothSummary, SlotPublic } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner, Badge } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
 import CustomerNav from '../../components/CustomerNav'
+import { openAtFor, kstYmd } from '../../components/BoothCard'
 
 export default function Reserve() {
   const { slug = '' } = useParams()
@@ -40,8 +41,14 @@ export default function Reserve() {
   if (booth.mode === 'queue') return <Page><Alert kind="info">이 부스는 현장 대기표로 운영됩니다. <Link to={`/q/${slug}`} className="font-semibold underline">대기 접수하기</Link></Alert></Page>
 
   const maxParty = booth.settings.max_party_size ?? 4
-  const openAt = booth.settings.reserve_open_at ? new Date(booth.settings.reserve_open_at) : null
+  // 선택한 날짜의 오픈 시각 (전체 오픈 일시 + 일별 오픈 시각 중 늦은 쪽). 날짜 탭마다 "예약 오픈 전"이 따로 판정된다.
+  const activeSlots = days.find(([d]) => d === activeDay)?.[1] ?? []
+  const openAt = activeSlots.length ? openAtFor(booth.settings, kstYmd(activeSlots[0].starts_at)) : (booth.settings.reserve_open_at ? new Date(booth.settings.reserve_open_at) : null)
   const notYet = !!openAt && openAt.getTime() > Date.now()
+  // 일별 오픈 안내문: "10. 23. (금)~10. 25. (일) 3일간, 매일 12:00부터 …" — 마지막 날 오픈 전까지 표시
+  const dailyHm = booth.settings.reserve_open_daily_time?.trim() || null
+  const lastDayOpen = dailyHm && days.length ? openAtFor(booth.settings, kstYmd(days[days.length - 1][1][0].starts_at)) : null
+  const showDaily = !!dailyHm && !!lastDayOpen && lastDayOpen.getTime() > Date.now()
   const closeBefore = (booth.settings.reserve_close_before_min ?? 60) * 60000
   const selected = data.slots.find(s => s.id === slotId) ?? null
   const existing = LS.get<{ token: string; at: number }>(`resv:${slug}`)
@@ -66,7 +73,9 @@ export default function Reserve() {
       <BoothHeader booth={booth} event={event} closed={closed}
         live={<>{todayLeft != null ? <>오늘 잔여 <b className="tabular-nums">{todayLeft}석</b></> : <>사전 예약</>}{data.waiting_teams > 0 ? <span className="ml-1 font-normal text-gray-500">· 현장 대기 {data.waiting_teams}팀</span> : null}</>} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
-      {notYet && <div className="mb-4"><Alert kind="info">예약은 <b>{fmtDateTime(openAt!.toISOString())}</b>부터 열립니다.</Alert></div>}
+      {showDaily
+        ? <div className="mb-4"><Alert kind="info">{days.length > 1 ? <><b>{days[0][0]}~{days[days.length - 1][0]}</b> {days.length}일간, </> : null}매일 <b>{dailyHm}</b>부터 신청 접수가 시작됩니다.{notYet && openAt ? <> (선택한 날짜는 <b>{fmtDateTime(openAt.toISOString())}</b> 오픈)</> : null}</Alert></div>
+        : notYet && <div className="mb-4"><Alert kind="info">예약은 <b>{fmtDateTime(openAt!.toISOString())}</b>부터 열립니다.</Alert></div>}
       {booth.is_paused && <div className="mb-4"><Alert kind="warn">현장 대기 접수는 잠시 중단된 상태입니다. 사전 예약은 계속 가능해요.</Alert></div>}
       {existing && Date.now() - existing.at < 7 * 86400_000 && (
         <div className="mb-4"><Alert kind="info">이미 예약하신 내역이 있어요. <Link to={`/t/${existing.token}`} className="font-semibold underline">예약 확인</Link></Alert></div>
@@ -87,14 +96,14 @@ export default function Reserve() {
           {(days.find(([d]) => d === activeDay)?.[1] ?? []).map(s => {
             const left = s.capacity - s.reserved
             const past = Date.now() > new Date(s.starts_at).getTime() - closeBefore
-            const dis = left <= 0 || past || s.status !== 'open'
+            const dis = left <= 0 || past || s.status !== 'open' || notYet
             const on = slotId === s.id
             return (
               <button key={s.id} type="button" disabled={dis} onClick={() => { setSlotId(s.id); if (party > left) setParty(Math.max(1, left)) }}
                 className={`rounded-xl p-3 text-left ring-1 transition ${on ? 'bg-gray-900 text-white ring-gray-900' : dis ? 'bg-gray-50 text-gray-400 ring-gray-200' : 'bg-white ring-gray-300 active:bg-gray-50'}`}>
                 <div className="text-lg font-bold tabular-nums">{fmtTime(s.starts_at)}</div>
                 <div className={`text-xs ${on ? 'text-gray-200' : ''}`}>
-                  {s.status !== 'open' ? '마감' : left <= 0 ? '매진' : past ? '예약 마감 · 현장 대기' : `잔여 ${left}석`}
+                  {s.status !== 'open' ? '마감' : left <= 0 ? '매진' : past ? '예약 마감 · 현장 대기' : notYet ? `오픈 전 · ${left}석` : `잔여 ${left}석`}
                 </div>
               </button>
             )

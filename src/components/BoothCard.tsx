@@ -1,14 +1,37 @@
 /** 손님 목록·상세 공통 조각: 썸네일(사진 없으면 이름 커버), 상태 뱃지, 상태 판정 */
 
-export interface BoothLike { id: string; name: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; image_url: string | null; group_name?: string | null; total_left?: number; reserve_open_at?: string | null }
+export interface BoothLike { id: string; name: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; image_url: string | null; group_name?: string | null; total_left?: number; reserve_open_at?: string | null; reserve_open_daily_time?: string | null }
 
 export type BoothStatus = { kind: 'open' | 'paused' | 'closed' | 'soldout' | 'upcoming'; label: string }
+
+/** KST 기준 YYYY-MM-DD */
+export const kstYmd = (d: Date | string) => new Date(d).toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
+
+/**
+ * 특정 날짜(KST)의 회차가 예약 가능해지는 시각.
+ * = max(전체 오픈 일시 reserve_open_at, 그 날짜 + 일별 오픈 시각 reserve_open_daily_time('12:00'))
+ * 일별 오픈이 설정되면 "매일 12:00에 그날 회차 오픈" 식으로 동작한다.
+ */
+export function openAtFor(b: Pick<BoothLike, 'reserve_open_at' | 'reserve_open_daily_time'>, ymd: string): Date | null {
+  const g = b.reserve_open_at ? new Date(b.reserve_open_at) : null
+  const hm = b.reserve_open_daily_time?.trim()
+  const d = hm && /^\d{1,2}:\d{2}$/.test(hm) ? new Date(`${ymd}T${hm.padStart(5, '0')}:00+09:00`) : null
+  if (g && d) return g.getTime() > d.getTime() ? g : d
+  return g ?? d
+}
+
+/** 존(group) 태그를 카테고리가 이미 포함하면(예: 존 '테크놀이터' + 카테고리 '테크놀이터 2번 부스') 존은 생략 */
+export function showGroupTag(group?: string | null, category?: string | null) {
+  const g = group?.trim()
+  if (!g) return null
+  return category?.trim().startsWith(g) ? null : g
+}
 
 export function boothStatus(b: BoothLike, eventClosed: boolean): BoothStatus {
   if (eventClosed) return { kind: 'closed', label: '운영 종료' }
   if (b.is_paused) return { kind: 'paused', label: '접수 중단' }
   if (b.mode !== 'queue') {
-    const openAt = b.reserve_open_at ? new Date(b.reserve_open_at) : null
+    const openAt = openAtFor(b, kstYmd(new Date()))
     if (openAt && openAt.getTime() > Date.now()) return { kind: 'upcoming', label: '예약 오픈 예정' }
     if ((b.total_left ?? 1) <= 0) return { kind: 'soldout', label: '매진' }
     return { kind: 'open', label: '예약 중' }
@@ -26,13 +49,9 @@ const hash = (s: string) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >
 
 export function BoothThumb({ b, dim, label, size = 'h-[100px] w-[100px]' }: { b: BoothLike; dim?: boolean; label?: string; size?: string }) {
   const grad = GRADS[hash(b.id) % GRADS.length]
-  const g = b.group_name?.trim()
-  const initial = (g && b.name.startsWith(g) ? b.name.slice(g.length).replace(/^[\s·\-:]+/, '') : b.name).trim().slice(0, 1) || b.name.slice(0, 1)
   return (
     <div className={`relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br ${grad} ${size}`}>
-      {b.image_url
-        ? <img src={b.image_url} alt="" className="h-full w-full object-cover" loading="lazy" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
-        : <div className="flex h-full items-center justify-center text-4xl font-black text-white/85">{initial}</div>}
+      {b.image_url && <img src={b.image_url} alt="" className="h-full w-full object-cover" loading="lazy" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />}
       {dim && label && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/55 text-[15px] font-bold text-white">{label}</div>
       )}
