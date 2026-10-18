@@ -45,7 +45,7 @@ export function setup() {
   // 폴링용 티켓 50장 + 스태프 세션
   const tokens = []
   for (let i = 0; i < 50; i++) {
-    const phone = '0105' + String(1000000 + (Date.now() % 1000000) * 50 % 9000000 + i).padStart(7, '0') // 실행마다 다른 번호 (중복 접수 거부 회피)
+    const phone = '01000' + String((Math.floor(Date.now() / 1000) % 9000) * 100 + i).padStart(6, '0') // 010-00xx-xxxx 테스트 번호대(notify 가 실발송 안 함) · 실행마다 다른 번호
     const r = http.post(`${SB}/rest/v1/rpc/join_queue`, JSON.stringify({ p_slug: BOOTH, p_name: 'k6p' + i, p_phone: phone, p_party: 1, p_consent: true }), H)
     if (r.status === 200) tokens.push(r.json('token'))
   }
@@ -71,7 +71,7 @@ export function poller(data) {
 }
 
 export function joiner() {
-  const phone = '010' + String(Math.floor(10000000 + Math.random() * 89999999))
+  const phone = '01000' + String(Math.floor(Math.random() * 1000000)).padStart(6, '0') // 테스트 번호대
   const r = http.post(`${SB}/rest/v1/rpc/join_queue`, JSON.stringify({ p_slug: BOOTH, p_name: 'k6', p_phone: phone, p_party: 1, p_consent: true }), H)
   check(r, { 'join 200': x => x.status === 200 })
 }
@@ -79,7 +79,7 @@ export function joiner() {
 export function reserver(data) {
   if (!data.slots.length) return
   const slot = data.slots[Math.floor(Math.random() * data.slots.length)]
-  const phone = '0107' + String(Math.floor(1000000 + Math.random() * 8999999))
+  const phone = '01000' + String(Math.floor(Math.random() * 1000000)).padStart(6, '0') // 테스트 번호대
   const r = http.post(`${SB}/rest/v1/rpc/reserve_slot`, JSON.stringify({ p_slot: slot, p_name: 'k6r', p_phone: phone, p_party: 1 + Math.floor(Math.random() * 2), p_consent: true }), H)
   // 200 = 예약 성공, 400 + '잔여석' = 정원 초과 거부(정상) — 그 외는 실패
   const ok = r.status === 200 || (r.status === 400 && String(r.body).includes('잔여석'))

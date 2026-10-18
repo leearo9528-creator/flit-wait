@@ -64,7 +64,9 @@ Deno.serve(async (req) => {
   for (const n of work) {
     const t = n.tickets, tpl = tplMap[n.template_code]
     const stale = (n.template_code === 'R02' || n.template_code === 'Q02') && t.status !== 'waiting'
-    if (!t?.phone || !tpl?.enabled || stale) { await sb.from('notifications').update({ status: 'skipped' }).eq('id', n.id); skipped++; continue }
+    // 010-00xx-xxxx 는 미할당 번호대 — 부하테스트(k6)·시뮬레이션 전용. 절대 실발송하지 않는다 (2026-10-18 사고 재발 방지)
+    const testNumber = /^01000\d{6}$/.test(t?.phone ?? '')
+    if (!t?.phone || !tpl?.enabled || stale || testNumber) { await sb.from('notifications').update({ status: 'skipped', provider_msg_id: testNumber ? 'TEST_NUMBER' : null }).eq('id', n.id); skipped++; continue }
 
     let ahead = ''
     if (n.template_code.startsWith('Q')) { const { data: a } = await sb.rpc('ahead_count', { p_ticket: t.id }); ahead = String(a ?? 0) }
