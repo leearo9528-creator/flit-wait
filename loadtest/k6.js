@@ -6,6 +6,8 @@ import { textSummary } from 'https://jslib.k6.io/k6-summary/0.1.0/index.js'
 
 const BASE = __ENV.BASE, SB = __ENV.SB, KEY = __ENV.KEY, SLUG = __ENV.SLUG || 'test', BOOTH = __ENV.BOOTH || 't-tech-2'
 const VUS = Number(__ENV.VUS || 200)
+// ⚠️ 전화번호는 반드시 010-00xx-xxxx 테스트 번호대만. notify 가 이 번호대는 실발송하지 않는다. DB 트리거도 k6 이름 + 다른 번호대를 거부한다.
+const testPhone = () => '01000' + String(Math.floor(Math.random() * 1000000)).padStart(6, '0')
 const COOK = __ENV.COOK || 't-cooking-tortilla' // 예약+현장대기 혼합(hybrid) 부스
 const DUR = __ENV.DUR || '2m'
 const H = { headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' } }
@@ -71,7 +73,7 @@ export function poller(data) {
 }
 
 export function joiner() {
-  const phone = '01000' + String(Math.floor(Math.random() * 1000000)).padStart(6, '0') // 테스트 번호대
+  const phone = testPhone() // 테스트 번호대
   const r = http.post(`${SB}/rest/v1/rpc/join_queue`, JSON.stringify({ p_slug: BOOTH, p_name: 'k6', p_phone: phone, p_party: 1, p_consent: true }), H)
   check(r, { 'join 200': x => x.status === 200 })
 }
@@ -79,7 +81,7 @@ export function joiner() {
 export function reserver(data) {
   if (!data.slots.length) return
   const slot = data.slots[Math.floor(Math.random() * data.slots.length)]
-  const phone = '01000' + String(Math.floor(Math.random() * 1000000)).padStart(6, '0') // 테스트 번호대
+  const phone = testPhone() // 테스트 번호대
   const r = http.post(`${SB}/rest/v1/rpc/reserve_slot`, JSON.stringify({ p_slot: slot, p_name: 'k6r', p_phone: phone, p_party: 1 + Math.floor(Math.random() * 2), p_consent: true }), H)
   // 200 = 예약 성공, 400 + '잔여석' = 정원 초과 거부(정상) — 그 외는 실패
   const ok = r.status === 200 || (r.status === 400 && String(r.body).includes('잔여석'))
@@ -87,7 +89,7 @@ export function reserver(data) {
 }
 
 export function walkin() {
-  const phone = '0106' + String(Math.floor(1000000 + Math.random() * 8999999))
+  const phone = testPhone() // 테스트 번호대
   const r = http.post(`${SB}/rest/v1/rpc/join_queue`, JSON.stringify({ p_slug: COOK, p_name: 'k6w', p_phone: phone, p_party: 1, p_consent: true }), H)
   check(r, { 'walkin 200': x => x.status === 200 })
 }
