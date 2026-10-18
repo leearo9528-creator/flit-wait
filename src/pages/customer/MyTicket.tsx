@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { rpc } from '../../lib/supabase'
-import { useAsync, fmtTime, fmtDate, STATUS_LABEL, useTick, LS } from '../../lib/util'
+import { useAsync, fmtTime, fmtDate, fmtDur, STATUS_LABEL, useTick, LS } from '../../lib/util'
 import { Ticket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
@@ -141,7 +141,7 @@ export default function MyTicket() {
       {t.can_cancel && <Button variant="secondary" onClick={cancel} loading={busy}>{isSlot ? '예약 취소' : '대기 취소'}</Button>}
       {!t.can_cancel && isSlot && t.status === 'waiting' && (
         <p className="text-center text-xs text-gray-500">
-          취소는 시작 {Math.round((t.booth.settings.cancel_until_before_min ?? 120) / 60 * 10) / 10}시간 전까지 가능했어요. 지금 취소가 필요하면 부스 스태프에게 말씀해 주세요.
+          취소는 시작 {fmtDur(t.booth.settings.cancel_until_before_min ?? 120)} 전까지 가능했어요. 지금 취소가 필요하면 부스 스태프에게 말씀해 주세요.
         </p>
       )}
 

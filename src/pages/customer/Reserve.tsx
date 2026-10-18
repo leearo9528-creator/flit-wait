@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { rpc, cachedRpc } from '../../lib/supabase'
-import { useAsync, useBoothLive, fmtPhone, fmtTime, fmtDate, fmtDateTime, LS } from '../../lib/util'
+import { useAsync, useBoothLive, fmtPhone, fmtTime, fmtDate, fmtDateTime, fmtDur, LS } from '../../lib/util'
 import { BoothSummary, SlotPublic } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner, Badge } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
@@ -129,7 +129,7 @@ export default function Reserve() {
             <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 h-5 w-5 rounded" required />
             <span className="text-gray-700"><span className="font-semibold">개인정보 수집·이용 동의 (필수)</span><br /><span className="text-xs text-gray-500">{event.privacy_text}</span></span>
           </label>
-          <p className="text-xs text-gray-500">체험 시작 {booth.settings.noshow_after_start_min ?? 10}분이 지나도 도착하지 않으면 예약이 취소되고 현장 대기자에게 자리가 넘어갑니다. 취소는 시작 {Math.round((booth.settings.cancel_until_before_min ?? 120) / 60)}시간 전까지 가능합니다.</p>
+          <p className="text-xs text-gray-500">체험 시작 {booth.settings.noshow_after_start_min ?? 10}분이 지나도 도착하지 않으면 예약이 취소되고 현장 대기자에게 자리가 넘어갑니다. 취소는 시작 {fmtDur(booth.settings.cancel_until_before_min ?? 120)} 전까지 가능합니다.</p>
           {err && <Alert kind="error">{err}</Alert>}
           <Button type="submit" size="lg" loading={busy} disabled={notYet || !slotId || !consent || event.status !== 'open'}>
             {notYet ? '예약 오픈 전' : '예약하기'}

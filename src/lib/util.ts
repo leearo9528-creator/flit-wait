@@ -68,3 +68,11 @@ export const LS = {
   set(k: string, v: unknown) { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} },
   del(k: string) { try { localStorage.removeItem(k) } catch {} },
 }
+
+/** 분 → '30분' / '2시간' / '1시간 30분' */
+export const fmtDur = (min: number) => {
+  const m = Math.max(0, Math.round(min))
+  if (m < 60) return `${m}분`
+  const h = Math.floor(m / 60), r = m % 60
+  return r ? `${h}시간 ${r}분` : `${h}시간`
+}
