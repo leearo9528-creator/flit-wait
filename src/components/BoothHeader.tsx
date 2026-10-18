@@ -21,6 +21,11 @@ export default function BoothHeader({ booth, event, live, closed }: {
         {booth.image_url
           ? <img src={booth.image_url} alt="" className="h-full w-full object-cover" />
           : <div className="h-full w-full bg-[radial-gradient(ellipse_at_top_right,_#fdba74_0%,_#f1f5f9_65%)]" />}
+        {booth.image_url && (
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-4 pb-2 pt-6 text-right text-[11px] text-white/90">
+            이해를 돕기 위한 예시 사진입니다. 실물과 다를 수 있습니다.
+          </div>
+        )}
         {event.slug && (
           <Link to={`/e/${event.slug}`} aria-label="목록으로" className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-2xl text-white backdrop-blur">‹</Link>
         )}
