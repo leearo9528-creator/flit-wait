@@ -62,6 +62,8 @@ export default function EventHome() {
 
   return (
     <div className="mx-auto min-h-dvh max-w-md bg-white pb-24">
+      {/* 행사 배너 (관리자 > 행사 설정 > 대표 이미지). 스크롤하면 올라가고 아래 제목 바만 고정 */}
+      {event.image_url && <img src={event.image_url} alt={event.name} className="block w-full" />}
       {/* 상단 바 */}
       <header className="sticky top-0 z-10 bg-white/95 backdrop-blur">
         <div className="flex h-14 items-center justify-between px-4">
