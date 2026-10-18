@@ -30,6 +30,8 @@ export interface Booth {
   settings: BoothSettings
   pin_hash?: string | null
   image_url?: string | null
+  /** 손님 목록 썸네일 전용 아이콘. 없으면 image_url(배너) 사용 */
+  icon_url?: string | null
   description?: string | null
   group_name?: string | null
   category?: string | null

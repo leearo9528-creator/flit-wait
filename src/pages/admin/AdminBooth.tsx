@@ -26,7 +26,7 @@ export default function AdminBooth() {
 }
 
 function Basic({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
-  const [f, setF] = useState({ name: booth.name, location: booth.location ?? '', mode: booth.mode, is_paused: booth.is_paused, sort_order: booth.sort_order ?? 0, image_url: booth.image_url ?? null as string | null, description: booth.description ?? '', group_name: (booth as any).group_name ?? '', category: (booth as any).category ?? '' })
+  const [f, setF] = useState({ name: booth.name, location: booth.location ?? '', mode: booth.mode, is_paused: booth.is_paused, sort_order: booth.sort_order ?? 0, image_url: booth.image_url ?? null as string | null, icon_url: booth.icon_url ?? null as string | null, description: booth.description ?? '', group_name: (booth as any).group_name ?? '', category: (booth as any).category ?? '' })
   const [msg, setMsg] = useState<string | null>(null)
   async function save() {
     const { error } = await supabase.from('booths').update({ ...f, description: f.description || null, group_name: f.group_name.trim() || null, category: f.category.trim() || null }).eq('id', booth.id)
@@ -35,7 +35,10 @@ function Basic({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
   return (
     <Card>
       <h2 className="mb-3 font-bold">기본 정보</h2>
-      <div className="mb-3"><ImageUpload value={f.image_url} folder={`booths/${booth.id}`} onChange={u => setF({ ...f, image_url: u })} /></div>
+      <div className="mb-3 grid gap-3 md:grid-cols-[1fr_160px]">
+        <div><div className="mb-1 text-xs text-gray-500">배너 (상세 상단 · 아이콘 없으면 목록에도)</div><ImageUpload value={f.image_url} folder={`booths/${booth.id}`} onChange={u => setF({ ...f, image_url: u })} /></div>
+        <div><div className="mb-1 text-xs text-gray-500">목록 아이콘 (정사각)</div><ImageUpload value={f.icon_url} folder={`booths/${booth.id}/icon`} aspect="aspect-square" onChange={u => setF({ ...f, icon_url: u })} /></div>
+      </div>
       <div className="grid gap-3 md:grid-cols-2">
         <div className="md:col-span-2"><Field label="소개 (손님 화면에 표시)"><textarea value={f.description} onChange={e => setF({ ...f, description: e.target.value })} rows={2} className="w-full rounded-xl border border-gray-300 p-3 text-sm" placeholder="예: 또띠아 반죽부터 토핑까지 직접 만들어 바로 먹어요 · 소요 50분 · 7세 이상" /></Field></div>
         <Field label="부스명"><Input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} /></Field>

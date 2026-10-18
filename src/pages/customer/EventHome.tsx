@@ -8,7 +8,7 @@ import { BoothThumb, StatusBadge, boothStatus, openAtFor, kstYmd, showGroupTag }
 
 export interface BoothCard {
   id: string; name: string; slug: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; location: string | null
-  image_url: string | null; description: string | null; max_party_size: string | null; reserve_open_at: string | null; reserve_open_daily_time?: string | null
+  image_url: string | null; icon_url?: string | null; description: string | null; max_party_size: string | null; reserve_open_at: string | null; reserve_open_daily_time?: string | null
   group_name?: string | null; category?: string | null
   waiting_teams: number; today_slots: number; today_left: number; total_left: number
 }

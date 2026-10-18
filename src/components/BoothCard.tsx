@@ -1,6 +1,6 @@
 /** 손님 목록·상세 공통 조각: 썸네일(사진 없으면 이름 커버), 상태 뱃지, 상태 판정 */
 
-export interface BoothLike { id: string; name: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; image_url: string | null; group_name?: string | null; total_left?: number; reserve_open_at?: string | null; reserve_open_daily_time?: string | null }
+export interface BoothLike { id: string; name: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; image_url: string | null; icon_url?: string | null; group_name?: string | null; total_left?: number; reserve_open_at?: string | null; reserve_open_daily_time?: string | null }
 
 export type BoothStatus = { kind: 'open' | 'paused' | 'closed' | 'soldout' | 'upcoming'; label: string }
 
@@ -49,9 +49,10 @@ const hash = (s: string) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >
 
 export function BoothThumb({ b, dim, label, size = 'h-[100px] w-[100px]' }: { b: BoothLike; dim?: boolean; label?: string; size?: string }) {
   const grad = GRADS[hash(b.id) % GRADS.length]
+  const src = b.icon_url || b.image_url  // 목록은 아이콘 우선, 없으면 배너
   return (
     <div className={`relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br ${grad} ${size}`}>
-      {b.image_url && <img src={b.image_url} alt="" className="h-full w-full object-cover" loading="lazy" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />}
+      {src && <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />}
       {dim && label && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/55 text-[15px] font-bold text-white">{label}</div>
       )}
