@@ -26,6 +26,8 @@ export default function QueueJoin() {
   if (error || !data) return <Page><Alert kind="error">{error ?? '부스를 찾을 수 없습니다.'}</Alert></Page>
 
   const { booth, event, waiting_teams } = data
+  // 예약 전용(slot) 부스는 현장 대기 접수가 없음 → 예약 화면으로 안내 (Reserve 의 queue 모드 처리와 대칭)
+  if (booth.mode === 'slot') return <Page><Alert kind="info">이 부스는 사전 예약제로 운영됩니다. <Link to={`/r/${slug}`} className="font-semibold underline">예약하러 가기</Link></Alert></Page>
   const maxParty = booth.settings.max_party_size ?? 4
   const closed = event.status !== 'open'
   const cookingLike = booth.mode === 'hybrid'
