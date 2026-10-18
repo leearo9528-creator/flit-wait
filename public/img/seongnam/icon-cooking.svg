@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbf7f1"/>
+      <stop offset="1" stop-color="#f1e9dd"/>
+    </linearGradient>
+    <radialGradient id="disc" cx="0.4" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#dcbb85"/>
+      <stop offset="1" stop-color="#b58f52"/>
+    </radialGradient>
+    <linearGradient id="hat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e6e9ee"/>
+    </linearGradient>
+    <radialGradient id="shadow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#6b4f23" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#6b4f23" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="200" height="200" fill="url(#bg)"/>
+  <!-- 접시형 원판 -->
+  <ellipse cx="100" cy="112" rx="78" ry="74" fill="url(#shadow)"/>
+  <circle cx="100" cy="100" r="72" fill="url(#disc)"/>
+  <circle cx="100" cy="100" r="62" fill="none" stroke="#f3dfb9" stroke-opacity="0.55" stroke-width="3"/>
+  <!-- 셰프 모자 그림자 -->
+  <ellipse cx="100" cy="140" rx="34" ry="7" fill="#7a5a2a" opacity="0.25"/>
+  <!-- 셰프 모자: 봉긋한 윗부분 -->
+  <g fill="url(#hat)" stroke="#cfd6de" stroke-width="2">
+    <circle cx="74" cy="84" r="20"/>
+    <circle cx="126" cy="84" r="20"/>
+    <circle cx="100" cy="70" r="24"/>
+    <rect x="62" y="84" width="76" height="34" rx="6"/>
+  </g>
+  <!-- 모자 띠 -->
+  <rect x="66" y="112" width="68" height="24" rx="6" fill="#f7f8fa" stroke="#cfd6de" stroke-width="2"/>
+  <line x1="78" y1="116" x2="78" y2="132" stroke="#dde2e8" stroke-width="3" stroke-linecap="round"/>
+  <line x1="92" y1="116" x2="92" y2="132" stroke="#dde2e8" stroke-width="3" stroke-linecap="round"/>
+  <line x1="108" y1="116" x2="108" y2="132" stroke="#dde2e8" stroke-width="3" stroke-linecap="round"/>
+  <line x1="122" y1="116" x2="122" y2="132" stroke="#dde2e8" stroke-width="3" stroke-linecap="round"/>
+  <!-- 하이라이트 -->
+  <ellipse cx="90" cy="62" rx="9" ry="5" fill="#ffffff" opacity="0.9" transform="rotate(-25 90 62)"/>
+</svg>
