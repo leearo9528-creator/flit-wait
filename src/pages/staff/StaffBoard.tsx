@@ -49,10 +49,13 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
     catch (e: any) { setErr(e.message) } finally { setBusyId(null) }
   }
   function flash(m: string) { setToast(m); setTimeout(() => setToast(null), 2500) }
-  async function togglePause() {
-    try { await rpc('staff_toggle_pause', { p_booth: sess.booth_id, p_token: sess.staff_token, p_paused: !booth.is_paused }); reload() }
+  // 일시중단(잠시) 과 오늘 마감(자정에 자동 해제) 을 구분. 재개는 공통
+  async function setPause(paused: boolean, mode?: 'paused' | 'closed_today') {
+    if (mode === 'closed_today' && !confirm('오늘 접수를 마감할까요?\n손님 화면에 "오늘 접수가 마감되었습니다"로 표시되고, 내일 자정에 자동으로 풀립니다. (대기 중인 손님 호출·입장은 계속 가능)')) return
+    try { await rpc('staff_toggle_pause', { p_booth: sess.booth_id, p_token: sess.staff_token, p_paused: paused, p_mode: mode ?? null }); reload() }
     catch (e: any) { setErr(e.message) }
   }
+  const closedToday = booth.is_paused && booth.settings.pause_mode === 'closed_today'
 
   const called = queue.filter(t => t.status === 'called')
   const waiting = queue.filter(t => t.status === 'waiting')
@@ -61,11 +64,16 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
   return (
     <Page title={booth.name} sub="스태프" wide>
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        {booth.is_paused ? <Badge tone="red">접수 일시중단</Badge> : <Badge tone="green">접수 중</Badge>}
+        {booth.is_paused ? <Badge tone={closedToday ? 'gray' : 'red'}>{closedToday ? '오늘 접수 마감' : '접수 일시중단'}</Badge> : <Badge tone="green">접수 중</Badge>}
         <span className="text-sm text-gray-500">대기 {waiting.length}팀 · 호출 {called.length} · 완료 {data.done_today} · 노쇼 {data.noshow_today}</span>
         <div className="ml-auto flex gap-2">
           <button onClick={() => setBig(b => !b)} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">{big ? '보통 글씨' : '큰 글씨'}</button>
-          {showQueue && <button onClick={togglePause} className={`h-9 rounded-lg px-3 text-sm ring-1 ${booth.is_paused ? 'bg-green-600 text-white ring-green-600' : 'bg-white ring-gray-300'}`}>{booth.is_paused ? '접수 재개' : '접수 일시중단'}</button>}
+          {showQueue && (booth.is_paused
+            ? <button onClick={() => setPause(false)} className="h-9 rounded-lg bg-green-600 px-3 text-sm text-white ring-1 ring-green-600">접수 재개</button>
+            : <>
+                <button onClick={() => setPause(true, 'paused')} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">일시중단</button>
+                <button onClick={() => setPause(true, 'closed_today')} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">오늘 마감</button>
+              </>)}
           <button onClick={() => { LS.del(`staff:${slug}`); nav(`/s/${slug}`) }} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">로그아웃</button>
         </div>
       </div>

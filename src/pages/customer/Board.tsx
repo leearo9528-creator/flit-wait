@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { cachedRpc, supabase } from '../../lib/supabase'
 import { useAsync, fmtTime, useTick } from '../../lib/util'
 
-interface B { id: string; name: string; mode: string; is_paused: boolean; waiting_teams: number; called: number[]; last_in: number | null; avg_service_min: number | null; next_slot: { starts_at: string; left: number } | null }
+interface B { id: string; name: string; mode: string; is_paused: boolean; pause_mode?: string | null; waiting_teams: number; called: number[]; last_in: number | null; avg_service_min: number | null; next_slot: { starts_at: string; left: number } | null }
 interface Data { event: { name: string; notice: string | null; status: string }; now: string; booths: B[] }
 
 /** 안내부스 모니터용 현황판 — 큰 글씨, 다크, 자동 갱신 */
@@ -39,7 +39,7 @@ export default function Board() {
           <div key={b.id} className="rounded-3xl bg-gray-900 p-6 ring-1 ring-gray-800">
             <div className="mb-4 flex items-center justify-between">
               <div className="text-2xl font-bold">{b.name}</div>
-              {b.is_paused && <span className="rounded-full bg-red-500 px-3 py-1 text-sm font-bold">접수 중단</span>}
+              {b.is_paused && <span className={`rounded-full px-3 py-1 text-sm font-bold ${b.pause_mode === 'closed_today' ? 'bg-gray-600' : 'bg-red-500'}`}>{b.pause_mode === 'closed_today' ? '오늘 마감' : '접수 중단'}</span>}
             </div>
             <div className="mb-5">
               <div className="text-sm text-gray-400">지금 호출</div>

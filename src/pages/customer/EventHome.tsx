@@ -7,7 +7,7 @@ import CustomerNav from '../../components/CustomerNav'
 import { BoothThumb, StatusBadge, boothStatus, nextOpenAt, showGroupTag } from '../../components/BoothCard'
 
 export interface BoothCard {
-  id: string; name: string; slug: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; location: string | null
+  id: string; name: string; slug: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; pause_mode?: string | null; location: string | null
   image_url: string | null; icon_url?: string | null; description: string | null; max_party_size: string | null; reserve_open_at: string | null; reserve_open_daily_time?: string | null; next_slot_at?: string | null
   group_name?: string | null; category?: string | null
   waiting_teams: number; today_slots: number; today_left: number; total_left: number
@@ -139,7 +139,7 @@ function BoothListItem({ b, closed }: { b: BoothCard; closed: boolean }) {
   return (
     <li>
       <Link to={to} className={`flex gap-4 py-4 active:bg-gray-50 ${dim ? 'opacity-60' : ''}`}>
-        <BoothThumb b={b} dim={dim} label={st.kind === 'closed' ? '운영 종료' : st.kind === 'paused' ? '접수 중단' : st.kind === 'soldout' ? '매진' : undefined} />
+        <BoothThumb b={b} dim={dim} label={dim ? st.label : undefined} />
         <div className="min-w-0 flex-1 py-0.5">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
             <StatusBadge st={st} />

@@ -47,12 +47,17 @@ export default function QueueJoin() {
       <BoothHeader booth={booth} event={event} closed={closed}
         live={<>대기손님 현황 <b className="tabular-nums">{waiting_teams}팀</b>{data.avg_service_min && waiting_teams > 0 ? <span className="ml-1 font-normal text-gray-500">· 예상 약 {Math.max(1, Math.round(waiting_teams * data.avg_service_min))}분</span> : null}</>} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
-      {booth.is_paused && (
-        <div className="mb-4 rounded-2xl bg-red-50 p-5 text-center ring-1 ring-red-200">
-          <div className="text-2xl">⏸️</div>
-          <div className="mt-1 text-lg font-bold text-red-800">지금은 접수를 잠시 멈췄어요</div>
-          <div className="mt-1 text-sm text-red-700">대기 인원이 많아 운영진이 접수를 일시 중단했습니다.<br />잠시 후 이 화면에서 다시 접수할 수 있어요. (자동으로 갱신됩니다)</div>
-        </div>
+      {booth.is_paused && (booth.settings.pause_mode === 'closed_today'
+        ? <div className="mb-4 rounded-2xl bg-gray-100 p-5 text-center ring-1 ring-gray-300">
+            <div className="text-2xl">🌙</div>
+            <div className="mt-1 text-lg font-bold text-gray-800">오늘 접수가 마감되었습니다</div>
+            <div className="mt-1 text-sm text-gray-600">오늘은 더 이상 접수를 받지 않아요.<br />내일 운영 시간에 다시 만나요.</div>
+          </div>
+        : <div className="mb-4 rounded-2xl bg-red-50 p-5 text-center ring-1 ring-red-200">
+            <div className="text-2xl">⏸️</div>
+            <div className="mt-1 text-lg font-bold text-red-800">지금은 접수를 잠시 멈췄어요</div>
+            <div className="mt-1 text-sm text-red-700">대기 인원이 많아 운영진이 접수를 일시 중단했습니다.<br />잠시 후 이 화면에서 다시 접수할 수 있어요. (자동으로 갱신됩니다)</div>
+          </div>
       )}
 
       {cookingLike && (
@@ -90,7 +95,7 @@ export default function QueueJoin() {
           </label>
           {err && <Alert kind="error">{err}</Alert>}
           <Button type="submit" size="lg" loading={busy} disabled={closed || booth.is_paused || !consent}>
-            {booth.is_paused ? '접수 일시중단' : closed ? '운영 시간이 아닙니다' : '대기 접수하기'}
+            {booth.is_paused ? (booth.settings.pause_mode === 'closed_today' ? '오늘 접수 마감' : '접수 일시중단') : closed ? '운영 시간이 아닙니다' : '대기 접수하기'}
           </Button>
         </form>
       </Card>}

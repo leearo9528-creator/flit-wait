@@ -16,6 +16,9 @@ export interface BoothSettings {
   transfer_noshow_to_queue: boolean
   cancel_until_before_min: number
   sms_fallback: boolean
+  /** 접수 중단 종류: 'paused' 잠시 중단 · 'closed_today' 오늘 마감(자정에 자동 해제). is_paused 가 true 일 때만 의미 */
+  pause_mode?: 'paused' | 'closed_today' | null
+  pause_date?: string | null
 }
 
 export interface Booth {

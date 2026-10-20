@@ -1,6 +1,6 @@
 /** 손님 목록·상세 공통 조각: 썸네일(사진 없으면 이름 커버), 상태 뱃지, 상태 판정 */
 
-export interface BoothLike { id: string; name: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; image_url: string | null; icon_url?: string | null; group_name?: string | null; total_left?: number; reserve_open_at?: string | null; reserve_open_daily_time?: string | null; next_slot_at?: string | null }
+export interface BoothLike { id: string; name: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; pause_mode?: string | null; image_url: string | null; icon_url?: string | null; group_name?: string | null; total_left?: number; reserve_open_at?: string | null; reserve_open_daily_time?: string | null; next_slot_at?: string | null }
 
 /** 목록 카드의 "예약 오픈" 기준 시각 — 다음 회차 날짜(없으면 오늘) 기준. 일별 오픈이면 그 날짜 HH:MM */
 export function nextOpenAt(b: Pick<BoothLike, 'reserve_open_at' | 'reserve_open_daily_time' | 'next_slot_at'>): Date | null {
@@ -34,7 +34,7 @@ export function showGroupTag(group?: string | null, category?: string | null) {
 
 export function boothStatus(b: BoothLike, eventClosed: boolean): BoothStatus {
   if (eventClosed) return { kind: 'closed', label: '운영 종료' }
-  if (b.is_paused) return { kind: 'paused', label: '접수 중단' }
+  if (b.is_paused) return { kind: 'paused', label: b.pause_mode === 'closed_today' ? '오늘 마감' : '접수 중단' }
   if (b.mode !== 'queue') {
     const openAt = nextOpenAt(b)
     if (openAt && openAt.getTime() > Date.now()) return { kind: 'upcoming', label: '예약 오픈 예정' }
