@@ -6,3 +6,7 @@ html { -webkit-tap-highlight-color: transparent; }
 body { font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; letter-spacing: -0.01em; font-feature-settings: "tnum"; }
 h1, h2, .font-black, .font-bold { letter-spacing: -0.02em; }
 input, button { font: inherit; }
+
+/* 가로 스크롤 칩 줄 — 어떤 브라우저에서도 스크롤바(얇은 선)가 보이지 않게 */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; width: 0; height: 0; }

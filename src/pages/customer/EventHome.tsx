@@ -72,7 +72,7 @@ export default function EventHome() {
         </div>
         {/* 존 탭 + 정렬 */}
         <div className="flex items-center gap-2 px-4 pb-3">
-          <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="no-scrollbar flex min-w-0 flex-1 gap-2 overflow-x-auto scroll-px-4">
             {zones.length > 1 && <Chip on={zone === ''} onClick={() => pickZone('')}>전체</Chip>}
             {zones.map(z => <Chip key={z} on={zone === z} onClick={() => pickZone(z)}>{z}</Chip>)}
             {zones.length === 0 && <Chip on>{event.name}</Chip>}
