@@ -246,7 +246,10 @@ function History({ items, act, busyId, big }: { items: StaffTicket[]; act: (id: 
                 </div>
                 <div className="flex w-28 flex-col gap-1.5">
                   {(t.status === 'no_show' || t.status === 'cancelled') && <Button size="sm" onClick={() => act(t.id, 'checkin')} loading={busyId === t.id}>지금 입장</Button>}
-                  <Button size="sm" variant="secondary" onClick={() => { if (confirm(`${t.ticket_no}번 ${t.name} — 대기 목록으로 되돌릴까요? (원래 순서대로 맨 앞에 섭니다)`)) act(t.id, 'restore') }} loading={busyId === t.id}>대기로 복구</Button>
+                  {/* 호출됨 카드에서 입장을 잘못 누른 손님은 같은 호출 카드로 돌아간다(알림 재발송 없음). 그 외는 대기 맨 앞으로 */}
+                  {(t.status === 'checked_in' || t.status === 'done') && t.called_at
+                    ? <Button size="sm" variant="secondary" onClick={() => { if (confirm(`${t.ticket_no}번 ${t.name} — 입장 처리를 취소하고 '호출됨' 카드로 되돌릴까요? (알림은 다시 가지 않습니다)`)) act(t.id, 'restore') }} loading={busyId === t.id}>호출로 복구</Button>
+                    : <Button size="sm" variant="secondary" onClick={() => { if (confirm(`${t.ticket_no}번 ${t.name} — 대기 목록으로 되돌릴까요? (원래 순서대로 맨 앞에 섭니다)`)) act(t.id, 'restore') }} loading={busyId === t.id}>대기로 복구</Button>}
                 </div>
               </div>
             </Card>

@@ -1,0 +1,6 @@
+-- 2026-10-20 프로덕션 적용 완료
+-- 되돌리기(restore): 대기표 손님이 '호출됨' 카드에서 입장 처리된 뒤 되돌리면 대기열 맨 앞이 아니라 같은 '호출됨' 카드로 복귀.
+--   조건: slot_id is null AND status in (checked_in, done) AND called_at is not null → status='called', called_at=now() (유효시간 새로 5분, Q03 재발송 없음)
+--   그 외(노쇼·취소에서 복구, 호출 없이 바로 입장했던 손님, 회차 티켓)는 기존대로 waiting.
+-- 반환값에 'restored_to': 'called' | 'waiting' 추가 (스태프 화면 토스트용).
+-- 본문 전체는 Supabase 적용본 참조 (0023 + 위 분기).
