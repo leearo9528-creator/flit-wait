@@ -66,19 +66,11 @@ export default function EventHome() {
       {event.image_url && <img src={event.image_url} alt={event.name} className="block w-full" />}
       {/* 상단 바 */}
       <header className="sticky top-0 z-10 bg-white/95 backdrop-blur">
-        <div className="flex h-14 items-center justify-between px-4">
-          <h1 className="text-xl font-bold">체험부스 신청</h1>
-          <Link to={`/e/${event.slug}/my`} aria-label="내 대기·예약" className="rounded-full p-2 text-2xl leading-none active:bg-gray-100">🎫</Link>
-        </div>
-        {/* 존 탭 + 정렬 */}
-        <div className="flex items-center gap-2 px-4 pb-3">
-          <div className="no-scrollbar flex min-w-0 flex-1 gap-2 overflow-x-auto scroll-px-4">
-            {zones.length > 1 && <Chip on={zone === ''} onClick={() => pickZone('')}>전체</Chip>}
-            {zones.map(z => <Chip key={z} on={zone === z} onClick={() => pickZone(z)}>{z}</Chip>)}
-            {zones.length === 0 && <Chip on>{event.name}</Chip>}
-          </div>
+        <div className="flex h-14 items-center gap-2 px-4">
+          <h1 className="flex-1 text-xl font-bold">체험부스 신청</h1>
+          {/* 정렬은 제목 줄 오른쪽 — 칩 줄은 전부 보이게 */}
           <div className="relative shrink-0">
-            <button type="button" onClick={() => setSortOpen(o => !o)} className="flex items-center gap-1 py-2 pl-2 text-sm font-medium text-gray-700">
+            <button type="button" onClick={() => setSortOpen(o => !o)} className="flex items-center gap-1 py-2 px-2 text-sm font-medium text-gray-700">
               {SORT_LABEL[sort]} <span className={`text-xs transition-transform ${sortOpen ? 'rotate-180' : ''}`}>⌄</span>
             </button>
             {sortOpen && (
@@ -89,6 +81,13 @@ export default function EventHome() {
               </div>
             )}
           </div>
+          <Link to={`/e/${event.slug}/my`} aria-label="내 대기·예약" className="rounded-full p-2 text-2xl leading-none active:bg-gray-100">🎫</Link>
+        </div>
+        {/* 존 칩 — 스크롤·잘림 없이 줄바꿈으로 전부 표시 */}
+        <div className="flex flex-wrap gap-2 px-4 pb-3">
+          {zones.length > 1 && <Chip on={zone === ''} onClick={() => pickZone('')}>전체</Chip>}
+          {zones.map(z => <Chip key={z} on={zone === z} onClick={() => pickZone(z)}>{z}</Chip>)}
+          {zones.length === 0 && <Chip on>{event.name}</Chip>}
         </div>
       </header>
 
