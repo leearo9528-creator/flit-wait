@@ -3,3 +3,4 @@
 -- staff_toggle_pause(p_booth, p_token, p_paused, p_mode default null): 켤 때 settings.pause_mode/pause_date 기록, 끌 때 제거. audit_logs 기록.
 -- auto_reopen_closed_today(): pause_date 가 어제 이전인 closed_today 부스를 자동 재개. pg_cron 'flit-wait-reopen-daily' 매일 00:05 KST(15:05 UTC).
 -- event_summary / event_board 에 'pause_mode' 키 추가 (본문은 Supabase 적용본 참조).
+-- 0027 보충: 3인자 구버전 staff_toggle_pause(uuid,text,boolean) drop (오버로드 모호성 제거)
