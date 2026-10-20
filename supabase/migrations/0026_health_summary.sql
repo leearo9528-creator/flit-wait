@@ -1,0 +1,4 @@
+-- 2026-10-20 프로덕션 적용 완료
+-- health_summary(): 현장 상태 점검 요약 (개인정보 없음, anon 실행 허용). /api/health 가 호출해 ok=false 면 503.
+-- 판정: cron 최근 실행 < 3분, cron 전부 active, sending 갇힘 0, 예정 지난 미발송 < 50, 1시간 실패 < 20.
+-- 본문은 Supabase 적용본 참조.
