@@ -1,0 +1,5 @@
+-- 2026-10-21 프로덕션 적용 완료 (아로 결정: 알림톡 과다 정리)
+-- 1) templates Q04(입장확인)·R05(체크인완료) enabled=false — 손님이 이미 부스 안. 되돌리려면 enabled=true.
+-- 2) run_scheduler: 순서임박(Q02) 후보에 `t.created_at < now() - interval '3 minutes'` 추가 — 접수완료 직후 중복 방지
+-- 3) reserve_slot: 리마인드(R02) 는 `r.at > now() + interval '15 minutes'` 일 때만 적재 — 시작 45분 이내 예약은 리마인드 생략
+-- 결과: 대기표 손님 2~3통(접수완료·(순서임박)·입장호출), 예약 손님 1~2통(확정·(리마인드)). 노쇼·취소 안내는 그대로.
