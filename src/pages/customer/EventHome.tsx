@@ -53,7 +53,8 @@ export default function EventHome() {
   }, [data?.booths, zone, sort])
 
   if (loading) return <Spinner />
-  if (error || !data?.event) return <div className="p-6"><Alert kind="error">{error ?? '행사를 찾을 수 없습니다.'}</Alert></div>
+  // 일시적 폴링 실패는 마지막 정상 화면을 유지하고 다음 폴링에서 조용히 복구. 처음부터 못 받았을 때만 오류 표시
+  if (!data?.event) return <div className="p-6"><Alert kind="error">{error ?? '행사를 찾을 수 없습니다.'}</Alert></div>
 
   const { event, booths } = data
   const closed = event.status !== 'open'

@@ -35,7 +35,7 @@ export default function Reserve() {
   const activeDay = day ?? days[0]?.[0] ?? null
 
   if (loading) return <Spinner />
-  if (error || !data) return <Page><Alert kind="error">{error ?? '부스를 찾을 수 없습니다.'}</Alert></Page>
+  if (!data) return <Page><Alert kind="error">{error ?? '부스를 찾을 수 없습니다.'}</Alert></Page>  // 폴링 실패 시 마지막 정상 화면 유지
 
   const { booth, event } = data
   if (booth.mode === 'queue') return <Page><Alert kind="info">이 부스는 현장 대기표로 운영됩니다. <Link to={`/q/${slug}`} className="font-semibold underline">대기 접수하기</Link></Alert></Page>

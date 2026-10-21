@@ -50,7 +50,7 @@ export default function MyTicket() {
   }, [token, t?.status, t?.ahead]) // eslint-disable-line
 
   if (loading) return <Spinner />
-  if (error || !t) return <Page><Alert kind="error">{error ?? '티켓을 찾을 수 없습니다.'}</Alert></Page>
+  if (!t) return <Page><Alert kind="error">{error ?? '티켓을 찾을 수 없습니다.'}</Alert></Page>  // 폴링 실패 시 마지막 정상 화면 유지
 
   const isSlot = !!t.slot
   const callValid = (t.booth.settings.call_valid_min ?? 5) * 60

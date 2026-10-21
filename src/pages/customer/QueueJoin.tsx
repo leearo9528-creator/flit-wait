@@ -23,7 +23,7 @@ export default function QueueJoin() {
   const existing = LS.get<{ token: string; slug: string; at: number }>(`ticket:${slug}`)
 
   if (loading) return <Spinner />
-  if (error || !data) return <Page><Alert kind="error">{error ?? '부스를 찾을 수 없습니다.'}</Alert></Page>
+  if (!data) return <Page><Alert kind="error">{error ?? '부스를 찾을 수 없습니다.'}</Alert></Page>  // 폴링 실패 시 마지막 정상 화면 유지
 
   const { booth, event, waiting_teams } = data
   // 예약 전용(slot) 부스는 현장 대기 접수가 없음 → 예약 화면으로 안내 (Reserve 의 queue 모드 처리와 대칭)
