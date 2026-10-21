@@ -10,7 +10,7 @@ export default function BoothHeader({ booth, event, live, closed }: {
   booth: Pick<Booth, 'id' | 'name' | 'mode' | 'is_paused' | 'image_url' | 'description' | 'location' | 'group_name' | 'category'> & { settings?: Partial<Pick<Booth['settings'], 'reserve_open_at' | 'reserve_open_daily_time' | 'pause_mode'>> }
   event: { name: string; slug?: string; status?: string }
   live?: React.ReactNode
-  closed?: boolean
+  closed?: boolean | 'before'
 }) {
   // booth_summary 는 오픈 일시를 settings 안에 담아 주므로 상태 판정(예약 오픈 예정)에 꺼내 넘긴다
   const st = boothStatus({ ...booth, image_url: booth.image_url ?? null, reserve_open_at: booth.settings?.reserve_open_at ?? null, reserve_open_daily_time: booth.settings?.reserve_open_daily_time ?? null, pause_mode: booth.settings?.pause_mode ?? null }, closed ?? event.status === 'closed')

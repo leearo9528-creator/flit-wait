@@ -32,7 +32,9 @@ export function showGroupTag(group?: string | null, category?: string | null) {
   return category?.trim().startsWith(g) ? null : g
 }
 
-export function boothStatus(b: BoothLike, eventClosed: boolean): BoothStatus {
+/** eventClosed: true=운영 종료 · 'before'=행사 시작 전(대기표 부스에만 씀, 예약 부스는 '예약 오픈 예정' 이 더 정확) */
+export function boothStatus(b: BoothLike, eventClosed: boolean | 'before'): BoothStatus {
+  if (eventClosed === 'before') return { kind: 'closed', label: '시작 전' }
   if (eventClosed) return { kind: 'closed', label: '운영 종료' }
   if (b.is_paused) return { kind: 'paused', label: b.pause_mode === 'closed_today' ? '오늘 마감' : '접수 중단' }
   if (b.mode !== 'queue') {

@@ -57,6 +57,7 @@ export default function EventHome() {
 
   const { event, booths } = data
   const closed = event.status !== 'open'
+  const beforeStart = !closed && new Date(event.starts_at).getTime() > Date.now()
   const mine = booths.map(b => LS.get<{ token: string; at: number }>(`ticket:${b.slug}`) ?? LS.get<{ token: string; at: number }>(`resv:${b.slug}`))
     .filter((x): x is { token: string; at: number } => !!x && Date.now() - x.at < 7 * 86400_000)
 
@@ -94,10 +95,11 @@ export default function EventHome() {
       <div className="px-4">
         {event.notice && <div className="mb-3"><Alert kind="warn">{event.notice}</Alert></div>}
         {closed && <div className="mb-3"><Alert kind="info">지금은 운영 시간이 아닙니다. 운영: {fmtDateTime(event.starts_at)} ~ {fmtDateTime(event.ends_at)}</Alert></div>}
+        {beforeStart && <div className="mb-3"><Alert kind="info">행사 시작 전이에요. 대기 접수는 <b>{fmtDateTime(event.starts_at)}</b>부터, 쿠킹 예약은 행사 당일 12:00부터 열립니다.</Alert></div>}
         {mine.length > 0 && <div className="mb-3"><Alert kind="info">접수한 대기·예약이 있어요. <Link to={`/t/${mine[0].token}`} className="font-semibold underline">내 현황 보기</Link></Alert></div>}
 
         <ul className="divide-y divide-gray-100">
-          {list.map(b => <BoothListItem key={b.id} b={b} closed={closed} />)}
+          {list.map(b => <BoothListItem key={b.id} b={b} closed={closed ? true : beforeStart && b.mode === 'queue' ? 'before' : false} />)}
         </ul>
         {list.length === 0 && <p className="py-16 text-center text-sm text-gray-400">표시할 체험부스가 없어요.</p>}
 
@@ -118,7 +120,7 @@ function Chip({ on, onClick, children }: { on?: boolean; onClick?: () => void; c
 }
 
 /** 한 줄 = 사진(좌) + [상태 뱃지 · 존 · 카테고리] / 이름 / 대기 현황 */
-function BoothListItem({ b, closed }: { b: BoothCard; closed: boolean }) {
+function BoothListItem({ b, closed }: { b: BoothCard; closed: boolean | 'before' }) {
   const isQueue = b.mode === 'queue'
   const st = boothStatus(b, closed)
   const dim = st.kind === 'closed' || st.kind === 'paused' || st.kind === 'soldout'

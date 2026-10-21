@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { rpc, cachedRpc } from '../../lib/supabase'
-import { useAsync, useBoothLive, fmtPhone, LS } from '../../lib/util'
+import { useAsync, useBoothLive, fmtPhone, fmtDateTime, LS } from '../../lib/util'
 import { BoothSummary } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
@@ -30,6 +30,7 @@ export default function QueueJoin() {
   if (booth.mode === 'slot') return <Page><Alert kind="info">이 부스는 사전 예약제로 운영됩니다. <Link to={`/r/${slug}`} className="font-semibold underline">예약하러 가기</Link></Alert></Page>
   const maxParty = booth.settings.max_party_size ?? 4
   const closed = event.status !== 'open'
+  const beforeStart = !closed && new Date(event.starts_at).getTime() > Date.now()
   const cookingLike = booth.mode === 'hybrid'
 
   async function submit(e: React.FormEvent) {
@@ -44,9 +45,10 @@ export default function QueueJoin() {
 
   return (
     <Page>
-      <BoothHeader booth={booth} event={event} closed={closed}
+      <BoothHeader booth={booth} event={event} closed={closed ? true : beforeStart ? 'before' : false}
         live={<>대기손님 현황 <b className="tabular-nums">{waiting_teams}팀</b>{data.avg_service_min && waiting_teams > 0 ? <span className="ml-1 font-normal text-gray-500">· 예상 약 {Math.max(1, Math.round(waiting_teams * data.avg_service_min))}분</span> : null}</>} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
+      {beforeStart && <div className="mb-4"><Alert kind="info">행사 시작 전이에요. 대기 접수는 <b>{fmtDateTime(event.starts_at)}</b>부터 받습니다. 그때 이 화면에서 바로 접수하세요.</Alert></div>}
       {booth.is_paused && (booth.settings.pause_mode === 'closed_today'
         ? <div className="mb-4 rounded-2xl bg-gray-100 p-5 text-center ring-1 ring-gray-300">
             <div className="text-2xl">🌙</div>
@@ -94,8 +96,8 @@ export default function QueueJoin() {
             </span>
           </label>
           {err && <Alert kind="error">{err}</Alert>}
-          <Button type="submit" size="lg" loading={busy} disabled={closed || booth.is_paused || !consent}>
-            {booth.is_paused ? (booth.settings.pause_mode === 'closed_today' ? '오늘 접수 마감' : '접수 일시중단') : closed ? '운영 시간이 아닙니다' : '대기 접수하기'}
+          <Button type="submit" size="lg" loading={busy} disabled={closed || beforeStart || booth.is_paused || !consent}>
+            {booth.is_paused ? (booth.settings.pause_mode === 'closed_today' ? '오늘 접수 마감' : '접수 일시중단') : closed ? '운영 시간이 아닙니다' : beforeStart ? '행사 시작 전' : '대기 접수하기'}
           </Button>
         </form>
       </Card>}
