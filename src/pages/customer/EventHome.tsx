@@ -4,11 +4,12 @@ import { cachedRpc } from '../../lib/supabase'
 import { useAsync, fmtDateTime, LS } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
-import { BoothThumb, StatusBadge, boothStatus, nextOpenAt, showGroupTag } from '../../components/BoothCard'
+import { BoothThumb, StatusBadge, boothStatus, nextOpenAt, showGroupTag, queueWindowState } from '../../components/BoothCard'
 
 export interface BoothCard {
   id: string; name: string; slug: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; pause_mode?: string | null; location: string | null
   image_url: string | null; icon_url?: string | null; description: string | null; max_party_size: string | null; reserve_open_at: string | null; reserve_open_daily_time?: string | null; next_slot_at?: string | null
+  queue_open_daily_time?: string | null; queue_close_daily_time?: string | null; open_override_date?: string | null
   group_name?: string | null; category?: string | null
   waiting_teams: number; today_slots: number; today_left: number; total_left: number
 }
@@ -96,11 +97,12 @@ export default function EventHome() {
       <div className="px-4">
         {event.notice && <div className="mb-3"><Alert kind="warn">{event.notice}</Alert></div>}
         {closed && <div className="mb-3"><Alert kind="info">지금은 운영 시간이 아닙니다. 운영: {fmtDateTime(event.starts_at)} ~ {fmtDateTime(event.ends_at)}</Alert></div>}
-        {beforeStart && <div className="mb-3"><Alert kind="info">행사 시작 전이에요. 대기 접수는 <b>{fmtDateTime(event.starts_at)}</b>부터, 쿠킹 예약은 행사 당일 12:00부터 열립니다.</Alert></div>}
+        {beforeStart && <div className="mb-3"><Alert kind="info">행사 시작 전이에요. 행사는 <b>{fmtDateTime(event.starts_at)}</b>에 시작하고, 부스별 접수·예약 시작 시각은 아래 목록에 표시됩니다.</Alert></div>}
         {mine.length > 0 && <div className="mb-3"><Alert kind="info">접수한 대기·예약이 있어요. <Link to={`/t/${mine[0].token}`} className="font-semibold underline">내 현황 보기</Link></Alert></div>}
 
         <ul className="divide-y divide-gray-100">
-          {list.map(b => <BoothListItem key={b.id} b={b} closed={closed ? true : beforeStart && b.mode === 'queue' ? 'before' : false} />)}
+          {/* 행사 시작 전 대기표 부스는 '시작 전' — 단, 접수 시간대가 따로 있으면 '접수 오픈 예정 14:00' 이 더 정확하므로 boothStatus 에 맡긴다 */}
+          {list.map(b => <BoothListItem key={b.id} b={b} closed={closed ? true : beforeStart && b.mode === 'queue' && queueWindowState(b) === 'open' ? 'before' : false} />)}
         </ul>
         {list.length === 0 && <p className="py-16 text-center text-sm text-gray-400">표시할 체험부스가 없어요.</p>}
 
@@ -133,8 +135,11 @@ function BoothListItem({ b, closed }: { b: BoothCard; closed: boolean | 'before'
   const g = showGroupTag(b.group_name, b.category)
   const label = b.name
 
+  const ws = isQueue ? queueWindowState(b) : 'open'
   const live = isQueue
-    ? <>대기손님 현황 <b className="tabular-nums">{b.waiting_teams}팀</b></>
+    ? ws === 'before_open' ? <>접수 오픈 {b.queue_open_daily_time}</>
+    : ws === 'after_close' ? <>오늘 접수 마감</>
+    : <>대기손님 현황 <b className="tabular-nums">{b.waiting_teams}팀</b></>
     : notYet ? <>예약 오픈 {fmtDateTime(openAt!.toISOString())}</>
     : b.total_left <= 0 ? <>전 회차 매진{b.waiting_teams > 0 ? ` · 현장 대기 ${b.waiting_teams}팀` : ''}</>
     : <>{b.today_slots > 0 ? '오늘 잔여' : '잔여'} <b className="tabular-nums">{left}석</b>{b.waiting_teams > 0 ? ` · 현장 대기 ${b.waiting_teams}팀` : ''}</>

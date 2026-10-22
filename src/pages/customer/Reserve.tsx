@@ -53,6 +53,9 @@ export default function Reserve() {
   const selected = data.slots.find(s => s.id === slotId) ?? null
   const existing = LS.get<{ token: string; at: number }>(`resv:${slug}`)
   const closed = event.status !== 'open'
+  // 예약 전용 부스는 스태프 '마감'·'일시중단'이 예약에도 적용된다 (hybrid 는 현장 대기만 멈춤)
+  const slotPaused = booth.mode === 'slot' && booth.is_paused
+  const slotClosedToday = slotPaused && booth.settings.pause_mode === 'closed_today'
   const todayKey = fmtDate(new Date().toISOString())
   const todaySlots = data.slots.filter(s => fmtDate(s.starts_at) === todayKey && s.status === 'open' && new Date(s.ends_at).getTime() > Date.now())
   const todayLeft = todaySlots.length ? todaySlots.reduce((a, s) => a + Math.max(0, s.capacity - s.reserved), 0) : null
@@ -76,7 +79,9 @@ export default function Reserve() {
       {showDaily
         ? <div className="mb-4"><Alert kind="info">{days.length > 1 ? <><b>{days[0][0]}~{days[days.length - 1][0]}</b> {days.length}일간, </> : null}매일 <b>{dailyHm}</b>부터 신청 접수가 시작됩니다.{notYet && openAt ? <> (선택한 날짜는 <b>{fmtDateTime(openAt.toISOString())}</b> 오픈)</> : null}</Alert></div>
         : notYet && <div className="mb-4"><Alert kind="info">예약은 <b>{fmtDateTime(openAt!.toISOString())}</b>부터 열립니다.</Alert></div>}
-      {booth.is_paused && <div className="mb-4"><Alert kind="warn">현장 대기 접수는 잠시 중단된 상태입니다. 사전 예약은 계속 가능해요.</Alert></div>}
+      {booth.is_paused && (slotPaused
+        ? <div className="mb-4"><Alert kind="warn">{slotClosedToday ? '오늘 예약이 마감되었습니다. 내일 운영 시간에 다시 만나요.' : '예약 접수를 잠시 멈췄어요. 잠시 후 이 화면에서 다시 예약할 수 있어요. (자동으로 갱신됩니다)'}</Alert></div>
+        : <div className="mb-4"><Alert kind="warn">현장 대기 접수는 잠시 중단된 상태입니다. 사전 예약은 계속 가능해요.</Alert></div>)}
       {existing && Date.now() - existing.at < 7 * 86400_000 && (
         <div className="mb-4"><Alert kind="info">이미 예약하신 내역이 있어요. <Link to={`/t/${existing.token}`} className="font-semibold underline">예약 확인</Link></Alert></div>
       )}
@@ -131,8 +136,8 @@ export default function Reserve() {
           </label>
           <p className="text-xs text-gray-500">체험 시작 {booth.settings.noshow_after_start_min ?? 10}분이 지나도 도착하지 않으면 예약이 취소되고 현장 대기자에게 자리가 넘어갑니다. 취소는 시작 {fmtDur(booth.settings.cancel_until_before_min ?? 120)} 전까지 가능합니다.</p>
           {err && <Alert kind="error">{err}</Alert>}
-          <Button type="submit" size="lg" loading={busy} disabled={notYet || !slotId || !consent || event.status !== 'open'}>
-            {notYet ? '예약 오픈 전' : '예약하기'}
+          <Button type="submit" size="lg" loading={busy} disabled={slotPaused || notYet || !slotId || !consent || event.status !== 'open'}>
+            {slotPaused ? (slotClosedToday ? '오늘 예약 마감' : '예약 일시중단') : notYet ? '예약 오픈 전' : '예약하기'}
           </Button>
         </form>
       </Card>

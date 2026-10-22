@@ -19,6 +19,11 @@ export interface BoothSettings {
   /** 접수 중단 종류: 'paused' 잠시 중단 · 'closed_today' 오늘 마감(자정에 자동 해제). is_paused 가 true 일 때만 의미 */
   pause_mode?: 'paused' | 'closed_today' | null
   pause_date?: string | null
+  /** 'HH:MM' KST — 대기표(queue/hybrid) 접수의 일별 오픈·마감 시각. 비우면 행사 시간 전체 */
+  queue_open_daily_time?: string | null
+  queue_close_daily_time?: string | null
+  /** 'YYYY-MM-DD' — 스태프가 '오픈'을 누른 날. 그날은 시간대·예약 오픈 시각과 무관하게 접수·예약을 받는다 */
+  open_override_date?: string | null
 }
 
 export interface Booth {

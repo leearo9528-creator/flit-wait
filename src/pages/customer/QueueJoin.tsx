@@ -6,6 +6,7 @@ import { BoothSummary } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
 import CustomerNav from '../../components/CustomerNav'
+import { queueWindowState } from '../../components/BoothCard'
 
 export default function QueueJoin() {
   const { slug = '' } = useParams()
@@ -32,6 +33,9 @@ export default function QueueJoin() {
   const closed = event.status !== 'open'
   const beforeStart = !closed && new Date(event.starts_at).getTime() > Date.now()
   const cookingLike = booth.mode === 'hybrid'
+  // 일별 접수 시간대 (관리자 설정) — 스태프가 오늘 '오픈'을 눌렀으면 open. 마감·일시중단이 우선
+  const ws = queueWindowState(booth.settings)
+  const windowBlocked = !booth.is_paused && ws !== 'open'
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -48,7 +52,18 @@ export default function QueueJoin() {
       <BoothHeader booth={booth} event={event} closed={closed ? true : beforeStart ? 'before' : false}
         live={<>대기손님 현황 <b className="tabular-nums">{waiting_teams}팀</b>{data.avg_service_min && waiting_teams > 0 ? <span className="ml-1 font-normal text-gray-500">· 예상 약 {Math.max(1, Math.round(waiting_teams * data.avg_service_min))}분</span> : null}</>} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
-      {beforeStart && <div className="mb-4"><Alert kind="info">행사 시작 전이에요. 대기 접수는 <b>{fmtDateTime(event.starts_at)}</b>부터 받습니다. 그때 이 화면에서 바로 접수하세요.</Alert></div>}
+      {beforeStart && ws === 'open' && <div className="mb-4"><Alert kind="info">행사 시작 전이에요. 대기 접수는 <b>{fmtDateTime(event.starts_at)}</b>부터 받습니다. 그때 이 화면에서 바로 접수하세요.</Alert></div>}
+      {windowBlocked && (ws === 'before_open'
+        ? <div className="mb-4 rounded-2xl bg-sky-50 p-5 text-center ring-1 ring-sky-200">
+            <div className="text-2xl">⏰</div>
+            <div className="mt-1 text-lg font-bold text-sky-900">오늘 대기 접수는 {booth.settings.queue_open_daily_time} 부터 받습니다</div>
+            <div className="mt-1 text-sm text-sky-800">그 시각이 되면 이 화면에서 바로 접수할 수 있어요. (자동으로 갱신됩니다)</div>
+          </div>
+        : <div className="mb-4 rounded-2xl bg-gray-100 p-5 text-center ring-1 ring-gray-300">
+            <div className="text-2xl">🌙</div>
+            <div className="mt-1 text-lg font-bold text-gray-800">오늘 접수가 마감되었습니다</div>
+            <div className="mt-1 text-sm text-gray-600">오늘 접수는 {booth.settings.queue_close_daily_time}에 끝났어요.<br />내일 운영 시간에 다시 만나요.</div>
+          </div>)}
       {booth.is_paused && (booth.settings.pause_mode === 'closed_today'
         ? <div className="mb-4 rounded-2xl bg-gray-100 p-5 text-center ring-1 ring-gray-300">
             <div className="text-2xl">🌙</div>
@@ -77,7 +92,7 @@ export default function QueueJoin() {
         </div>
       )}
 
-      {!booth.is_paused && <Card>
+      {!booth.is_paused && !windowBlocked && <Card>
         <form onSubmit={submit} className="space-y-4">
           <Field label="이름 (대표자)">
             <Input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" required maxLength={20} autoComplete="name" />

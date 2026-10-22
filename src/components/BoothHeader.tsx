@@ -7,13 +7,18 @@ import { StatusBadge, boothStatus, showGroupTag } from './BoothCard'
  * 큰 사진(뒤로가기 오버레이) → [상태 뱃지 · 존 · 카테고리] → 이름 → 대기 현황(주황) → 안내문 박스
  */
 export default function BoothHeader({ booth, event, live, closed }: {
-  booth: Pick<Booth, 'id' | 'name' | 'mode' | 'is_paused' | 'image_url' | 'description' | 'location' | 'group_name' | 'category'> & { settings?: Partial<Pick<Booth['settings'], 'reserve_open_at' | 'reserve_open_daily_time' | 'pause_mode'>> }
+  booth: Pick<Booth, 'id' | 'name' | 'mode' | 'is_paused' | 'image_url' | 'description' | 'location' | 'group_name' | 'category'> & { settings?: Partial<Pick<Booth['settings'], 'reserve_open_at' | 'reserve_open_daily_time' | 'pause_mode' | 'queue_open_daily_time' | 'queue_close_daily_time' | 'open_override_date'>> }
   event: { name: string; slug?: string; status?: string }
   live?: React.ReactNode
   closed?: boolean | 'before'
 }) {
-  // booth_summary 는 오픈 일시를 settings 안에 담아 주므로 상태 판정(예약 오픈 예정)에 꺼내 넘긴다
-  const st = boothStatus({ ...booth, image_url: booth.image_url ?? null, reserve_open_at: booth.settings?.reserve_open_at ?? null, reserve_open_daily_time: booth.settings?.reserve_open_daily_time ?? null, pause_mode: booth.settings?.pause_mode ?? null }, closed ?? event.status === 'closed')
+  // booth_summary 는 오픈 일시·접수 시간대를 settings 안에 담아 주므로 상태 판정(예약 오픈 예정·접수 오픈 예정)에 꺼내 넘긴다
+  const s = booth.settings
+  const st = boothStatus({
+    ...booth, image_url: booth.image_url ?? null, pause_mode: s?.pause_mode ?? null,
+    reserve_open_at: s?.reserve_open_at ?? null, reserve_open_daily_time: s?.reserve_open_daily_time ?? null,
+    queue_open_daily_time: s?.queue_open_daily_time ?? null, queue_close_daily_time: s?.queue_close_daily_time ?? null, open_override_date: s?.open_override_date ?? null,
+  }, closed ?? event.status === 'closed')
   const g = showGroupTag(booth.group_name, booth.category)
   return (
     <header className="-mx-4 -mt-6 mb-4">

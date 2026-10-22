@@ -4,6 +4,7 @@ import { rpc } from '../../lib/supabase'
 import { LS, useAsync, useBoothLive, useTick, fmtTime, fmtDate, minutesSince } from '../../lib/util'
 import { StaffBoard, StaffSession, StaffTicket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge, Empty, Input, Stepper } from '../../components/ui'
+import { queueWindowState, openAtFor, kstYmd } from '../../components/BoothCard'
 
 export default function StaffBoardPage() {
   const { slug = '' } = useParams()
@@ -49,13 +50,34 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
     catch (e: any) { setErr(e.message) } finally { setBusyId(null) }
   }
   function flash(m: string) { setToast(m); setTimeout(() => setToast(null), 2500) }
-  // 일시중단(잠시) 과 오늘 마감(자정에 자동 해제) 을 구분. 재개는 공통
+  // 일시중단(잠시) 과 재개. 오늘 마감·오픈은 아래 setOpen (staff_set_open)
   async function setPause(paused: boolean, mode?: 'paused' | 'closed_today') {
-    if (mode === 'closed_today' && !confirm('오늘 접수를 마감할까요?\n손님 화면에 "오늘 접수가 마감되었습니다"로 표시되고, 내일 자정에 자동으로 풀립니다. (대기 중인 손님 호출·입장은 계속 가능)')) return
     try { await rpc('staff_toggle_pause', { p_booth: sess.booth_id, p_token: sess.staff_token, p_paused: paused, p_mode: mode ?? null }); reload() }
     catch (e: any) { setErr(e.message) }
   }
   const closedToday = booth.is_paused && booth.settings.pause_mode === 'closed_today'
+  // 상단 상태 판정 — 마감·일시중단 > 오늘 수동 오픈(open_override_date) > 시간대 설정(대기표) / 오늘 회차 예약 오픈 시각(예약 전용)
+  const noun = booth.mode === 'slot' ? '예약' : '접수'
+  const today = kstYmd(new Date())
+  const ws = queueWindowState(booth.settings)
+  const slotOpenAt = booth.mode === 'slot' ? openAtFor(booth.settings, today) : null
+  const state: 'paused' | 'closed_today' | 'before_open' | 'after_close' | 'open' =
+    booth.is_paused ? (closedToday ? 'closed_today' : 'paused')
+    : booth.mode === 'slot' ? (slotOpenAt && slotOpenAt.getTime() > Date.now() ? 'before_open' : 'open')
+    : ws
+  const openHm = booth.mode === 'slot' ? (slotOpenAt ? fmtTime(slotOpenAt.toISOString()) : null) : booth.settings.queue_open_daily_time
+  const closeHm = booth.settings.queue_close_daily_time
+  /** 오픈 = 오늘 하루 시간대·예약 오픈 시각보다 우선해서 받음(마감·일시중단 해제) · 마감 = '오늘 마감'(자정 자동 해제) */
+  async function setOpen(open: boolean) {
+    const q = open
+      ? state === 'before_open' ? `예정 시각(${openHm}) 전입니다. 지금 바로 ${noun}을 열까요?\n오늘 하루는 시간 설정보다 우선합니다.`
+        : state === 'after_close' ? `오늘 ${noun} 시간(${closeHm} 마감)이 끝났습니다. 다시 열까요?`
+        : `오늘 마감을 취소하고 다시 ${noun}을 받을까요?`
+      : `오늘 ${noun}을 마감할까요?\n손님 화면에 "오늘 ${noun}이 마감되었습니다"로 표시되고, 내일 자정에 자동으로 풀립니다. (이미 ${noun}된 손님 호출·입장은 계속 가능)`
+    if (!confirm(q)) return
+    try { await rpc('staff_set_open', { p_booth: sess.booth_id, p_token: sess.staff_token, p_open: open }); reload() }
+    catch (e: any) { setErr(e.message) }
+  }
 
   const called = queue.filter(t => t.status === 'called')
   const waiting = queue.filter(t => t.status === 'waiting')
@@ -64,16 +86,22 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
   return (
     <Page title={booth.name} sub="스태프" wide>
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        {booth.is_paused ? <Badge tone={closedToday ? 'gray' : 'red'}>{closedToday ? '오늘 접수 마감' : '접수 일시중단'}</Badge> : <Badge tone="green">접수 중</Badge>}
+        {state === 'paused' ? <Badge tone="red">접수 일시중단</Badge>
+          : state === 'closed_today' ? <Badge tone="gray">오늘 {noun} 마감</Badge>
+          : state === 'before_open' ? <Badge tone="blue">{noun} 오픈 예정 {openHm}</Badge>
+          : state === 'after_close' ? <Badge tone="gray">오늘 {noun} 마감 ({closeHm})</Badge>
+          : <Badge tone="green">{noun} 중{booth.settings.open_override_date === today ? ' · 수동 오픈' : ''}</Badge>}
         <span className="text-sm text-gray-500">대기 {waiting.length}팀 · 호출 {called.length} · 완료 {data.done_today} · 노쇼 {data.noshow_today}</span>
         <div className="ml-auto flex gap-2">
           <button onClick={() => setBig(b => !b)} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">{big ? '보통 글씨' : '큰 글씨'}</button>
-          {showQueue && (booth.is_paused
-            ? <button onClick={() => setPause(false)} className="h-9 rounded-lg bg-green-600 px-3 text-sm text-white ring-1 ring-green-600">접수 재개</button>
-            : <>
-                <button onClick={() => setPause(true, 'paused')} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">일시중단</button>
-                <button onClick={() => setPause(true, 'closed_today')} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">오늘 마감</button>
-              </>)}
+          {state === 'paused' && <button onClick={() => setPause(false)} className="h-9 rounded-lg bg-green-600 px-3 text-sm text-white ring-1 ring-green-600">접수 재개</button>}
+          {(state === 'closed_today' || state === 'before_open' || state === 'after_close') && (
+            <button onClick={() => setOpen(true)} className="h-9 rounded-lg bg-green-600 px-3 text-sm font-semibold text-white ring-1 ring-green-600">{noun} 오픈</button>
+          )}
+          {state === 'open' && <>
+            {showQueue && <button onClick={() => setPause(true, 'paused')} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">일시중단</button>}
+            <button onClick={() => setOpen(false)} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">{noun} 마감</button>
+          </>}
           <button onClick={() => { LS.del(`staff:${slug}`); nav(`/s/${slug}`) }} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">로그아웃</button>
         </div>
       </div>

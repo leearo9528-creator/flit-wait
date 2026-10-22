@@ -1,9 +1,14 @@
 /** 손님 목록·상세 공통 조각: 썸네일(사진 없으면 이름 커버), 상태 뱃지, 상태 판정 */
 
-export interface BoothLike { id: string; name: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; pause_mode?: string | null; image_url: string | null; icon_url?: string | null; group_name?: string | null; total_left?: number; reserve_open_at?: string | null; reserve_open_daily_time?: string | null; next_slot_at?: string | null }
+export interface BoothLike {
+  id: string; name: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; pause_mode?: string | null; image_url: string | null; icon_url?: string | null; group_name?: string | null; total_left?: number
+  reserve_open_at?: string | null; reserve_open_daily_time?: string | null; next_slot_at?: string | null
+  /** 대기표 접수 일별 시간대 + 스태프 수동 오픈(그 날짜) — event_summary / booth.settings 양쪽에서 같은 이름으로 온다 */
+  queue_open_daily_time?: string | null; queue_close_daily_time?: string | null; open_override_date?: string | null
+}
 
 /** 목록 카드의 "예약 오픈" 기준 시각 — 다음 회차 날짜(없으면 오늘) 기준. 일별 오픈이면 그 날짜 HH:MM */
-export function nextOpenAt(b: Pick<BoothLike, 'reserve_open_at' | 'reserve_open_daily_time' | 'next_slot_at'>): Date | null {
+export function nextOpenAt(b: Pick<BoothLike, 'reserve_open_at' | 'reserve_open_daily_time' | 'next_slot_at' | 'open_override_date'>): Date | null {
   return openAtFor(b, kstYmd(b.next_slot_at ? new Date(b.next_slot_at) : new Date()))
 }
 
@@ -11,13 +16,31 @@ export type BoothStatus = { kind: 'open' | 'paused' | 'closed' | 'soldout' | 'up
 
 /** KST 기준 YYYY-MM-DD */
 export const kstYmd = (d: Date | string) => new Date(d).toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
+/** KST 기준 'HH:MM' (h23 — 자정이 24:00 으로 나오는 엔진 차이 회피) */
+export const kstHm = (d: Date = new Date()) => d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'Asia/Seoul' })
+const normHm = (s?: string | null) => { const t = s?.trim(); return t && /^\d{1,2}:\d{2}$/.test(t) ? t.padStart(5, '0') : null }
+
+export type WindowState = 'open' | 'before_open' | 'after_close'
+/**
+ * 대기표 접수 일별 시간대 판정 (서버 queue_window_state 와 같은 규칙).
+ * 스태프가 오늘 '오픈'을 눌렀으면(open_override_date = 오늘) 시간대와 무관하게 open.
+ */
+export function queueWindowState(b: Pick<BoothLike, 'queue_open_daily_time' | 'queue_close_daily_time' | 'open_override_date'>, now = new Date()): WindowState {
+  if (b.open_override_date === kstYmd(now)) return 'open'
+  const hm = kstHm(now), o = normHm(b.queue_open_daily_time), c = normHm(b.queue_close_daily_time)
+  if (o && hm < o) return 'before_open'
+  if (c && hm >= c) return 'after_close'
+  return 'open'
+}
 
 /**
  * 특정 날짜(KST)의 회차가 예약 가능해지는 시각.
  * = max(전체 오픈 일시 reserve_open_at, 그 날짜 + 일별 오픈 시각 reserve_open_daily_time('12:00'))
  * 일별 오픈이 설정되면 "매일 12:00에 그날 회차 오픈" 식으로 동작한다.
+ * 스태프가 그 날짜에 '오픈'을 눌렀으면(open_override_date) null — 바로 예약 가능.
  */
-export function openAtFor(b: Pick<BoothLike, 'reserve_open_at' | 'reserve_open_daily_time'>, ymd: string): Date | null {
+export function openAtFor(b: Pick<BoothLike, 'reserve_open_at' | 'reserve_open_daily_time' | 'open_override_date'>, ymd: string): Date | null {
+  if (b.open_override_date === ymd) return null
   const g = b.reserve_open_at ? new Date(b.reserve_open_at) : null
   const hm = b.reserve_open_daily_time?.trim()
   const d = hm && /^\d{1,2}:\d{2}$/.test(hm) ? new Date(`${ymd}T${hm.padStart(5, '0')}:00+09:00`) : null
@@ -43,6 +66,9 @@ export function boothStatus(b: BoothLike, eventClosed: boolean | 'before'): Boot
     if ((b.total_left ?? 1) <= 0) return { kind: 'soldout', label: '매진' }
     return { kind: 'open', label: '예약 중' }
   }
+  const ws = queueWindowState(b)
+  if (ws === 'before_open') return { kind: 'upcoming', label: '접수 오픈 예정' }
+  if (ws === 'after_close') return { kind: 'closed', label: '오늘 접수 마감' }
   return { kind: 'open', label: '접수 중' }
 }
 
