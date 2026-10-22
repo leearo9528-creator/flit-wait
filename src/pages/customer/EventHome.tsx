@@ -97,7 +97,6 @@ export default function EventHome() {
       <div className="px-4">
         {event.notice && <div className="mb-3"><Alert kind="warn">{event.notice}</Alert></div>}
         {closed && <div className="mb-3"><Alert kind="info">지금은 운영 시간이 아닙니다. 운영: {fmtDateTime(event.starts_at)} ~ {fmtDateTime(event.ends_at)}</Alert></div>}
-        {beforeStart && <div className="mb-3"><Alert kind="info">행사 시작 전이에요. 행사는 <b>{fmtDateTime(event.starts_at)}</b>에 시작하고, 부스별 접수·예약 시작 시각은 아래 목록에 표시됩니다.</Alert></div>}
         {mine.length > 0 && <div className="mb-3"><Alert kind="info">접수한 대기·예약이 있어요. <Link to={`/t/${mine[0].token}`} className="font-semibold underline">내 현황 보기</Link></Alert></div>}
 
         <ul className="divide-y divide-gray-100">
