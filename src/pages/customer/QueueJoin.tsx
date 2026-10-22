@@ -49,7 +49,7 @@ export default function QueueJoin() {
 
   return (
     <Page>
-      <BoothHeader booth={booth} event={event} closed={closed ? true : beforeStart ? 'before' : false}
+      <BoothHeader booth={booth} event={event} closed={closed ? true : beforeStart && ws === 'open' ? 'before' : false}
         live={<>대기손님 현황 <b className="tabular-nums">{waiting_teams}팀</b>{data.avg_service_min && waiting_teams > 0 ? <span className="ml-1 font-normal text-gray-500">· 예상 약 {Math.max(1, Math.round(waiting_teams * data.avg_service_min))}분</span> : null}</>} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
       {beforeStart && ws === 'open' && <div className="mb-4"><Alert kind="info">행사 시작 전이에요. 대기 접수는 <b>{fmtDateTime(event.starts_at)}</b>부터 받습니다. 그때 이 화면에서 바로 접수하세요.</Alert></div>}
