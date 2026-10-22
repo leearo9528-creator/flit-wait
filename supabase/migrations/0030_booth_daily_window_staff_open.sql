@@ -1,6 +1,6 @@
 -- 2026-10-23 프로덕션 적용 완료 (성남 행사 당일 새벽, 아로 지시)
 -- 1) 대기표(queue/hybrid) 부스 일별 접수 시간대: settings.queue_open_daily_time / queue_close_daily_time ('HH:MM' KST).
---    비우면 기존처럼 행사 시간 전체. 성남 테크놀이터 1~3 = 14:00 ~ 20:00.
+--    비우면 기존처럼 행사 시간 전체. 성남 테크놀이터 1~3 = 접수 12:00 ~ 20:00 (운영 14:00 ~ 20:00, 10/23 02시 아로 지시로 14:00→12:00).
 -- 2) 스태프 수동 오픈/마감 staff_set_open(p_open):
 --    오픈 = is_paused 해제 + settings.open_override_date = 오늘 → 그날은 시간대와 무관하게 접수(대기표)·예약(회차) 받음.
 --    마감 = 기존 '오늘 마감'(closed_today, 00:05 KST auto_reopen 으로 자동 해제) + override 제거.
@@ -189,5 +189,5 @@ create or replace function public.event_board(p_slug text)
 $function$;
 
 -- 성남 테크놀이터 1~3 접수 시간대 14:00~20:00 (코드 배포 뒤 별도 실행함)
--- update booths b set settings = b.settings || '{"queue_open_daily_time":"14:00","queue_close_daily_time":"20:00"}'::jsonb
+-- update booths b set settings = b.settings || '{"queue_open_daily_time":"12:00","queue_close_daily_time":"20:00"}'::jsonb
 --   from events e where e.id = b.event_id and e.slug = 'seongnam-2026' and b.slug in ('tech-1','tech-2','tech-3');
