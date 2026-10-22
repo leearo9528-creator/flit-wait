@@ -53,23 +53,6 @@ export default function QueueJoin() {
         live={<>대기손님 현황 <b className="tabular-nums">{waiting_teams}팀</b>{data.avg_service_min && waiting_teams > 0 ? <span className="ml-1 font-normal text-gray-500">· 예상 약 {Math.max(1, Math.round(waiting_teams * data.avg_service_min))}분</span> : null}</>} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
       {beforeStart && ws === 'open' && <div className="mb-4"><Alert kind="info">행사 시작 전이에요. 대기 접수는 <b>{fmtDateTime(event.starts_at)}</b>부터 받습니다. 그때 이 화면에서 바로 접수하세요.</Alert></div>}
-      {/* 접수 시간대 안내 — 위 안내문 박스(BoothHeader)와 같은 카드 톤: 흰 배경 · 회색 테두리 · 왼쪽 아이콘 */}
-      {windowBlocked && (
-        <div className="mb-4 flex items-start gap-3 rounded-xl px-4 py-3.5 ring-1 ring-gray-200">
-          <span className="mt-0.5 text-lg" aria-hidden>{ws === 'before_open' ? '⏰' : '🌙'}</span>
-          <div className="min-w-0 text-[15px] leading-relaxed text-gray-700">
-            {ws === 'before_open'
-              ? <>
-                  <div className="font-semibold text-gray-900">대기 접수 : {booth.settings.queue_open_daily_time}~</div>
-                  {booth.settings.queue_open_note && <div className="text-sm text-gray-500">{booth.settings.queue_open_note}</div>}
-                </>
-              : <>
-                  <div className="font-semibold text-gray-900">오늘 접수가 마감되었습니다</div>
-                  <div className="text-sm text-gray-500">접수 {booth.settings.queue_close_daily_time} 마감 · 내일 운영 시간에 다시 열립니다.</div>
-                </>}
-          </div>
-        </div>
-      )}
       {booth.is_paused && (booth.settings.pause_mode === 'closed_today'
         ? <div className="mb-4 rounded-2xl bg-gray-100 p-5 text-center ring-1 ring-gray-300">
             <div className="text-2xl">🌙</div>
@@ -98,7 +81,8 @@ export default function QueueJoin() {
         </div>
       )}
 
-      {!booth.is_paused && !windowBlocked && <Card>
+      {/* 접수 시간대 밖(오픈 전·마감 후)에는 폼을 그대로 두고 반투명 회색 박스로 덮는다 */}
+      {!booth.is_paused && <div className="relative"><Card>
         <form onSubmit={submit} className="space-y-4">
           <Field label="이름 (대표자)">
             <Input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" required maxLength={20} autoComplete="name" />
@@ -117,11 +101,19 @@ export default function QueueJoin() {
             </span>
           </label>
           {err && <Alert kind="error">{err}</Alert>}
-          <Button type="submit" size="lg" loading={busy} disabled={closed || beforeStart || booth.is_paused || !consent}>
-            {booth.is_paused ? (booth.settings.pause_mode === 'closed_today' ? '오늘 접수 마감' : '접수 일시중단') : closed ? '운영 시간이 아닙니다' : beforeStart ? '행사 시작 전' : '대기 접수하기'}
+          <Button type="submit" size="lg" loading={busy} disabled={closed || beforeStart || booth.is_paused || windowBlocked || !consent}>
+            {booth.is_paused ? (booth.settings.pause_mode === 'closed_today' ? '오늘 접수 마감' : '접수 일시중단') : windowBlocked ? (ws === 'before_open' ? '접수 예정' : '오늘 접수 마감') : closed ? '운영 시간이 아닙니다' : beforeStart ? '행사 시작 전' : '대기 접수하기'}
           </Button>
         </form>
-      </Card>}
+      </Card>
+      {windowBlocked && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl bg-gray-500/60 px-6 text-center text-white backdrop-blur-[1.5px]">
+          <div className="text-2xl font-bold">{ws === 'before_open' ? '접수 예정' : '오늘 접수 마감'}</div>
+          <div className="mt-1.5 text-lg font-semibold">{ws === 'before_open' ? `대기 접수 : ${booth.settings.queue_open_daily_time}~` : `접수 ${booth.settings.queue_close_daily_time} 마감`}</div>
+          {ws === 'before_open' && booth.settings.queue_open_note && <div className="mt-1 text-sm text-white/90">{booth.settings.queue_open_note}</div>}
+        </div>
+      )}
+      </div>}
       <p className="mt-4 text-center text-xs text-gray-400">운영 · 플릿 (FLIT)</p>
       <CustomerNav slug={(event as any).slug} />
     </Page>
