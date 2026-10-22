@@ -75,6 +75,7 @@ function Settings({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
   const [dailyTime, setDailyTime] = useState(booth.settings.reserve_open_daily_time ?? '')
   const [qOpen, setQOpen] = useState(booth.settings.queue_open_daily_time ?? '')
   const [qClose, setQClose] = useState(booth.settings.queue_close_daily_time ?? '')
+  const [qNote, setQNote] = useState(booth.settings.queue_open_note ?? '')
   const [dayBefore, setDayBefore] = useState(() => { const r = booth.settings.reminders?.find(r => r.type === 'day_before') as any; return r ? String(r.hour) : '' })
   const [beforeMin, setBeforeMin] = useState(() => { const r = booth.settings.reminders?.find(r => r.type === 'before_min') as any; return r ? String(r.min) : '' })
   const [msg, setMsg] = useState<string | null>(null)
@@ -89,6 +90,7 @@ function Settings({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
     const settings = {
       ...s, reminders, reserve_open_at: openAt ? new Date(openAt).toISOString() : null, reserve_open_daily_time: dt ? dt.padStart(5, '0') : null,
       queue_open_daily_time: qo ? qo.padStart(5, '0') : null, queue_close_daily_time: qc ? qc.padStart(5, '0') : null,
+      queue_open_note: qNote.trim() || null,
     }
     const { error } = await supabase.from('booths').update({ settings }).eq('id', booth.id)
     setMsg(error ? error.message : '저장했습니다.'); onSaved()
@@ -104,6 +106,7 @@ function Settings({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
         <Field label="일별 예약 오픈 시각 (매일 HH:MM, 비우면 없음)" hint="설정하면 각 날짜 회차는 그날 이 시각부터 예약 가능. 위 오픈 일시와 둘 중 늦은 쪽 적용"><Input value={dailyTime} onChange={e => setDailyTime(e.target.value)} placeholder="12:00" /></Field>
         <Field label="대기표 접수 오픈 시각 (매일 HH:MM, 비우면 행사 시작부터)" hint="대기표·혼합 부스에 적용. 스태프가 보드에서 '접수 오픈'을 누르면 그날은 이 시각 전에도 받음"><Input value={qOpen} onChange={e => setQOpen(e.target.value)} placeholder="14:00" /></Field>
         <Field label="대기표 접수 마감 시각 (매일 HH:MM, 비우면 행사 종료까지)" hint="이 시각부터 손님 화면은 '오늘 접수 마감'. 행사 종료 N분 전 마감과 둘 중 이른 쪽"><Input value={qClose} onChange={e => setQClose(e.target.value)} placeholder="20:00" /></Field>
+        <Field label="접수 오픈 전 안내 한 줄 (손님 화면 '대기 접수 : 14:00~' 아래)" hint="예: 시작 2시간 전부터 접수 가능합니다."><Input value={qNote} onChange={e => setQNote(e.target.value)} placeholder="시작 2시간 전부터 접수 가능합니다." maxLength={60} /></Field>
         <Field label="리마인드 ① 전날 N시 (비우면 안 보냄)"><Input type="number" value={dayBefore} onChange={e => setDayBefore(e.target.value)} placeholder="19" /></Field>
         <Field label="리마인드 ② 시작 N분 전 (비우면 안 보냄)"><Input type="number" value={beforeMin} onChange={e => setBeforeMin(e.target.value)} placeholder="30" /></Field>
         <div className="space-y-2 text-sm md:col-span-2">

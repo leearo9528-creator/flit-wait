@@ -137,7 +137,7 @@ function BoothListItem({ b, closed }: { b: BoothCard; closed: boolean | 'before'
 
   const ws = isQueue ? queueWindowState(b) : 'open'
   const live = isQueue
-    ? ws === 'before_open' ? <>접수 오픈 {b.queue_open_daily_time}</>
+    ? ws === 'before_open' ? <>대기 접수 {b.queue_open_daily_time}~</>
     : ws === 'after_close' ? <>오늘 접수 마감</>
     : <>대기손님 현황 <b className="tabular-nums">{b.waiting_teams}팀</b></>
     : notYet ? <>예약 오픈 {fmtDateTime(openAt!.toISOString())}</>

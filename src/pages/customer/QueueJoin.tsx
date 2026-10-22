@@ -55,9 +55,8 @@ export default function QueueJoin() {
       {beforeStart && ws === 'open' && <div className="mb-4"><Alert kind="info">행사 시작 전이에요. 대기 접수는 <b>{fmtDateTime(event.starts_at)}</b>부터 받습니다. 그때 이 화면에서 바로 접수하세요.</Alert></div>}
       {windowBlocked && (ws === 'before_open'
         ? <div className="mb-4 rounded-2xl bg-sky-50 p-5 text-center ring-1 ring-sky-200">
-            <div className="text-2xl">⏰</div>
-            <div className="mt-1 text-lg font-bold text-sky-900">오늘 대기 접수는 {booth.settings.queue_open_daily_time} 부터 받습니다</div>
-            <div className="mt-1 text-sm text-sky-800">그 시각이 되면 이 화면에서 바로 접수할 수 있어요. (자동으로 갱신됩니다)</div>
+            <div className="text-xl font-bold text-sky-900">대기 접수 : {booth.settings.queue_open_daily_time}~</div>
+            {booth.settings.queue_open_note && <div className="mt-1 text-sm text-sky-800">{booth.settings.queue_open_note}</div>}
           </div>
         : <div className="mb-4 rounded-2xl bg-gray-100 p-5 text-center ring-1 ring-gray-300">
             <div className="text-2xl">🌙</div>

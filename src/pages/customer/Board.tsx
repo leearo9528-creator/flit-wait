@@ -41,7 +41,7 @@ export default function Board() {
               <div className="text-2xl font-bold">{b.name}</div>
               {b.is_paused
                 ? <span className={`rounded-full px-3 py-1 text-sm font-bold ${b.pause_mode === 'closed_today' ? 'bg-gray-600' : 'bg-red-500'}`}>{b.pause_mode === 'closed_today' ? '오늘 마감' : '접수 중단'}</span>
-                : b.window_state === 'before_open' ? <span className="rounded-full bg-sky-600 px-3 py-1 text-sm font-bold">{b.queue_open_daily_time} 접수 시작</span>
+                : b.window_state === 'before_open' ? <span className="rounded-full bg-sky-600 px-3 py-1 text-sm font-bold">대기 접수 {b.queue_open_daily_time}~</span>
                 : b.window_state === 'after_close' ? <span className="rounded-full bg-gray-600 px-3 py-1 text-sm font-bold">오늘 마감</span>
                 : null}
             </div>

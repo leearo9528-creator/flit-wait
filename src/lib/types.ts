@@ -22,6 +22,8 @@ export interface BoothSettings {
   /** 'HH:MM' KST — 대기표(queue/hybrid) 접수의 일별 오픈·마감 시각. 비우면 행사 시간 전체 */
   queue_open_daily_time?: string | null
   queue_close_daily_time?: string | null
+  /** 접수 오픈 전 손님 화면 안내 한 줄 (예: '시작 2시간 전부터 접수 가능합니다.') */
+  queue_open_note?: string | null
   /** 'YYYY-MM-DD' — 스태프가 '오픈'을 누른 날. 그날은 시간대·예약 오픈 시각과 무관하게 접수·예약을 받는다 */
   open_override_date?: string | null
 }
