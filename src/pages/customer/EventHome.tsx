@@ -4,7 +4,7 @@ import { cachedRpc } from '../../lib/supabase'
 import { useAsync, fmtDateTime, LS } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
-import { BoothThumb, StatusBadge, boothStatus, nextOpenAt, showGroupTag, queueWindowState } from '../../components/BoothCard'
+import { BoothThumb, StatusBadge, boothStatus, nextOpenAt, showGroupTag, queueWindowState, kstYmd } from '../../components/BoothCard'
 
 export interface BoothCard {
   id: string; name: string; slug: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; pause_mode?: string | null; location: string | null
@@ -101,7 +101,8 @@ export default function EventHome() {
 
         <ul className="divide-y divide-gray-100">
           {/* 행사 시작 전 대기표 부스는 '시작 전' — 단, 접수 시간대가 따로 있으면 '접수 오픈 예정 14:00' 이 더 정확하므로 boothStatus 에 맡긴다 */}
-          {list.map(b => <BoothListItem key={b.id} b={b} closed={closed ? true : beforeStart && b.mode === 'queue' && queueWindowState(b) === 'open' ? 'before' : false} />)}
+          {/* 스태프가 오늘 '접수 오픈'을 누른 부스(open_override_date=오늘)는 행사 시작 전이라도 '접수 중' */}
+          {list.map(b => <BoothListItem key={b.id} b={b} closed={closed ? true : beforeStart && b.mode === 'queue' && queueWindowState(b) === 'open' && b.open_override_date !== kstYmd(new Date()) ? 'before' : false} />)}
         </ul>
         {list.length === 0 && <p className="py-16 text-center text-sm text-gray-400">표시할 체험부스가 없어요.</p>}
 

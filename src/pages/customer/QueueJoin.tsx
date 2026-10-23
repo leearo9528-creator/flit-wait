@@ -6,7 +6,7 @@ import { BoothSummary } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
 import CustomerNav from '../../components/CustomerNav'
-import { queueWindowState } from '../../components/BoothCard'
+import { queueWindowState, kstYmd } from '../../components/BoothCard'
 
 export default function QueueJoin() {
   const { slug = '' } = useParams()
@@ -31,7 +31,9 @@ export default function QueueJoin() {
   if (booth.mode === 'slot') return <Page><Alert kind="info">이 부스는 사전 예약제로 운영됩니다. <Link to={`/r/${slug}`} className="font-semibold underline">예약하러 가기</Link></Alert></Page>
   const maxParty = booth.settings.max_party_size ?? 4
   const closed = event.status !== 'open'
-  const beforeStart = !closed && new Date(event.starts_at).getTime() > Date.now()
+  // 스태프가 오늘 '접수 오픈'을 눌렀으면(open_override_date) 행사 시작 시각 전이라도 받는다 (서버 join_queue 도 동일, migration 0031)
+  const openedToday = booth.settings.open_override_date === kstYmd(new Date())
+  const beforeStart = !closed && !openedToday && new Date(event.starts_at).getTime() > Date.now()
   const cookingLike = booth.mode === 'hybrid'
   // 일별 접수 시간대 (관리자 설정) — 스태프가 오늘 '오픈'을 눌렀으면 open. 마감·일시중단이 우선
   const ws = queueWindowState(booth.settings)
@@ -52,7 +54,6 @@ export default function QueueJoin() {
       <BoothHeader booth={booth} event={event} closed={closed ? true : beforeStart && ws === 'open' ? 'before' : false}
         live={<>대기손님 현황 <b className="tabular-nums">{waiting_teams}팀</b>{data.avg_service_min && waiting_teams > 0 ? <span className="ml-1 font-normal text-gray-500">· 예상 약 {Math.max(1, Math.round(waiting_teams * data.avg_service_min))}분</span> : null}</>} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
-      {beforeStart && ws === 'open' && <div className="mb-4"><Alert kind="info">행사 시작 전이에요. 대기 접수는 <b>{fmtDateTime(event.starts_at)}</b>부터 받습니다. 그때 이 화면에서 바로 접수하세요.</Alert></div>}
       {booth.is_paused && (booth.settings.pause_mode === 'closed_today'
         ? <div className="mb-4 rounded-2xl bg-gray-100 p-5 text-center ring-1 ring-gray-300">
             <div className="text-2xl">🌙</div>
