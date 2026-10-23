@@ -69,6 +69,18 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
     : ws
   const openHm = booth.mode === 'slot' ? (slotOpenAt ? fmtTime(slotOpenAt.toISOString()) : null) : booth.settings.queue_open_daily_time
   const closeHm = booth.settings.queue_close_daily_time
+  // 수동 오픈 중이고, 수동 오픈이 없었다면 아직 닫혀 있을 때만 '오픈 취소'(예정대로 되돌리기) 노출
+  const manualOpen = state === 'open' && booth.settings.open_override_date === today
+  const noOverride = { ...booth.settings, open_override_date: null }
+  const scheduledClosed = booth.mode === 'slot'
+    ? (() => { const at = openAtFor(noOverride, today); return !!at && at.getTime() > Date.now() })()
+    : queueWindowState(noOverride) !== 'open'
+  const scheduledOpenHm = booth.mode === 'slot' ? (() => { const at = openAtFor(noOverride, today); return at ? fmtTime(at.toISOString()) : null })() : booth.settings.queue_open_daily_time
+  async function cancelOpen() {
+    if (!confirm(`수동 오픈을 취소하고 예정대로(${scheduledOpenHm ?? '설정 시각'}부터) 돌아갈까요?\n이미 ${noun}된 손님은 그대로 유지됩니다.`)) return
+    try { await rpc('staff_cancel_open', { p_booth: sess.booth_id, p_token: sess.staff_token }); reload() }
+    catch (e: any) { setErr(e.message) }
+  }
   /** 오픈 = 오늘 하루 시간대·예약 오픈 시각보다 우선해서 받음(마감·일시중단 해제) · 마감 = '오늘 마감'(자정 자동 해제) */
   async function setOpen(open: boolean) {
     const q = open
@@ -101,6 +113,7 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
             <button onClick={() => setOpen(true)} className="h-9 rounded-lg bg-green-600 px-3 text-sm font-semibold text-white ring-1 ring-green-600">{noun} 오픈</button>
           )}
           {state === 'open' && <>
+            {manualOpen && scheduledClosed && <button onClick={cancelOpen} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-amber-400 text-amber-800">오픈 취소</button>}
             {showQueue && <button onClick={() => setPause(true, 'paused')} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">일시중단</button>}
             <button onClick={() => setOpen(false)} className="h-9 rounded-lg bg-white px-3 text-sm ring-1 ring-gray-300">{noun} 마감</button>
           </>}
