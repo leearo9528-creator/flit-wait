@@ -10,25 +10,16 @@
         script: loadtest/k6.js
         output: -
 
-     scenarios: (100.00%) 7 scenarios, 3126 max VUs, 3m10s max duration (incl. graceful stop):
-              * viewers: Up to 1500 looping VUs for 2m20s over 2 stages (gracefulRampDown: 30s, exec: viewer, gracefulStop: 30s)
+     scenarios: (100.00%) 7 scenarios, 2126 max VUs, 3m10s max duration (incl. graceful stop):
+              * viewers: Up to 1000 looping VUs for 2m20s over 2 stages (gracefulRampDown: 30s, exec: viewer, gracefulStop: 30s)
               * staff: 5 looping VUs for 2m0s (exec: staff, startTime: 5s, gracefulStop: 30s)
-              * pollers: Up to 1500 looping VUs for 2m20s over 2 stages (gracefulRampDown: 30s, exec: poller, startTime: 10s, gracefulStop: 30s)
+              * pollers: Up to 1000 looping VUs for 2m20s over 2 stages (gracefulRampDown: 30s, exec: poller, startTime: 10s, gracefulStop: 30s)
               * joiners: 20.00 iterations/s for 30s (maxVUs: 60, exec: joiner, startTime: 30s, gracefulStop: 30s)
               * reservers: 10.00 iterations/s for 30s (maxVUs: 40, exec: reserver, startTime: 30s, gracefulStop: 30s)
               * walkins: 5.00 iterations/s for 30s (maxVUs: 20, exec: walkin, startTime: 30s, gracefulStop: 30s)
               * operator: 1 looping VUs for 2m0s (exec: operator, startTime: 40s, gracefulStop: 30s)
 
 
-Init        [  98% ] 3079/3126 VUs initialized
-viewers     [   0% ]
-staff       [   0% ]
-pollers     [   0% ]
-joiners     [   0% ]
-reservers   [   0% ]
-walkins     [   0% ]
-operator    [   0% ]
-
 Run         [ 100% ] setup()
 viewers     [   0% ]
 staff       [   0% ]
@@ -128,1630 +119,1486 @@ reservers   [   0% ]
 walkins     [   0% ]
 operator    [   0% ]
 
-Run         [ 100% ] setup()
-viewers     [   0% ]
-staff       [   0% ]
-pollers     [   0% ]
-joiners     [   0% ]
-reservers   [   0% ]
-walkins     [   0% ]
-operator    [   0% ]
-
-running (0m13.0s), 0039/3126 VUs, 0 complete and 0 interrupted iterations
-viewers     [   0% ] 0039/1500 VUs  0m00.5s/2m20.0s
-staff     • [   0% ] waiting        4.5s
-pollers   • [   0% ] waiting        09.5s
-joiners   • [   0% ] waiting        29.5s
-reservers • [   0% ] waiting        29.5s
-walkins   • [   0% ] waiting        29.5s
-operator  • [   0% ] waiting        39.5s
-
-running (0m14.0s), 0114/3126 VUs, 0 complete and 0 interrupted iterations
-viewers     [   1% ] 0114/1500 VUs  0m01.5s/2m20.0s
-staff     • [   0% ] waiting        3.5s
-pollers   • [   0% ] waiting        08.5s
-joiners   • [   0% ] waiting        28.5s
-reservers • [   0% ] waiting        28.5s
-walkins   • [   0% ] waiting        28.5s
-operator  • [   0% ] waiting        38.5s
-
-running (0m15.0s), 0189/3126 VUs, 0 complete and 0 interrupted iterations
-viewers     [   2% ] 0189/1500 VUs  0m02.5s/2m20.0s
-staff     • [   0% ] waiting        2.5s
-pollers   • [   0% ] waiting        07.5s
-joiners   • [   0% ] waiting        27.5s
-reservers • [   0% ] waiting        27.5s
-walkins   • [   0% ] waiting        27.5s
-operator  • [   0% ] waiting        37.5s
-
-running (0m16.0s), 0264/3126 VUs, 0 complete and 0 interrupted iterations
-viewers     [   3% ] 0264/1500 VUs  0m03.5s/2m20.0s
-staff     • [   0% ] waiting        1.5s
-pollers   • [   0% ] waiting        06.5s
-joiners   • [   0% ] waiting        26.5s
-reservers • [   0% ] waiting        26.5s
-walkins   • [   0% ] waiting        26.5s
-operator  • [   0% ] waiting        36.5s
-
-running (0m17.0s), 0339/3126 VUs, 0 complete and 0 interrupted iterations
-viewers     [   3% ] 0339/1500 VUs  0m04.5s/2m20.0s
-staff     • [   0% ] waiting        0.5s
-pollers   • [   0% ] waiting        05.5s
-joiners   • [   0% ] waiting        25.5s
-reservers • [   0% ] waiting        25.5s
-walkins   • [   0% ] waiting        25.5s
-operator  • [   0% ] waiting        35.5s
-
-running (0m18.0s), 0419/3126 VUs, 0 complete and 0 interrupted iterations
-viewers     [   4% ] 0414/1500 VUs  0m05.5s/2m20.0s
-staff       [   0% ] 5 VUs          0m00.5s/2m0s
-pollers   • [   0% ] waiting        04.5s
-joiners   • [   0% ] waiting        24.5s
-reservers • [   0% ] waiting        24.5s
-walkins   • [   0% ] waiting        24.5s
-operator  • [   0% ] waiting        34.5s
-
-running (0m19.0s), 0494/3126 VUs, 0 complete and 0 interrupted iterations
-viewers     [   5% ] 0489/1500 VUs  0m06.5s/2m20.0s
-staff       [   1% ] 5 VUs          0m01.5s/2m0s
-pollers   • [   0% ] waiting        03.5s
-joiners   • [   0% ] waiting        23.5s
-reservers • [   0% ] waiting        23.5s
-walkins   • [   0% ] waiting        23.5s
-operator  • [   0% ] waiting        33.5s
-
-running (0m20.0s), 0569/3126 VUs, 0 complete and 0 interrupted iterations
-viewers     [   5% ] 0564/1500 VUs  0m07.5s/2m20.0s
-staff       [   2% ] 5 VUs          0m02.5s/2m0s
-pollers   • [   0% ] waiting        02.5s
-joiners   • [   0% ] waiting        22.5s
-reservers • [   0% ] waiting        22.5s
-walkins   • [   0% ] waiting        22.5s
-operator  • [   0% ] waiting        32.5s
-
-running (0m21.0s), 0644/3126 VUs, 0 complete and 0 interrupted iterations
-viewers     [   6% ] 0639/1500 VUs  0m08.5s/2m20.0s
-staff       [   3% ] 5 VUs          0m03.5s/2m0s
-pollers   • [   0% ] waiting        01.5s
-joiners   • [   0% ] waiting        21.5s
-reservers • [   0% ] waiting        21.5s
-walkins   • [   0% ] waiting        21.5s
-operator  • [   0% ] waiting        31.5s
-
-running (0m22.0s), 0719/3126 VUs, 0 complete and 0 interrupted iterations
-viewers     [   7% ] 0714/1500 VUs  0m09.5s/2m20.0s
-staff       [   4% ] 5 VUs          0m04.5s/2m0s
-pollers   • [   0% ] waiting        00.5s
-joiners   • [   0% ] waiting        20.5s
-reservers • [   0% ] waiting        20.5s
-walkins   • [   0% ] waiting        20.5s
-operator  • [   0% ] waiting        30.5s
-
-running (0m23.0s), 0833/3126 VUs, 5 complete and 0 interrupted iterations
-viewers     [   8% ] 0789/1500 VUs  0m10.5s/2m20.0s
-staff       [   5% ] 5 VUs          0m05.5s/2m0s
-pollers     [   0% ] 0039/1500 VUs  0m00.5s/2m20.0s
-joiners   • [   0% ] waiting        19.5s
-reservers • [   0% ] waiting        19.5s
-walkins   • [   0% ] waiting        19.5s
-operator  • [   0% ] waiting        29.5s
-
-running (0m24.0s), 0983/3126 VUs, 5 complete and 0 interrupted iterations
-viewers     [   8% ] 0864/1500 VUs  0m11.5s/2m20.0s
-staff       [   5% ] 5 VUs          0m06.5s/2m0s
-pollers     [   1% ] 0114/1500 VUs  0m01.5s/2m20.0s
-joiners   • [   0% ] waiting        18.5s
-reservers • [   0% ] waiting        18.5s
-walkins   • [   0% ] waiting        18.5s
-operator  • [   0% ] waiting        28.5s
-
-running (0m25.0s), 1131/3126 VUs, 5 complete and 0 interrupted iterations
-viewers     [   9% ] 0938/1500 VUs  0m12.5s/2m20.0s
-staff       [   6% ] 5 VUs          0m07.5s/2m0s
-pollers     [   2% ] 0188/1500 VUs  0m02.5s/2m20.0s
-joiners   • [   0% ] waiting        17.5s
-reservers • [   0% ] waiting        17.5s
-walkins   • [   0% ] waiting        17.5s
-operator  • [   0% ] waiting        27.5s
-
-running (0m26.0s), 1283/3126 VUs, 5 complete and 0 interrupted iterations
-viewers     [  10% ] 1014/1500 VUs  0m13.5s/2m20.0s
-staff       [   7% ] 5 VUs          0m08.5s/2m0s
-pollers     [   3% ] 0264/1500 VUs  0m03.5s/2m20.0s
-joiners   • [   0% ] waiting        16.5s
-reservers • [   0% ] waiting        16.5s
-walkins   • [   0% ] waiting        16.5s
-operator  • [   0% ] waiting        26.5s
-
-running (0m27.0s), 1433/3126 VUs, 5 complete and 0 interrupted iterations
-viewers     [  10% ] 1089/1500 VUs  0m14.5s/2m20.0s
-staff       [   8% ] 5 VUs          0m09.5s/2m0s
-pollers     [   3% ] 0339/1500 VUs  0m04.5s/2m20.0s
-joiners   • [   0% ] waiting        15.5s
-reservers • [   0% ] waiting        15.5s
-walkins   • [   0% ] waiting        15.5s
-operator  • [   0% ] waiting        25.5s
-
-running (0m28.0s), 1583/3126 VUs, 5 complete and 0 interrupted iterations
-viewers     [  11% ] 1164/1500 VUs  0m15.5s/2m20.0s
-staff       [   9% ] 5 VUs          0m10.5s/2m0s
-pollers     [   4% ] 0414/1500 VUs  0m05.5s/2m20.0s
-joiners   • [   0% ] waiting        14.5s
-reservers • [   0% ] waiting        14.5s
-walkins   • [   0% ] waiting        14.5s
-operator  • [   0% ] waiting        24.5s
-
-running (0m29.0s), 1733/3126 VUs, 17 complete and 0 interrupted iterations
-viewers     [  12% ] 1239/1500 VUs  0m16.5s/2m20.0s
-staff       [  10% ] 5 VUs          0m11.5s/2m0s
-pollers     [   5% ] 0489/1500 VUs  0m06.5s/2m20.0s
-joiners   • [   0% ] waiting        13.5s
-reservers • [   0% ] waiting        13.5s
-walkins   • [   0% ] waiting        13.5s
-operator  • [   0% ] waiting        23.5s
-
-running (0m30.0s), 1883/3126 VUs, 46 complete and 0 interrupted iterations
-viewers     [  13% ] 1314/1500 VUs  0m17.5s/2m20.0s
-staff       [  10% ] 5 VUs          0m12.5s/2m0s
-pollers     [   5% ] 0564/1500 VUs  0m07.5s/2m20.0s
-joiners   • [   0% ] waiting        12.5s
-reservers • [   0% ] waiting        12.5s
-walkins   • [   0% ] waiting        12.5s
-operator  • [   0% ] waiting        22.5s
-
-running (0m31.0s), 2033/3126 VUs, 101 complete and 0 interrupted iterations
-viewers     [  13% ] 1389/1500 VUs  0m18.5s/2m20.0s
-staff       [  11% ] 5 VUs          0m13.5s/2m0s
-pollers     [   6% ] 0639/1500 VUs  0m08.5s/2m20.0s
-joiners   • [   0% ] waiting        11.5s
-reservers • [   0% ] waiting        11.5s
-walkins   • [   0% ] waiting        11.5s
-operator  • [   0% ] waiting        21.5s
-
-running (0m32.0s), 2183/3126 VUs, 179 complete and 0 interrupted iterations
-viewers     [  14% ] 1464/1500 VUs  0m19.5s/2m20.0s
-staff       [  12% ] 5 VUs          0m14.5s/2m0s
-pollers     [   7% ] 0714/1500 VUs  0m09.5s/2m20.0s
-joiners   • [   0% ] waiting        10.5s
-reservers • [   0% ] waiting        10.5s
-walkins   • [   0% ] waiting        10.5s
-operator  • [   0% ] waiting        20.5s
-
-running (0m33.0s), 2294/3126 VUs, 292 complete and 0 interrupted iterations
-viewers     [  15% ] 1500/1500 VUs  0m20.5s/2m20.0s
-staff       [  13% ] 5 VUs          0m15.5s/2m0s
-pollers     [   8% ] 0789/1500 VUs  0m10.5s/2m20.0s
-joiners   • [   0% ] waiting        09.5s
-reservers • [   0% ] waiting        09.5s
-walkins   • [   0% ] waiting        09.5s
-operator  • [   0% ] waiting        19.5s
-
-running (0m34.0s), 2369/3126 VUs, 413 complete and 0 interrupted iterations
-viewers     [  15% ] 1500/1500 VUs  0m21.5s/2m20.0s
-staff       [  14% ] 5 VUs          0m16.5s/2m0s
-pollers     [   8% ] 0864/1500 VUs  0m11.5s/2m20.0s
-joiners   • [   0% ] waiting        08.5s
-reservers • [   0% ] waiting        08.5s
-walkins   • [   0% ] waiting        08.5s
-operator  • [   0% ] waiting        18.5s
-
-running (0m35.0s), 2444/3126 VUs, 523 complete and 0 interrupted iterations
-viewers     [  16% ] 1500/1500 VUs  0m22.5s/2m20.0s
-staff       [  15% ] 5 VUs          0m17.5s/2m0s
-pollers     [   9% ] 0939/1500 VUs  0m12.5s/2m20.0s
-joiners   • [   0% ] waiting        07.5s
-reservers • [   0% ] waiting        07.5s
-walkins   • [   0% ] waiting        07.5s
-operator  • [   0% ] waiting        17.5s
-
-running (0m36.0s), 2519/3126 VUs, 663 complete and 0 interrupted iterations
-viewers     [  17% ] 1500/1500 VUs  0m23.5s/2m20.0s
-staff       [  15% ] 5 VUs          0m18.5s/2m0s
-pollers     [  10% ] 1014/1500 VUs  0m13.5s/2m20.0s
-joiners   • [   0% ] waiting        06.5s
-reservers • [   0% ] waiting        06.5s
-walkins   • [   0% ] waiting        06.5s
-operator  • [   0% ] waiting        16.5s
-
-running (0m37.0s), 2594/3126 VUs, 819 complete and 0 interrupted iterations
-viewers     [  18% ] 1500/1500 VUs  0m24.5s/2m20.0s
-staff       [  16% ] 5 VUs          0m19.5s/2m0s
-pollers     [  10% ] 1089/1500 VUs  0m14.5s/2m20.0s
-joiners   • [   0% ] waiting        05.5s
-reservers • [   0% ] waiting        05.5s
-walkins   • [   0% ] waiting        05.5s
-operator  • [   0% ] waiting        15.5s
-
-running (0m38.0s), 2669/3126 VUs, 983 complete and 0 interrupted iterations
-viewers     [  18% ] 1500/1500 VUs  0m25.5s/2m20.0s
-staff       [  17% ] 5 VUs          0m20.5s/2m0s
-pollers     [  11% ] 1164/1500 VUs  0m15.5s/2m20.0s
-joiners   • [   0% ] waiting        04.5s
-reservers • [   0% ] waiting        04.5s
-walkins   • [   0% ] waiting        04.5s
-operator  • [   0% ] waiting        14.5s
-
-running (0m39.0s), 2744/3126 VUs, 1157 complete and 0 interrupted iterations
-viewers     [  19% ] 1500/1500 VUs  0m26.5s/2m20.0s
-staff       [  18% ] 5 VUs          0m21.5s/2m0s
-pollers     [  12% ] 1239/1500 VUs  0m16.5s/2m20.0s
-joiners   • [   0% ] waiting        03.5s
-reservers • [   0% ] waiting        03.5s
-walkins   • [   0% ] waiting        03.5s
-operator  • [   0% ] waiting        13.5s
-
-running (0m40.0s), 2819/3126 VUs, 1339 complete and 0 interrupted iterations
-viewers     [  20% ] 1500/1500 VUs  0m27.5s/2m20.0s
-staff       [  19% ] 5 VUs          0m22.5s/2m0s
-pollers     [  13% ] 1314/1500 VUs  0m17.5s/2m20.0s
-joiners   • [   0% ] waiting        02.5s
-reservers • [   0% ] waiting        02.5s
-walkins   • [   0% ] waiting        02.5s
-operator  • [   0% ] waiting        12.5s
-
-running (0m41.0s), 2894/3126 VUs, 1594 complete and 0 interrupted iterations
-viewers     [  20% ] 1500/1500 VUs  0m28.5s/2m20.0s
-staff       [  20% ] 5 VUs          0m23.5s/2m0s
-pollers     [  13% ] 1389/1500 VUs  0m18.5s/2m20.0s
-joiners   • [   0% ] waiting        01.5s
-reservers • [   0% ] waiting        01.5s
-walkins   • [   0% ] waiting        01.5s
-operator  • [   0% ] waiting        11.5s
-
-running (0m42.0s), 2969/3126 VUs, 1827 complete and 0 interrupted iterations
-viewers     [  21% ] 1500/1500 VUs  0m29.5s/2m20.0s
-staff       [  20% ] 5 VUs          0m24.5s/2m0s
-pollers     [  14% ] 1464/1500 VUs  0m19.5s/2m20.0s
-joiners   • [   0% ] waiting        00.5s
-reservers • [   0% ] waiting        00.5s
-walkins   • [   0% ] waiting        00.5s
-operator  • [   0% ] waiting        10.5s
-
-running (0m43.0s), 3013/3126 VUs, 2062 complete and 0 interrupted iterations
-viewers     [  22% ] 1500/1500 VUs  0m30.5s/2m20.0s
-staff       [  21% ] 5 VUs          0m25.5s/2m0s
-pollers     [  15% ] 1500/1500 VUs  0m20.5s/2m20.0s
-joiners     [   2% ] 04/60 VUs      00.5s/30s  20.00 iters/s
-reservers   [   2% ] 03/40 VUs      00.5s/30s  10.00 iters/s
-walkins     [   2% ] 01/20 VUs      00.5s/30s  5.00 iters/s
-operator  • [   0% ] waiting        09.5s     
-
-running (0m44.0s), 3012/3126 VUs, 2325 complete and 0 interrupted iterations
-viewers     [  23% ] 1500/1500 VUs  0m31.5s/2m20.0s
-staff       [  22% ] 5 VUs          0m26.5s/2m0s
-pollers     [  15% ] 1500/1500 VUs  0m21.5s/2m20.0s
-joiners     [   5% ] 04/60 VUs      01.5s/30s  20.00 iters/s
-reservers   [   5% ] 02/40 VUs      01.5s/30s  10.00 iters/s
-walkins     [   5% ] 01/20 VUs      01.5s/30s  5.00 iters/s
-operator  • [   0% ] waiting        08.5s     
-
-running (0m45.0s), 3012/3126 VUs, 2578 complete and 0 interrupted iterations
-viewers     [  23% ] 1500/1500 VUs  0m32.5s/2m20.0s
-staff       [  23% ] 5 VUs          0m27.5s/2m0s
-pollers     [  16% ] 1500/1500 VUs  0m22.5s/2m20.0s
-joiners     [   8% ] 04/60 VUs      02.5s/30s  20.00 iters/s
-reservers   [   8% ] 02/40 VUs      02.5s/30s  10.00 iters/s
-walkins     [   8% ] 01/20 VUs      02.5s/30s  5.00 iters/s
-operator  • [   0% ] waiting        07.5s     
-
-running (0m46.0s), 3016/3126 VUs, 2863 complete and 0 interrupted iterations
-viewers     [  24% ] 1500/1500 VUs  0m33.5s/2m20.0s
-staff       [  24% ] 5 VUs          0m28.5s/2m0s
-pollers     [  17% ] 1500/1500 VUs  0m23.5s/2m20.0s
-joiners     [  12% ] 06/60 VUs      03.5s/30s  20.00 iters/s
-reservers   [  12% ] 04/40 VUs      03.5s/30s  10.00 iters/s
-walkins     [  12% ] 01/20 VUs      03.5s/30s  5.00 iters/s
-operator  • [   0% ] waiting        06.5s     
-
-running (0m47.0s), 3022/3126 VUs, 3151 complete and 0 interrupted iterations
-viewers     [  25% ] 1500/1500 VUs  0m34.5s/2m20.0s
-staff       [  25% ] 5 VUs          0m29.5s/2m0s
-pollers     [  18% ] 1500/1500 VUs  0m24.5s/2m20.0s
-joiners     [  15% ] 10/60 VUs      04.5s/30s  20.00 iters/s
-reservers   [  15% ] 05/40 VUs      04.5s/30s  10.00 iters/s
-walkins     [  15% ] 02/20 VUs      04.5s/30s  5.00 iters/s
-operator  • [   0% ] waiting        05.5s     
-
-running (0m48.0s), 3021/3126 VUs, 3441 complete and 0 interrupted iterations
-viewers     [  25% ] 1500/1500 VUs  0m35.5s/2m20.0s
-staff       [  25% ] 5 VUs          0m30.5s/2m0s
-pollers     [  18% ] 1500/1500 VUs  0m25.5s/2m20.0s
-joiners     [  18% ] 10/60 VUs      05.5s/30s  20.00 iters/s
-reservers   [  18% ] 05/40 VUs      05.5s/30s  10.00 iters/s
-walkins     [  18% ] 01/20 VUs      05.5s/30s  5.00 iters/s
-operator  • [   0% ] waiting        04.5s     
-
-running (0m49.0s), 3015/3126 VUs, 3789 complete and 0 interrupted iterations
-viewers     [  26% ] 1500/1500 VUs  0m36.5s/2m20.0s
-staff       [  26% ] 5 VUs          0m31.5s/2m0s
-pollers     [  19% ] 1500/1500 VUs  0m26.5s/2m20.0s
-joiners     [  22% ] 06/60 VUs      06.5s/30s  20.00 iters/s
-reservers   [  22% ] 03/40 VUs      06.5s/30s  10.00 iters/s
-walkins     [  22% ] 01/20 VUs      06.5s/30s  5.00 iters/s
-operator  • [   0% ] waiting        03.5s     
-
-running (0m50.0s), 3021/3126 VUs, 4103 complete and 0 interrupted iterations
-viewers     [  27% ] 1500/1500 VUs  0m37.5s/2m20.0s
-staff       [  27% ] 5 VUs          0m32.5s/2m0s
-pollers     [  20% ] 1500/1500 VUs  0m27.5s/2m20.0s
-joiners     [  25% ] 10/60 VUs      07.5s/30s  20.00 iters/s
-reservers   [  25% ] 04/40 VUs      07.5s/30s  10.00 iters/s
-walkins     [  25% ] 02/20 VUs      07.5s/30s  5.00 iters/s
-operator  • [   0% ] waiting        02.5s     
-
-running (0m51.0s), 3029/3126 VUs, 4411 complete and 0 interrupted iterations
-viewers     [  28% ] 1500/1500 VUs  0m38.5s/2m20.0s
-staff       [  28% ] 5 VUs          0m33.5s/2m0s
-pollers     [  20% ] 1500/1500 VUs  0m28.5s/2m20.0s
-joiners     [  28% ] 14/60 VUs      08.5s/30s  20.00 iters/s
-reservers   [  28% ] 07/40 VUs      08.5s/30s  10.00 iters/s
-walkins     [  28% ] 03/20 VUs      08.5s/30s  5.00 iters/s
-operator  • [   0% ] waiting        01.5s     
-
-running (0m52.0s), 3024/3126 VUs, 4674 complete and 0 interrupted iterations
-viewers     [  28% ] 1500/1500 VUs  0m39.5s/2m20.0s
-staff       [  29% ] 5 VUs          0m34.5s/2m0s
-pollers     [  21% ] 1500/1500 VUs  0m29.5s/2m20.0s
-joiners     [  32% ] 14/60 VUs      09.5s/30s  20.00 iters/s
-reservers   [  32% ] 03/40 VUs      09.5s/30s  10.00 iters/s
-walkins     [  32% ] 02/20 VUs      09.5s/30s  5.00 iters/s
-operator  • [   0% ] waiting        00.5s     
-
-running (0m53.0s), 3015/3126 VUs, 4972 complete and 0 interrupted iterations
-viewers     [  29% ] 1500/1500 VUs  0m40.5s/2m20.0s
-staff       [  30% ] 5 VUs          0m35.5s/2m0s
-pollers     [  22% ] 1500/1500 VUs  0m30.5s/2m20.0s
-joiners     [  35% ] 06/60 VUs      10.5s/30s  20.00 iters/s
-reservers   [  35% ] 02/40 VUs      10.5s/30s  10.00 iters/s
-walkins     [  35% ] 01/20 VUs      10.5s/30s  5.00 iters/s
-operator    [   0% ] 1 VUs          0m00.5s/2m0s
-
-running (0m54.0s), 3015/3126 VUs, 5225 complete and 0 interrupted iterations
-viewers     [  30% ] 1500/1500 VUs  0m41.5s/2m20.0s
-staff       [  30% ] 5 VUs          0m36.5s/2m0s
-pollers     [  23% ] 1500/1500 VUs  0m31.5s/2m20.0s
-joiners     [  38% ] 06/60 VUs      11.5s/30s  20.00 iters/s
-reservers   [  38% ] 02/40 VUs      11.5s/30s  10.00 iters/s
-walkins     [  38% ] 01/20 VUs      11.5s/30s  5.00 iters/s
-operator    [   1% ] 1 VUs          0m01.5s/2m0s
-
-running (0m55.0s), 3020/3126 VUs, 5521 complete and 0 interrupted iterations
-viewers     [  30% ] 1500/1500 VUs  0m42.5s/2m20.0s
-staff       [  31% ] 5 VUs          0m37.5s/2m0s
-pollers     [  23% ] 1500/1500 VUs  0m32.5s/2m20.0s
-joiners     [  42% ] 08/60 VUs      12.5s/30s  20.00 iters/s
-reservers   [  42% ] 04/40 VUs      12.5s/30s  10.00 iters/s
-walkins     [  42% ] 02/20 VUs      12.5s/30s  5.00 iters/s
-operator    [   2% ] 1 VUs          0m02.5s/2m0s
-
-running (0m56.0s), 3020/3126 VUs, 5797 complete and 0 interrupted iterations
-viewers     [  31% ] 1500/1500 VUs  0m43.5s/2m20.0s
-staff       [  32% ] 5 VUs          0m38.5s/2m0s
-pollers     [  24% ] 1500/1500 VUs  0m33.5s/2m20.0s
-joiners     [  45% ] 08/60 VUs      13.5s/30s  20.00 iters/s
-reservers   [  45% ] 04/40 VUs      13.5s/30s  10.00 iters/s
-walkins     [  45% ] 02/20 VUs      13.5s/30s  5.00 iters/s
-operator    [   3% ] 1 VUs          0m03.5s/2m0s
-
-running (0m57.0s), 3022/3126 VUs, 6099 complete and 0 interrupted iterations
-viewers     [  32% ] 1500/1500 VUs  0m44.5s/2m20.0s
-staff       [  33% ] 5 VUs          0m39.5s/2m0s
-pollers     [  25% ] 1500/1500 VUs  0m34.5s/2m20.0s
-joiners     [  48% ] 11/60 VUs      14.5s/30s  20.00 iters/s
-reservers   [  48% ] 03/40 VUs      14.5s/30s  10.00 iters/s
-walkins     [  48% ] 02/20 VUs      14.5s/30s  5.00 iters/s
-operator    [   4% ] 1 VUs          0m04.5s/2m0s
-
-running (0m58.0s), 3025/3126 VUs, 6387 complete and 0 interrupted iterations
-viewers     [  33% ] 1500/1500 VUs  0m45.5s/2m20.0s
-staff       [  34% ] 5 VUs          0m40.5s/2m0s
-pollers     [  25% ] 1500/1500 VUs  0m35.5s/2m20.0s
-joiners     [  52% ] 12/60 VUs      15.5s/30s  20.00 iters/s
-reservers   [  52% ] 05/40 VUs      15.5s/30s  10.00 iters/s
-walkins     [  52% ] 02/20 VUs      15.5s/30s  5.00 iters/s
-operator    [   5% ] 1 VUs          0m05.5s/2m0s
-
-running (0m59.0s), 3023/3126 VUs, 6674 complete and 0 interrupted iterations
-viewers     [  33% ] 1500/1500 VUs  0m46.5s/2m20.0s
-staff       [  35% ] 5 VUs          0m41.5s/2m0s
-pollers     [  26% ] 1500/1500 VUs  0m36.5s/2m20.0s
-joiners     [  55% ] 08/60 VUs      16.5s/30s  20.00 iters/s
-reservers   [  55% ] 07/40 VUs      16.5s/30s  10.00 iters/s
-walkins     [  55% ] 02/20 VUs      16.5s/30s  5.00 iters/s
-operator    [   5% ] 1 VUs          0m06.5s/2m0s
-
-running (1m00.0s), 3032/3126 VUs, 6967 complete and 0 interrupted iterations
-viewers     [  34% ] 1500/1500 VUs  0m47.5s/2m20.0s
-staff       [  35% ] 5 VUs          0m42.5s/2m0s
-pollers     [  27% ] 1500/1500 VUs  0m37.5s/2m20.0s
-joiners     [  58% ] 15/60 VUs      17.5s/30s  20.00 iters/s
-reservers   [  58% ] 08/40 VUs      17.5s/30s  10.00 iters/s
-walkins     [  58% ] 03/20 VUs      17.5s/30s  5.00 iters/s
-operator    [   6% ] 1 VUs          0m07.5s/2m0s
-
-running (1m01.0s), 3040/3126 VUs, 7253 complete and 0 interrupted iterations
-viewers     [  35% ] 1500/1500 VUs  0m48.5s/2m20.0s
-staff       [  36% ] 5 VUs          0m43.5s/2m0s
-pollers     [  28% ] 1500/1500 VUs  0m38.5s/2m20.0s
-joiners     [  62% ] 20/60 VUs      18.5s/30s  20.00 iters/s
-reservers   [  62% ] 09/40 VUs      18.5s/30s  10.00 iters/s
-walkins     [  62% ] 05/20 VUs      18.5s/30s  5.00 iters/s
-operator    [   7% ] 1 VUs          0m08.5s/2m0s
-
-running (1m02.0s), 3054/3126 VUs, 7498 complete and 0 interrupted iterations
-viewers     [  35% ] 1500/1500 VUs  0m49.5s/2m20.0s
-staff       [  37% ] 5 VUs          0m44.5s/2m0s
-pollers     [  28% ] 1500/1500 VUs  0m39.5s/2m20.0s
-joiners     [  65% ] 29/60 VUs      19.5s/30s  20.00 iters/s
-reservers   [  65% ] 13/40 VUs      19.5s/30s  10.00 iters/s
-walkins     [  65% ] 06/20 VUs      19.5s/30s  5.00 iters/s
-operator    [   8% ] 1 VUs          0m09.5s/2m0s
-
-running (1m03.0s), 3047/3126 VUs, 7785 complete and 0 interrupted iterations
-viewers     [  36% ] 1500/1500 VUs  0m50.5s/2m20.0s
-staff       [  38% ] 5 VUs          0m45.5s/2m0s
-pollers     [  29% ] 1500/1500 VUs  0m40.5s/2m20.0s
-joiners     [  68% ] 25/60 VUs      20.5s/30s  20.00 iters/s
-reservers   [  68% ] 11/40 VUs      20.5s/30s  10.00 iters/s
-walkins     [  68% ] 05/20 VUs      20.5s/30s  5.00 iters/s
-operator    [   9% ] 1 VUs          0m10.5s/2m0s
-
-running (1m04.0s), 3055/3126 VUs, 8075 complete and 0 interrupted iterations
-viewers     [  37% ] 1500/1500 VUs  0m51.5s/2m20.0s
-staff       [  39% ] 5 VUs          0m46.5s/2m0s
-pollers     [  30% ] 1500/1500 VUs  0m41.5s/2m20.0s
-joiners     [  72% ] 28/60 VUs      21.5s/30s  20.00 iters/s
-reservers   [  72% ] 14/40 VUs      21.5s/30s  10.00 iters/s
-walkins     [  72% ] 07/20 VUs      21.5s/30s  5.00 iters/s
-operator    [  10% ] 1 VUs          0m11.5s/2m0s
-
-running (1m05.0s), 3069/3126 VUs, 8342 complete and 0 interrupted iterations
-viewers     [  38% ] 1500/1500 VUs  0m52.5s/2m20.0s
-staff       [  40% ] 5 VUs          0m47.5s/2m0s
-pollers     [  30% ] 1500/1500 VUs  0m42.5s/2m20.0s
-joiners     [  75% ] 36/60 VUs      22.5s/30s  20.00 iters/s
-reservers   [  75% ] 18/40 VUs      22.5s/30s  10.00 iters/s
-walkins     [  75% ] 09/20 VUs      22.5s/30s  5.00 iters/s
-operator    [  10% ] 1 VUs          0m12.5s/2m0s
-
-running (1m06.0s), 3090/3126 VUs, 8619 complete and 0 interrupted iterations
-viewers     [  38% ] 1500/1500 VUs  0m53.5s/2m20.0s
-staff       [  40% ] 5 VUs          0m48.5s/2m0s
-pollers     [  31% ] 1500/1500 VUs  0m43.5s/2m20.0s
-joiners     [  78% ] 49/60 VUs      23.5s/30s  20.00 iters/s
-reservers   [  78% ] 24/40 VUs      23.5s/30s  10.00 iters/s
-walkins     [  78% ] 11/20 VUs      23.5s/30s  5.00 iters/s
-operator    [  11% ] 1 VUs          0m13.5s/2m0s
-
-running (1m07.0s), 3089/3126 VUs, 8928 complete and 0 interrupted iterations
-viewers     [  39% ] 1500/1500 VUs  0m54.5s/2m20.0s
-staff       [  41% ] 5 VUs          0m49.5s/2m0s
-pollers     [  32% ] 1500/1500 VUs  0m44.5s/2m20.0s
-joiners     [  82% ] 52/60 VUs      24.5s/30s  20.00 iters/s
-reservers   [  82% ] 20/40 VUs      24.5s/30s  10.00 iters/s
-walkins     [  82% ] 11/20 VUs      24.5s/30s  5.00 iters/s
-operator    [  12% ] 1 VUs          0m14.5s/2m0s
-
-running (1m08.0s), 3093/3126 VUs, 9213 complete and 0 interrupted iterations
-viewers     [  40% ] 1500/1500 VUs  0m55.5s/2m20.0s
-staff       [  42% ] 5 VUs          0m50.5s/2m0s
-pollers     [  33% ] 1500/1500 VUs  0m45.5s/2m20.0s
-joiners     [  85% ] 52/60 VUs      25.5s/30s  20.00 iters/s
-reservers   [  85% ] 23/40 VUs      25.5s/30s  10.00 iters/s
-walkins     [  85% ] 12/20 VUs      25.5s/30s  5.00 iters/s
-operator    [  13% ] 1 VUs          0m15.5s/2m0s
-
-running (1m09.0s), 3092/3126 VUs, 9478 complete and 0 interrupted iterations
-viewers     [  40% ] 1500/1500 VUs  0m56.5s/2m20.0s
-staff       [  43% ] 5 VUs          0m51.5s/2m0s
-pollers     [  33% ] 1500/1500 VUs  0m46.5s/2m20.0s
-joiners     [  88% ] 52/60 VUs      26.5s/30s  20.00 iters/s
-reservers   [  88% ] 22/40 VUs      26.5s/30s  10.00 iters/s
-walkins     [  88% ] 12/20 VUs      26.5s/30s  5.00 iters/s
-operator    [  14% ] 1 VUs          0m16.5s/2m0s
-
-running (1m10.0s), 3085/3126 VUs, 9746 complete and 0 interrupted iterations
-viewers     [  41% ] 1500/1500 VUs  0m57.5s/2m20.0s
-staff       [  44% ] 5 VUs          0m52.5s/2m0s
-pollers     [  34% ] 1500/1500 VUs  0m47.5s/2m20.0s
-joiners     [  92% ] 46/60 VUs      27.5s/30s  20.00 iters/s
-reservers   [  92% ] 22/40 VUs      27.5s/30s  10.00 iters/s
-walkins     [  92% ] 11/20 VUs      27.5s/30s  5.00 iters/s
-operator    [  15% ] 1 VUs          0m17.5s/2m0s
-
-running (1m11.0s), 3097/3126 VUs, 9966 complete and 0 interrupted iterations
-viewers     [  42% ] 1500/1500 VUs  0m58.5s/2m20.0s
-staff       [  45% ] 5 VUs          0m53.5s/2m0s
-pollers     [  35% ] 1500/1500 VUs  0m48.5s/2m20.0s
-joiners     [  95% ] 57/60 VUs      28.5s/30s  20.00 iters/s
-reservers   [  95% ] 23/40 VUs      28.5s/30s  10.00 iters/s
-walkins     [  95% ] 11/20 VUs      28.5s/30s  5.00 iters/s
-operator    [  15% ] 1 VUs          0m18.5s/2m0s
-
-running (1m12.0s), 3099/3126 VUs, 10187 complete and 0 interrupted iterations
-viewers     [  43% ] 1500/1500 VUs  0m59.5s/2m20.0s
-staff       [  45% ] 5 VUs          0m54.5s/2m0s
-pollers     [  35% ] 1500/1500 VUs  0m49.5s/2m20.0s
-joiners     [  98% ] 59/60 VUs      29.5s/30s  20.00 iters/s
-reservers   [  98% ] 23/40 VUs      29.5s/30s  10.00 iters/s
-walkins     [  98% ] 11/20 VUs      29.5s/30s  5.00 iters/s
-operator    [  16% ] 1 VUs          0m19.5s/2m0s
-
-running (1m13.0s), 3081/3126 VUs, 10447 complete and 0 interrupted iterations
-viewers     [  43% ] 1500/1500 VUs  1m00.5s/2m20.0s
-staff       [  46% ] 5 VUs          0m55.5s/2m0s
-pollers     [  36% ] 1500/1500 VUs  0m50.5s/2m20.0s
-joiners   ↓ [ 100% ] 59/60 VUs      30s  20.00 iters/s
-reservers ↓ [ 100% ] 20/40 VUs      30s  10.00 iters/s
-walkins   ↓ [ 100% ] 11/20 VUs      30s  5.00 iters/s
-operator    [  17% ] 1 VUs          0m20.5s/2m0s
-
-running (1m14.0s), 3057/3126 VUs, 10669 complete and 0 interrupted iterations
-viewers     [  44% ] 1500/1500 VUs  1m01.5s/2m20.0s
-staff       [  47% ] 5 VUs          0m56.5s/2m0s
-pollers     [  37% ] 1500/1500 VUs  0m51.5s/2m20.0s
-joiners   ↓ [ 100% ] 59/60 VUs      30s  20.00 iters/s
-reservers ↓ [ 100% ] 20/40 VUs      30s  10.00 iters/s
-walkins   ↓ [ 100% ] 11/20 VUs      30s  5.00 iters/s
-operator    [  18% ] 1 VUs          0m21.5s/2m0s
-
-running (1m15.0s), 3031/3126 VUs, 10893 complete and 0 interrupted iterations
-viewers     [  45% ] 1500/1500 VUs  1m02.5s/2m20.0s
-staff       [  48% ] 5 VUs          0m57.5s/2m0s
-pollers     [  38% ] 1500/1500 VUs  0m52.5s/2m20.0s
-joiners   ↓ [ 100% ] 59/60 VUs      30s  20.00 iters/s
-reservers ↓ [ 100% ] 20/40 VUs      30s  10.00 iters/s
-walkins   ↓ [ 100% ] 11/20 VUs      30s  5.00 iters/s
-operator    [  19% ] 1 VUs          0m22.5s/2m0s
-
-running (1m16.0s), 3020/3126 VUs, 11146 complete and 0 interrupted iterations
-viewers     [  45% ] 1500/1500 VUs  1m03.5s/2m20.0s
-staff       [  49% ] 5 VUs          0m58.5s/2m0s
-pollers     [  38% ] 1500/1500 VUs  0m53.5s/2m20.0s
-joiners   ↓ [ 100% ] 59/60 VUs      30s  20.00 iters/s
-reservers ↓ [ 100% ] 20/40 VUs      30s  10.00 iters/s
-walkins   ↓ [ 100% ] 11/20 VUs      30s  5.00 iters/s
-operator    [  20% ] 1 VUs          0m23.5s/2m0s
-
-running (1m17.0s), 3016/3126 VUs, 11388 complete and 0 interrupted iterations
-viewers     [  46% ] 1500/1500 VUs  1m04.5s/2m20.0s
-staff       [  50% ] 5 VUs          0m59.5s/2m0s
-pollers     [  39% ] 1500/1500 VUs  0m54.5s/2m20.0s
-joiners   ↓ [ 100% ] 59/60 VUs      30s  20.00 iters/s
-reservers ↓ [ 100% ] 20/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  20% ] 1 VUs          0m24.5s/2m0s
-
-running (1m18.0s), 3009/3126 VUs, 11613 complete and 0 interrupted iterations
-viewers     [  47% ] 1500/1500 VUs  1m05.5s/2m20.0s
-staff       [  50% ] 5 VUs          1m00.5s/2m0s
-pollers     [  40% ] 1500/1500 VUs  0m55.5s/2m20.0s
-joiners   ↓ [ 100% ] 59/60 VUs      30s  20.00 iters/s
-reservers ↓ [ 100% ] 20/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  21% ] 1 VUs          0m25.5s/2m0s
-
-running (1m19.0s), 3006/3126 VUs, 11844 complete and 0 interrupted iterations
-viewers     [  48% ] 1500/1500 VUs  1m06.5s/2m20.0s
-staff       [  51% ] 5 VUs          1m01.5s/2m0s
-pollers     [  40% ] 1500/1500 VUs  0m56.5s/2m20.0s
+running (0m11.3s), 0003/2126 VUs, 0 complete and 0 interrupted iterations
+viewers     [   0% ] 0003/1000 VUs  0m00.1s/2m20.0s
+staff     • [   0% ] waiting        4.9s
+pollers   • [   0% ] waiting        09.9s
+joiners   • [   0% ] waiting        29.9s
+reservers • [   0% ] waiting        29.9s
+walkins   • [   0% ] waiting        29.9s
+operator  • [   0% ] waiting        39.9s
+
+running (0m12.3s), 0053/2126 VUs, 0 complete and 0 interrupted iterations
+viewers     [   1% ] 0053/1000 VUs  0m01.1s/2m20.0s
+staff     • [   0% ] waiting        3.9s
+pollers   • [   0% ] waiting        08.9s
+joiners   • [   0% ] waiting        28.9s
+reservers • [   0% ] waiting        28.9s
+walkins   • [   0% ] waiting        28.9s
+operator  • [   0% ] waiting        38.9s
+
+running (0m13.3s), 0103/2126 VUs, 0 complete and 0 interrupted iterations
+viewers     [   1% ] 0103/1000 VUs  0m02.1s/2m20.0s
+staff     • [   0% ] waiting        2.9s
+pollers   • [   0% ] waiting        07.9s
+joiners   • [   0% ] waiting        27.9s
+reservers • [   0% ] waiting        27.9s
+walkins   • [   0% ] waiting        27.9s
+operator  • [   0% ] waiting        37.9s
+
+running (0m14.3s), 0153/2126 VUs, 0 complete and 0 interrupted iterations
+viewers     [   2% ] 0153/1000 VUs  0m03.1s/2m20.0s
+staff     • [   0% ] waiting        1.9s
+pollers   • [   0% ] waiting        06.9s
+joiners   • [   0% ] waiting        26.9s
+reservers • [   0% ] waiting        26.9s
+walkins   • [   0% ] waiting        26.9s
+operator  • [   0% ] waiting        36.9s
+
+running (0m15.3s), 0203/2126 VUs, 0 complete and 0 interrupted iterations
+viewers     [   3% ] 0203/1000 VUs  0m04.1s/2m20.0s
+staff     • [   0% ] waiting        0.9s
+pollers   • [   0% ] waiting        05.9s
+joiners   • [   0% ] waiting        25.9s
+reservers • [   0% ] waiting        25.9s
+walkins   • [   0% ] waiting        25.9s
+operator  • [   0% ] waiting        35.9s
+
+running (0m16.3s), 0258/2126 VUs, 0 complete and 0 interrupted iterations
+viewers     [   4% ] 0253/1000 VUs  0m05.1s/2m20.0s
+staff       [   0% ] 5 VUs          0m00.1s/2m0s
+pollers   • [   0% ] waiting        04.9s
+joiners   • [   0% ] waiting        24.9s
+reservers • [   0% ] waiting        24.9s
+walkins   • [   0% ] waiting        24.9s
+operator  • [   0% ] waiting        34.9s
+
+running (0m17.3s), 0308/2126 VUs, 0 complete and 0 interrupted iterations
+viewers     [   4% ] 0303/1000 VUs  0m06.1s/2m20.0s
+staff       [   1% ] 5 VUs          0m01.1s/2m0s
+pollers   • [   0% ] waiting        03.9s
+joiners   • [   0% ] waiting        23.9s
+reservers • [   0% ] waiting        23.9s
+walkins   • [   0% ] waiting        23.9s
+operator  • [   0% ] waiting        33.9s
+
+running (0m18.3s), 0358/2126 VUs, 0 complete and 0 interrupted iterations
+viewers     [   5% ] 0353/1000 VUs  0m07.1s/2m20.0s
+staff       [   2% ] 5 VUs          0m02.1s/2m0s
+pollers   • [   0% ] waiting        02.9s
+joiners   • [   0% ] waiting        22.9s
+reservers • [   0% ] waiting        22.9s
+walkins   • [   0% ] waiting        22.9s
+operator  • [   0% ] waiting        32.9s
+
+running (0m19.3s), 0408/2126 VUs, 0 complete and 0 interrupted iterations
+viewers     [   6% ] 0403/1000 VUs  0m08.1s/2m20.0s
+staff       [   3% ] 5 VUs          0m03.1s/2m0s
+pollers   • [   0% ] waiting        01.9s
+joiners   • [   0% ] waiting        21.9s
+reservers • [   0% ] waiting        21.9s
+walkins   • [   0% ] waiting        21.9s
+operator  • [   0% ] waiting        31.9s
+
+running (0m20.3s), 0458/2126 VUs, 0 complete and 0 interrupted iterations
+viewers     [   6% ] 0453/1000 VUs  0m09.1s/2m20.0s
+staff       [   3% ] 5 VUs          0m04.1s/2m0s
+pollers   • [   0% ] waiting        00.9s
+joiners   • [   0% ] waiting        20.9s
+reservers • [   0% ] waiting        20.9s
+walkins   • [   0% ] waiting        20.9s
+operator  • [   0% ] waiting        30.9s
+
+running (0m21.3s), 0511/2126 VUs, 0 complete and 0 interrupted iterations
+viewers     [   7% ] 0503/1000 VUs  0m10.1s/2m20.0s
+staff       [   4% ] 5 VUs          0m05.1s/2m0s
+pollers     [   0% ] 0003/1000 VUs  0m00.1s/2m20.0s
+joiners   • [   0% ] waiting        19.9s
+reservers • [   0% ] waiting        19.9s
+walkins   • [   0% ] waiting        19.9s
+operator  • [   0% ] waiting        29.9s
+
+running (0m22.3s), 0611/2126 VUs, 5 complete and 0 interrupted iterations
+viewers     [   8% ] 0553/1000 VUs  0m11.1s/2m20.0s
+staff       [   5% ] 5 VUs          0m06.1s/2m0s
+pollers     [   1% ] 0053/1000 VUs  0m01.1s/2m20.0s
+joiners   • [   0% ] waiting        18.9s
+reservers • [   0% ] waiting        18.9s
+walkins   • [   0% ] waiting        18.9s
+operator  • [   0% ] waiting        28.9s
+
+running (0m23.3s), 0711/2126 VUs, 5 complete and 0 interrupted iterations
+viewers     [   9% ] 0603/1000 VUs  0m12.1s/2m20.0s
+staff       [   6% ] 5 VUs          0m07.1s/2m0s
+pollers     [   1% ] 0103/1000 VUs  0m02.1s/2m20.0s
+joiners   • [   0% ] waiting        17.9s
+reservers • [   0% ] waiting        17.9s
+walkins   • [   0% ] waiting        17.9s
+operator  • [   0% ] waiting        27.9s
+
+running (0m24.3s), 0811/2126 VUs, 5 complete and 0 interrupted iterations
+viewers     [   9% ] 0653/1000 VUs  0m13.1s/2m20.0s
+staff       [   7% ] 5 VUs          0m08.1s/2m0s
+pollers     [   2% ] 0153/1000 VUs  0m03.1s/2m20.0s
+joiners   • [   0% ] waiting        16.9s
+reservers • [   0% ] waiting        16.9s
+walkins   • [   0% ] waiting        16.9s
+operator  • [   0% ] waiting        26.9s
+
+running (0m25.3s), 0911/2126 VUs, 5 complete and 0 interrupted iterations
+viewers     [  10% ] 0703/1000 VUs  0m14.1s/2m20.0s
+staff       [   8% ] 5 VUs          0m09.1s/2m0s
+pollers     [   3% ] 0203/1000 VUs  0m04.1s/2m20.0s
+joiners   • [   0% ] waiting        15.9s
+reservers • [   0% ] waiting        15.9s
+walkins   • [   0% ] waiting        15.9s
+operator  • [   0% ] waiting        25.9s
+
+running (0m26.3s), 1011/2126 VUs, 5 complete and 0 interrupted iterations
+viewers     [  11% ] 0753/1000 VUs  0m15.1s/2m20.0s
+staff       [   8% ] 5 VUs          0m10.1s/2m0s
+pollers     [   4% ] 0253/1000 VUs  0m05.1s/2m20.0s
+joiners   • [   0% ] waiting        14.9s
+reservers • [   0% ] waiting        14.9s
+walkins   • [   0% ] waiting        14.9s
+operator  • [   0% ] waiting        24.9s
+
+running (0m27.3s), 1111/2126 VUs, 9 complete and 0 interrupted iterations
+viewers     [  11% ] 0803/1000 VUs  0m16.1s/2m20.0s
+staff       [   9% ] 5 VUs          0m11.1s/2m0s
+pollers     [   4% ] 0303/1000 VUs  0m06.1s/2m20.0s
+joiners   • [   0% ] waiting        13.9s
+reservers • [   0% ] waiting        13.9s
+walkins   • [   0% ] waiting        13.9s
+operator  • [   0% ] waiting        23.9s
+
+running (0m28.3s), 1211/2126 VUs, 21 complete and 0 interrupted iterations
+viewers     [  12% ] 0853/1000 VUs  0m17.1s/2m20.0s
+staff       [  10% ] 5 VUs          0m12.1s/2m0s
+pollers     [   5% ] 0353/1000 VUs  0m07.1s/2m20.0s
+joiners   • [   0% ] waiting        12.9s
+reservers • [   0% ] waiting        12.9s
+walkins   • [   0% ] waiting        12.9s
+operator  • [   0% ] waiting        22.9s
+
+running (0m29.3s), 1311/2126 VUs, 44 complete and 0 interrupted iterations
+viewers     [  13% ] 0903/1000 VUs  0m18.1s/2m20.0s
+staff       [  11% ] 5 VUs          0m13.1s/2m0s
+pollers     [   6% ] 0403/1000 VUs  0m08.1s/2m20.0s
+joiners   • [   0% ] waiting        11.9s
+reservers • [   0% ] waiting        11.9s
+walkins   • [   0% ] waiting        11.9s
+operator  • [   0% ] waiting        21.9s
+
+running (0m30.3s), 1411/2126 VUs, 94 complete and 0 interrupted iterations
+viewers     [  14% ] 0953/1000 VUs  0m19.1s/2m20.0s
+staff       [  12% ] 5 VUs          0m14.1s/2m0s
+pollers     [   6% ] 0453/1000 VUs  0m09.1s/2m20.0s
+joiners   • [   0% ] waiting        10.9s
+reservers • [   0% ] waiting        10.9s
+walkins   • [   0% ] waiting        10.9s
+operator  • [   0% ] waiting        20.9s
+
+running (0m31.3s), 1508/2126 VUs, 163 complete and 0 interrupted iterations
+viewers     [  14% ] 1000/1000 VUs  0m20.1s/2m20.0s
+staff       [  13% ] 5 VUs          0m15.1s/2m0s
+pollers     [   7% ] 0503/1000 VUs  0m10.1s/2m20.0s
+joiners   • [   0% ] waiting        09.9s
+reservers • [   0% ] waiting        09.9s
+walkins   • [   0% ] waiting        09.9s
+operator  • [   0% ] waiting        19.9s
+
+running (0m32.3s), 1558/2126 VUs, 252 complete and 0 interrupted iterations
+viewers     [  15% ] 1000/1000 VUs  0m21.1s/2m20.0s
+staff       [  13% ] 5 VUs          0m16.1s/2m0s
+pollers     [   8% ] 0553/1000 VUs  0m11.1s/2m20.0s
+joiners   • [   0% ] waiting        08.9s
+reservers • [   0% ] waiting        08.9s
+walkins   • [   0% ] waiting        08.9s
+operator  • [   0% ] waiting        18.9s
+
+running (0m33.3s), 1608/2126 VUs, 326 complete and 0 interrupted iterations
+viewers     [  16% ] 1000/1000 VUs  0m22.1s/2m20.0s
+staff       [  14% ] 5 VUs          0m17.1s/2m0s
+pollers     [   9% ] 0603/1000 VUs  0m12.1s/2m20.0s
+joiners   • [   0% ] waiting        07.9s
+reservers • [   0% ] waiting        07.9s
+walkins   • [   0% ] waiting        07.9s
+operator  • [   0% ] waiting        17.9s
+
+running (0m34.3s), 1658/2126 VUs, 414 complete and 0 interrupted iterations
+viewers     [  16% ] 1000/1000 VUs  0m23.1s/2m20.0s
+staff       [  15% ] 5 VUs          0m18.1s/2m0s
+pollers     [   9% ] 0653/1000 VUs  0m13.1s/2m20.0s
+joiners   • [   0% ] waiting        06.9s
+reservers • [   0% ] waiting        06.9s
+walkins   • [   0% ] waiting        06.9s
+operator  • [   0% ] waiting        16.9s
+
+running (0m35.3s), 1708/2126 VUs, 503 complete and 0 interrupted iterations
+viewers     [  17% ] 1000/1000 VUs  0m24.1s/2m20.0s
+staff       [  16% ] 5 VUs          0m19.1s/2m0s
+pollers     [  10% ] 0703/1000 VUs  0m14.1s/2m20.0s
+joiners   • [   0% ] waiting        05.9s
+reservers • [   0% ] waiting        05.9s
+walkins   • [   0% ] waiting        05.9s
+operator  • [   0% ] waiting        15.9s
+
+running (0m36.3s), 1758/2126 VUs, 603 complete and 0 interrupted iterations
+viewers     [  18% ] 1000/1000 VUs  0m25.1s/2m20.0s
+staff       [  17% ] 5 VUs          0m20.1s/2m0s
+pollers     [  11% ] 0753/1000 VUs  0m15.1s/2m20.0s
+joiners   • [   0% ] waiting        04.9s
+reservers • [   0% ] waiting        04.9s
+walkins   • [   0% ] waiting        04.9s
+operator  • [   0% ] waiting        14.9s
+
+running (0m37.3s), 1808/2126 VUs, 716 complete and 0 interrupted iterations
+viewers     [  19% ] 1000/1000 VUs  0m26.1s/2m20.0s
+staff       [  18% ] 5 VUs          0m21.1s/2m0s
+pollers     [  11% ] 0803/1000 VUs  0m16.1s/2m20.0s
+joiners   • [   0% ] waiting        03.9s
+reservers • [   0% ] waiting        03.9s
+walkins   • [   0% ] waiting        03.9s
+operator  • [   0% ] waiting        13.9s
+
+running (0m38.3s), 1858/2126 VUs, 835 complete and 0 interrupted iterations
+viewers     [  19% ] 1000/1000 VUs  0m27.1s/2m20.0s
+staff       [  18% ] 5 VUs          0m22.1s/2m0s
+pollers     [  12% ] 0853/1000 VUs  0m17.1s/2m20.0s
+joiners   • [   0% ] waiting        02.9s
+reservers • [   0% ] waiting        02.9s
+walkins   • [   0% ] waiting        02.9s
+operator  • [   0% ] waiting        12.9s
+
+running (0m39.3s), 1908/2126 VUs, 980 complete and 0 interrupted iterations
+viewers     [  20% ] 1000/1000 VUs  0m28.1s/2m20.0s
+staff       [  19% ] 5 VUs          0m23.1s/2m0s
+pollers     [  13% ] 0903/1000 VUs  0m18.1s/2m20.0s
+joiners   • [   0% ] waiting        01.9s
+reservers • [   0% ] waiting        01.9s
+walkins   • [   0% ] waiting        01.9s
+operator  • [   0% ] waiting        11.9s
+
+running (0m40.3s), 1958/2126 VUs, 1147 complete and 0 interrupted iterations
+viewers     [  21% ] 1000/1000 VUs  0m29.1s/2m20.0s
+staff       [  20% ] 5 VUs          0m24.1s/2m0s
+pollers     [  14% ] 0953/1000 VUs  0m19.1s/2m20.0s
+joiners   • [   0% ] waiting        00.9s
+reservers • [   0% ] waiting        00.9s
+walkins   • [   0% ] waiting        00.9s
+operator  • [   0% ] waiting        10.9s
+
+running (0m41.3s), 2009/2126 VUs, 1280 complete and 0 interrupted iterations
+viewers     [  21% ] 1000/1000 VUs  0m30.1s/2m20.0s
+staff       [  21% ] 5 VUs          0m25.1s/2m0s
+pollers     [  14% ] 1000/1000 VUs  0m20.1s/2m20.0s
+joiners     [   0% ] 02/60 VUs      00.1s/30s  20.00 iters/s
+reservers   [   0% ] 01/40 VUs      00.1s/30s  10.00 iters/s
+walkins     [   0% ] 01/20 VUs      00.1s/30s  5.00 iters/s
+operator  • [   0% ] waiting        09.9s     
+
+running (0m42.3s), 2013/2126 VUs, 1472 complete and 0 interrupted iterations
+viewers     [  22% ] 1000/1000 VUs  0m31.1s/2m20.0s
+staff       [  22% ] 5 VUs          0m26.1s/2m0s
+pollers     [  15% ] 1000/1000 VUs  0m21.1s/2m20.0s
+joiners     [   4% ] 05/60 VUs      01.1s/30s  20.00 iters/s
+reservers   [   4% ] 02/40 VUs      01.1s/30s  10.00 iters/s
+walkins     [   4% ] 01/20 VUs      01.1s/30s  5.00 iters/s
+operator  • [   0% ] waiting        08.9s     
+
+running (0m43.3s), 2014/2126 VUs, 1669 complete and 0 interrupted iterations
+viewers     [  23% ] 1000/1000 VUs  0m32.1s/2m20.0s
+staff       [  23% ] 5 VUs          0m27.1s/2m0s
+pollers     [  16% ] 1000/1000 VUs  0m22.1s/2m20.0s
+joiners     [   7% ] 05/60 VUs      02.1s/30s  20.00 iters/s
+reservers   [   7% ] 02/40 VUs      02.1s/30s  10.00 iters/s
+walkins     [   7% ] 02/20 VUs      02.1s/30s  5.00 iters/s
+operator  • [   0% ] waiting        07.9s     
+
+running (0m44.3s), 2013/2126 VUs, 1859 complete and 0 interrupted iterations
+viewers     [  24% ] 1000/1000 VUs  0m33.1s/2m20.0s
+staff       [  23% ] 5 VUs          0m28.1s/2m0s
+pollers     [  16% ] 1000/1000 VUs  0m23.1s/2m20.0s
+joiners     [  10% ] 05/60 VUs      03.1s/30s  20.00 iters/s
+reservers   [  10% ] 02/40 VUs      03.1s/30s  10.00 iters/s
+walkins     [  10% ] 01/20 VUs      03.1s/30s  5.00 iters/s
+operator  • [   0% ] waiting        06.9s     
+
+running (0m45.3s), 2015/2126 VUs, 2046 complete and 0 interrupted iterations
+viewers     [  24% ] 1000/1000 VUs  0m34.1s/2m20.0s
+staff       [  24% ] 5 VUs          0m29.1s/2m0s
+pollers     [  17% ] 1000/1000 VUs  0m24.1s/2m20.0s
+joiners     [  14% ] 06/60 VUs      04.1s/30s  20.00 iters/s
+reservers   [  14% ] 02/40 VUs      04.1s/30s  10.00 iters/s
+walkins     [  14% ] 02/20 VUs      04.1s/30s  5.00 iters/s
+operator  • [   0% ] waiting        05.9s     
+
+running (0m46.3s), 2014/2126 VUs, 2256 complete and 0 interrupted iterations
+viewers     [  25% ] 1000/1000 VUs  0m35.1s/2m20.0s
+staff       [  25% ] 5 VUs          0m30.1s/2m0s
+pollers     [  18% ] 1000/1000 VUs  0m25.1s/2m20.0s
+joiners     [  17% ] 05/60 VUs      05.1s/30s  20.00 iters/s
+reservers   [  17% ] 02/40 VUs      05.1s/30s  10.00 iters/s
+walkins     [  17% ] 02/20 VUs      05.1s/30s  5.00 iters/s
+operator  • [   0% ] waiting        04.9s     
+
+running (0m47.3s), 2012/2126 VUs, 2487 complete and 0 interrupted iterations
+viewers     [  26% ] 1000/1000 VUs  0m36.1s/2m20.0s
+staff       [  26% ] 5 VUs          0m31.1s/2m0s
+pollers     [  19% ] 1000/1000 VUs  0m26.1s/2m20.0s
+joiners     [  20% ] 04/60 VUs      06.1s/30s  20.00 iters/s
+reservers   [  20% ] 02/40 VUs      06.1s/30s  10.00 iters/s
+walkins     [  20% ] 01/20 VUs      06.1s/30s  5.00 iters/s
+operator  • [   0% ] waiting        03.9s     
+
+running (0m48.3s), 2012/2126 VUs, 2696 complete and 0 interrupted iterations
+viewers     [  26% ] 1000/1000 VUs  0m37.1s/2m20.0s
+staff       [  27% ] 5 VUs          0m32.1s/2m0s
+pollers     [  19% ] 1000/1000 VUs  0m27.1s/2m20.0s
+joiners     [  24% ] 04/60 VUs      07.1s/30s  20.00 iters/s
+reservers   [  24% ] 02/40 VUs      07.1s/30s  10.00 iters/s
+walkins     [  24% ] 01/20 VUs      07.1s/30s  5.00 iters/s
+operator  • [   0% ] waiting        02.9s     
+
+running (0m49.3s), 2026/2126 VUs, 2942 complete and 0 interrupted iterations
+viewers     [  27% ] 1000/1000 VUs  0m38.1s/2m20.0s
+staff       [  28% ] 5 VUs          0m33.1s/2m0s
+pollers     [  20% ] 1000/1000 VUs  0m28.1s/2m20.0s
+joiners     [  27% ] 12/60 VUs      08.1s/30s  20.00 iters/s
+reservers   [  27% ] 07/40 VUs      08.1s/30s  10.00 iters/s
+walkins     [  27% ] 02/20 VUs      08.1s/30s  5.00 iters/s
+operator  • [   0% ] waiting        01.9s     
+
+running (0m50.3s), 2033/2126 VUs, 3143 complete and 0 interrupted iterations
+viewers     [  28% ] 1000/1000 VUs  0m39.1s/2m20.0s
+staff       [  28% ] 5 VUs          0m34.1s/2m0s
+pollers     [  21% ] 1000/1000 VUs  0m29.1s/2m20.0s
+joiners     [  30% ] 19/60 VUs      09.1s/30s  20.00 iters/s
+reservers   [  30% ] 06/40 VUs      09.1s/30s  10.00 iters/s
+walkins     [  30% ] 03/20 VUs      09.1s/30s  5.00 iters/s
+operator  • [   0% ] waiting        00.9s     
+
+running (0m51.3s), 2013/2126 VUs, 3346 complete and 0 interrupted iterations
+viewers     [  29% ] 1000/1000 VUs  0m40.1s/2m20.0s
+staff       [  29% ] 5 VUs          0m35.1s/2m0s
+pollers     [  21% ] 1000/1000 VUs  0m30.1s/2m20.0s
+joiners     [  34% ] 04/60 VUs      10.1s/30s  20.00 iters/s
+reservers   [  34% ] 02/40 VUs      10.1s/30s  10.00 iters/s
+walkins     [  34% ] 01/20 VUs      10.1s/30s  5.00 iters/s
+operator    [   0% ] 1 VUs          0m00.1s/2m0s
+
+running (0m52.3s), 2013/2126 VUs, 3537 complete and 0 interrupted iterations
+viewers     [  29% ] 1000/1000 VUs  0m41.1s/2m20.0s
+staff       [  30% ] 5 VUs          0m36.1s/2m0s
+pollers     [  22% ] 1000/1000 VUs  0m31.1s/2m20.0s
+joiners     [  37% ] 04/60 VUs      11.1s/30s  20.00 iters/s
+reservers   [  37% ] 02/40 VUs      11.1s/30s  10.00 iters/s
+walkins     [  37% ] 01/20 VUs      11.1s/30s  5.00 iters/s
+operator    [   1% ] 1 VUs          0m01.1s/2m0s
+
+running (0m53.3s), 2020/2126 VUs, 3726 complete and 0 interrupted iterations
+viewers     [  30% ] 1000/1000 VUs  0m42.1s/2m20.0s
+staff       [  31% ] 5 VUs          0m37.1s/2m0s
+pollers     [  23% ] 1000/1000 VUs  0m32.1s/2m20.0s
+joiners     [  40% ] 08/60 VUs      12.1s/30s  20.00 iters/s
+reservers   [  40% ] 04/40 VUs      12.1s/30s  10.00 iters/s
+walkins     [  40% ] 02/20 VUs      12.1s/30s  5.00 iters/s
+operator    [   2% ] 1 VUs          0m02.1s/2m0s
+
+running (0m54.3s), 2014/2126 VUs, 3931 complete and 0 interrupted iterations
+viewers     [  31% ] 1000/1000 VUs  0m43.1s/2m20.0s
+staff       [  32% ] 5 VUs          0m38.1s/2m0s
+pollers     [  24% ] 1000/1000 VUs  0m33.1s/2m20.0s
+joiners     [  44% ] 05/60 VUs      13.1s/30s  20.00 iters/s
+reservers   [  44% ] 02/40 VUs      13.1s/30s  10.00 iters/s
+walkins     [  44% ] 01/20 VUs      13.1s/30s  5.00 iters/s
+operator    [   3% ] 1 VUs          0m03.1s/2m0s
+
+running (0m55.3s), 2017/2126 VUs, 4128 complete and 0 interrupted iterations
+viewers     [  31% ] 1000/1000 VUs  0m44.1s/2m20.0s
+staff       [  33% ] 5 VUs          0m39.1s/2m0s
+pollers     [  24% ] 1000/1000 VUs  0m34.1s/2m20.0s
+joiners     [  47% ] 07/60 VUs      14.1s/30s  20.00 iters/s
+reservers   [  47% ] 03/40 VUs      14.1s/30s  10.00 iters/s
+walkins     [  47% ] 01/20 VUs      14.1s/30s  5.00 iters/s
+operator    [   3% ] 1 VUs          0m04.1s/2m0s
+
+running (0m56.3s), 2015/2126 VUs, 4347 complete and 0 interrupted iterations
+viewers     [  32% ] 1000/1000 VUs  0m45.1s/2m20.0s
+staff       [  33% ] 5 VUs          0m40.1s/2m0s
+pollers     [  25% ] 1000/1000 VUs  0m35.1s/2m20.0s
+joiners     [  50% ] 05/60 VUs      15.1s/30s  20.00 iters/s
+reservers   [  50% ] 02/40 VUs      15.1s/30s  10.00 iters/s
+walkins     [  50% ] 02/20 VUs      15.1s/30s  5.00 iters/s
+operator    [   4% ] 1 VUs          0m05.1s/2m0s
+
+running (0m57.3s), 2018/2126 VUs, 4561 complete and 0 interrupted iterations
+viewers     [  33% ] 1000/1000 VUs  0m46.1s/2m20.0s
+staff       [  34% ] 5 VUs          0m41.1s/2m0s
+pollers     [  26% ] 1000/1000 VUs  0m36.1s/2m20.0s
+joiners     [  54% ] 06/60 VUs      16.1s/30s  20.00 iters/s
+reservers   [  54% ] 04/40 VUs      16.1s/30s  10.00 iters/s
+walkins     [  54% ] 02/20 VUs      16.1s/30s  5.00 iters/s
+operator    [   5% ] 1 VUs          0m06.1s/2m0s
+
+running (0m58.3s), 2015/2126 VUs, 4776 complete and 0 interrupted iterations
+viewers     [  34% ] 1000/1000 VUs  0m47.1s/2m20.0s
+staff       [  35% ] 5 VUs          0m42.1s/2m0s
+pollers     [  26% ] 1000/1000 VUs  0m37.1s/2m20.0s
+joiners     [  57% ] 06/60 VUs      17.1s/30s  20.00 iters/s
+reservers   [  57% ] 02/40 VUs      17.1s/30s  10.00 iters/s
+walkins     [  57% ] 01/20 VUs      17.1s/30s  5.00 iters/s
+operator    [   6% ] 1 VUs          0m07.1s/2m0s
+
+running (0m59.3s), 2013/2126 VUs, 4979 complete and 0 interrupted iterations
+viewers     [  34% ] 1000/1000 VUs  0m48.1s/2m20.0s
+staff       [  36% ] 5 VUs          0m43.1s/2m0s
+pollers     [  27% ] 1000/1000 VUs  0m38.1s/2m20.0s
+joiners     [  60% ] 04/60 VUs      18.1s/30s  20.00 iters/s
+reservers   [  60% ] 02/40 VUs      18.1s/30s  10.00 iters/s
+walkins     [  60% ] 01/20 VUs      18.1s/30s  5.00 iters/s
+operator    [   7% ] 1 VUs          0m08.1s/2m0s
+
+running (1m00.3s), 2014/2126 VUs, 5158 complete and 0 interrupted iterations
+viewers     [  35% ] 1000/1000 VUs  0m49.1s/2m20.0s
+staff       [  37% ] 5 VUs          0m44.1s/2m0s
+pollers     [  28% ] 1000/1000 VUs  0m39.1s/2m20.0s
+joiners     [  64% ] 05/60 VUs      19.1s/30s  20.00 iters/s
+reservers   [  64% ] 02/40 VUs      19.1s/30s  10.00 iters/s
+walkins     [  64% ] 01/20 VUs      19.1s/30s  5.00 iters/s
+operator    [   8% ] 1 VUs          0m09.1s/2m0s
+
+running (1m01.3s), 2013/2126 VUs, 5368 complete and 0 interrupted iterations
+viewers     [  36% ] 1000/1000 VUs  0m50.1s/2m20.0s
+staff       [  38% ] 5 VUs          0m45.1s/2m0s
+pollers     [  29% ] 1000/1000 VUs  0m40.1s/2m20.0s
+joiners     [  67% ] 04/60 VUs      20.1s/30s  20.00 iters/s
+reservers   [  67% ] 02/40 VUs      20.1s/30s  10.00 iters/s
+walkins     [  67% ] 01/20 VUs      20.1s/30s  5.00 iters/s
+operator    [   8% ] 1 VUs          0m10.1s/2m0s
+
+running (1m02.3s), 2013/2126 VUs, 5551 complete and 0 interrupted iterations
+viewers     [  36% ] 1000/1000 VUs  0m51.1s/2m20.0s
+staff       [  38% ] 5 VUs          0m46.1s/2m0s
+pollers     [  29% ] 1000/1000 VUs  0m41.1s/2m20.0s
+joiners     [  70% ] 04/60 VUs      21.1s/30s  20.00 iters/s
+reservers   [  70% ] 02/40 VUs      21.1s/30s  10.00 iters/s
+walkins     [  70% ] 01/20 VUs      21.1s/30s  5.00 iters/s
+operator    [   9% ] 1 VUs          0m11.1s/2m0s
+
+running (1m03.3s), 2013/2126 VUs, 5762 complete and 0 interrupted iterations
+viewers     [  37% ] 1000/1000 VUs  0m52.1s/2m20.0s
+staff       [  39% ] 5 VUs          0m47.1s/2m0s
+pollers     [  30% ] 1000/1000 VUs  0m42.1s/2m20.0s
+joiners     [  74% ] 04/60 VUs      22.1s/30s  20.00 iters/s
+reservers   [  74% ] 02/40 VUs      22.1s/30s  10.00 iters/s
+walkins     [  74% ] 01/20 VUs      22.1s/30s  5.00 iters/s
+operator    [  10% ] 1 VUs          0m12.1s/2m0s
+
+running (1m04.3s), 2014/2126 VUs, 5992 complete and 0 interrupted iterations
+viewers     [  38% ] 1000/1000 VUs  0m53.1s/2m20.0s
+staff       [  40% ] 5 VUs          0m48.1s/2m0s
+pollers     [  31% ] 1000/1000 VUs  0m43.1s/2m20.0s
+joiners     [  77% ] 05/60 VUs      23.1s/30s  20.00 iters/s
+reservers   [  77% ] 02/40 VUs      23.1s/30s  10.00 iters/s
+walkins     [  77% ] 01/20 VUs      23.1s/30s  5.00 iters/s
+operator    [  11% ] 1 VUs          0m13.1s/2m0s
+
+running (1m05.3s), 2015/2126 VUs, 6211 complete and 0 interrupted iterations
+viewers     [  39% ] 1000/1000 VUs  0m54.1s/2m20.0s
+staff       [  41% ] 5 VUs          0m49.1s/2m0s
+pollers     [  31% ] 1000/1000 VUs  0m44.1s/2m20.0s
+joiners     [  80% ] 05/60 VUs      24.1s/30s  20.00 iters/s
+reservers   [  80% ] 03/40 VUs      24.1s/30s  10.00 iters/s
+walkins     [  80% ] 01/20 VUs      24.1s/30s  5.00 iters/s
+operator    [  12% ] 1 VUs          0m14.1s/2m0s
+
+running (1m06.3s), 2013/2126 VUs, 6434 complete and 0 interrupted iterations
+viewers     [  39% ] 1000/1000 VUs  0m55.1s/2m20.0s
+staff       [  42% ] 5 VUs          0m50.1s/2m0s
+pollers     [  32% ] 1000/1000 VUs  0m45.1s/2m20.0s
+joiners     [  84% ] 04/60 VUs      25.1s/30s  20.00 iters/s
+reservers   [  84% ] 02/40 VUs      25.1s/30s  10.00 iters/s
+walkins     [  84% ] 01/20 VUs      25.1s/30s  5.00 iters/s
+operator    [  13% ] 1 VUs          0m15.1s/2m0s
+
+running (1m07.3s), 2018/2126 VUs, 6638 complete and 0 interrupted iterations
+viewers     [  40% ] 1000/1000 VUs  0m56.1s/2m20.0s
+staff       [  43% ] 5 VUs          0m51.1s/2m0s
+pollers     [  33% ] 1000/1000 VUs  0m46.1s/2m20.0s
+joiners     [  87% ] 07/60 VUs      26.1s/30s  20.00 iters/s
+reservers   [  87% ] 03/40 VUs      26.1s/30s  10.00 iters/s
+walkins     [  87% ] 02/20 VUs      26.1s/30s  5.00 iters/s
+operator    [  13% ] 1 VUs          0m16.1s/2m0s
+
+running (1m08.3s), 2014/2126 VUs, 6853 complete and 0 interrupted iterations
+viewers     [  41% ] 1000/1000 VUs  0m57.1s/2m20.0s
+staff       [  43% ] 5 VUs          0m52.1s/2m0s
+pollers     [  34% ] 1000/1000 VUs  0m47.1s/2m20.0s
+joiners     [  90% ] 05/60 VUs      27.1s/30s  20.00 iters/s
+reservers   [  90% ] 02/40 VUs      27.1s/30s  10.00 iters/s
+walkins     [  90% ] 01/20 VUs      27.1s/30s  5.00 iters/s
+operator    [  14% ] 1 VUs          0m17.1s/2m0s
+
+running (1m09.3s), 2013/2126 VUs, 7047 complete and 0 interrupted iterations
+viewers     [  41% ] 1000/1000 VUs  0m58.1s/2m20.0s
+staff       [  44% ] 5 VUs          0m53.1s/2m0s
+pollers     [  34% ] 1000/1000 VUs  0m48.1s/2m20.0s
+joiners     [  94% ] 04/60 VUs      28.1s/30s  20.00 iters/s
+reservers   [  94% ] 02/40 VUs      28.1s/30s  10.00 iters/s
+walkins     [  94% ] 01/20 VUs      28.1s/30s  5.00 iters/s
+operator    [  15% ] 1 VUs          0m18.1s/2m0s
+
+running (1m10.3s), 2015/2126 VUs, 7255 complete and 0 interrupted iterations
+viewers     [  42% ] 1000/1000 VUs  0m59.1s/2m20.0s
+staff       [  45% ] 5 VUs          0m54.1s/2m0s
+pollers     [  35% ] 1000/1000 VUs  0m49.1s/2m20.0s
+joiners     [  97% ] 06/60 VUs      29.1s/30s  20.00 iters/s
+reservers   [  97% ] 02/40 VUs      29.1s/30s  10.00 iters/s
+walkins     [  97% ] 01/20 VUs      29.1s/30s  5.00 iters/s
+operator    [  16% ] 1 VUs          0m19.1s/2m0s
+
+running (1m11.3s), 2013/2126 VUs, 7445 complete and 0 interrupted iterations
+viewers     [  43% ] 1000/1000 VUs  1m00.1s/2m20.0s
+staff       [  46% ] 5 VUs          0m55.1s/2m0s
+pollers     [  36% ] 1000/1000 VUs  0m50.1s/2m20.0s
+joiners   ↓ [ 100% ] 04/60 VUs      30s  20.00 iters/s
+reservers ↓ [ 100% ] 03/40 VUs      30s  10.00 iters/s
+walkins   ↓ [ 100% ] 02/20 VUs      30s  5.00 iters/s
+operator    [  17% ] 1 VUs          0m20.1s/2m0s
+
+running (1m12.3s), 2006/2126 VUs, 7627 complete and 0 interrupted iterations
+viewers     [  44% ] 1000/1000 VUs  1m01.1s/2m20.0s
+staff       [  47% ] 5 VUs          0m56.1s/2m0s
+pollers     [  36% ] 1000/1000 VUs  0m51.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  22% ] 1 VUs          0m26.5s/2m0s
+operator    [  18% ] 1 VUs          0m21.1s/2m0s
 
-running (1m20.0s), 3006/3126 VUs, 12063 complete and 0 interrupted iterations
-viewers     [  48% ] 1500/1500 VUs  1m07.5s/2m20.0s
-staff       [  52% ] 5 VUs          1m02.5s/2m0s
-pollers     [  41% ] 1500/1500 VUs  0m57.5s/2m20.0s
+running (1m13.3s), 2006/2126 VUs, 7814 complete and 0 interrupted iterations
+viewers     [  44% ] 1000/1000 VUs  1m02.1s/2m20.0s
+staff       [  48% ] 5 VUs          0m57.1s/2m0s
+pollers     [  37% ] 1000/1000 VUs  0m52.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  23% ] 1 VUs          0m27.5s/2m0s
+operator    [  18% ] 1 VUs          0m22.1s/2m0s
 
-running (1m21.0s), 3006/3126 VUs, 12260 complete and 0 interrupted iterations
-viewers     [  49% ] 1500/1500 VUs  1m08.5s/2m20.0s
-staff       [  53% ] 5 VUs          1m03.5s/2m0s
-pollers     [  42% ] 1500/1500 VUs  0m58.5s/2m20.0s
+running (1m14.3s), 2006/2126 VUs, 8000 complete and 0 interrupted iterations
+viewers     [  45% ] 1000/1000 VUs  1m03.1s/2m20.0s
+staff       [  48% ] 5 VUs          0m58.1s/2m0s
+pollers     [  38% ] 1000/1000 VUs  0m53.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  24% ] 1 VUs          0m28.5s/2m0s
+operator    [  19% ] 1 VUs          0m23.1s/2m0s
 
-running (1m22.0s), 3006/3126 VUs, 12489 complete and 0 interrupted iterations
-viewers     [  50% ] 1500/1500 VUs  1m09.5s/2m20.0s
-staff       [  54% ] 5 VUs          1m04.5s/2m0s
-pollers     [  43% ] 1500/1500 VUs  0m59.5s/2m20.0s
+running (1m15.3s), 2006/2126 VUs, 8165 complete and 0 interrupted iterations
+viewers     [  46% ] 1000/1000 VUs  1m04.1s/2m20.0s
+staff       [  49% ] 5 VUs          0m59.1s/2m0s
+pollers     [  39% ] 1000/1000 VUs  0m54.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  25% ] 1 VUs          0m29.5s/2m0s
+operator    [  20% ] 1 VUs          0m24.1s/2m0s
 
-running (1m23.0s), 3006/3126 VUs, 12697 complete and 0 interrupted iterations
-viewers     [  50% ] 1500/1500 VUs  1m10.5s/2m20.0s
-staff       [  55% ] 5 VUs          1m05.5s/2m0s
-pollers     [  43% ] 1500/1500 VUs  1m00.5s/2m20.0s
+running (1m16.3s), 2006/2126 VUs, 8325 complete and 0 interrupted iterations
+viewers     [  46% ] 1000/1000 VUs  1m05.1s/2m20.0s
+staff       [  50% ] 5 VUs          1m00.1s/2m0s
+pollers     [  39% ] 1000/1000 VUs  0m55.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  25% ] 1 VUs          0m30.5s/2m0s
+operator    [  21% ] 1 VUs          0m25.1s/2m0s
 
-running (1m24.0s), 3006/3126 VUs, 12899 complete and 0 interrupted iterations
-viewers     [  51% ] 1500/1500 VUs  1m11.5s/2m20.0s
-staff       [  55% ] 5 VUs          1m06.5s/2m0s
-pollers     [  44% ] 1500/1500 VUs  1m01.5s/2m20.0s
+running (1m17.3s), 2006/2126 VUs, 8486 complete and 0 interrupted iterations
+viewers     [  47% ] 1000/1000 VUs  1m06.1s/2m20.0s
+staff       [  51% ] 5 VUs          1m01.1s/2m0s
+pollers     [  40% ] 1000/1000 VUs  0m56.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  26% ] 1 VUs          0m31.5s/2m0s
+operator    [  22% ] 1 VUs          0m26.1s/2m0s
 
-running (1m25.0s), 3006/3126 VUs, 13106 complete and 0 interrupted iterations
-viewers     [  52% ] 1500/1500 VUs  1m12.5s/2m20.0s
-staff       [  56% ] 5 VUs          1m07.5s/2m0s
-pollers     [  45% ] 1500/1500 VUs  1m02.5s/2m20.0s
+running (1m18.3s), 2006/2126 VUs, 8662 complete and 0 interrupted iterations
+viewers     [  48% ] 1000/1000 VUs  1m07.1s/2m20.0s
+staff       [  52% ] 5 VUs          1m02.1s/2m0s
+pollers     [  41% ] 1000/1000 VUs  0m57.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  27% ] 1 VUs          0m32.5s/2m0s
+operator    [  23% ] 1 VUs          0m27.1s/2m0s
 
-running (1m26.0s), 3006/3126 VUs, 13339 complete and 0 interrupted iterations
-viewers     [  53% ] 1500/1500 VUs  1m13.5s/2m20.0s
-staff       [  57% ] 5 VUs          1m08.5s/2m0s
-pollers     [  45% ] 1500/1500 VUs  1m03.5s/2m20.0s
+running (1m19.3s), 2006/2126 VUs, 8817 complete and 0 interrupted iterations
+viewers     [  49% ] 1000/1000 VUs  1m08.1s/2m20.0s
+staff       [  53% ] 5 VUs          1m03.1s/2m0s
+pollers     [  41% ] 1000/1000 VUs  0m58.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  28% ] 1 VUs          0m33.5s/2m0s
+operator    [  23% ] 1 VUs          0m28.1s/2m0s
 
-running (1m27.0s), 3006/3126 VUs, 13551 complete and 0 interrupted iterations
-viewers     [  53% ] 1500/1500 VUs  1m14.5s/2m20.0s
-staff       [  58% ] 5 VUs          1m09.5s/2m0s
-pollers     [  46% ] 1500/1500 VUs  1m04.5s/2m20.0s
+running (1m20.3s), 2006/2126 VUs, 8982 complete and 0 interrupted iterations
+viewers     [  49% ] 1000/1000 VUs  1m09.1s/2m20.0s
+staff       [  53% ] 5 VUs          1m04.1s/2m0s
+pollers     [  42% ] 1000/1000 VUs  0m59.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  29% ] 1 VUs          0m34.5s/2m0s
+operator    [  24% ] 1 VUs          0m29.1s/2m0s
 
-running (1m28.0s), 3006/3126 VUs, 13774 complete and 0 interrupted iterations
-viewers     [  54% ] 1500/1500 VUs  1m15.5s/2m20.0s
-staff       [  59% ] 5 VUs          1m10.5s/2m0s
-pollers     [  47% ] 1500/1500 VUs  1m05.5s/2m20.0s
+running (1m21.3s), 2006/2126 VUs, 9167 complete and 0 interrupted iterations
+viewers     [  50% ] 1000/1000 VUs  1m10.1s/2m20.0s
+staff       [  54% ] 5 VUs          1m05.1s/2m0s
+pollers     [  43% ] 1000/1000 VUs  1m00.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  30% ] 1 VUs          0m35.5s/2m0s
+operator    [  25% ] 1 VUs          0m30.1s/2m0s
 
-running (1m29.0s), 3006/3126 VUs, 14002 complete and 0 interrupted iterations
-viewers     [  55% ] 1500/1500 VUs  1m16.5s/2m20.0s
-staff       [  60% ] 5 VUs          1m11.5s/2m0s
-pollers     [  48% ] 1500/1500 VUs  1m06.5s/2m20.0s
+running (1m22.3s), 2006/2126 VUs, 9354 complete and 0 interrupted iterations
+viewers     [  51% ] 1000/1000 VUs  1m11.1s/2m20.0s
+staff       [  55% ] 5 VUs          1m06.1s/2m0s
+pollers     [  44% ] 1000/1000 VUs  1m01.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  30% ] 1 VUs          0m36.5s/2m0s
+operator    [  26% ] 1 VUs          0m31.1s/2m0s
 
-running (1m30.0s), 3006/3126 VUs, 14231 complete and 0 interrupted iterations
-viewers     [  55% ] 1500/1500 VUs  1m17.5s/2m20.0s
-staff       [  60% ] 5 VUs          1m12.5s/2m0s
-pollers     [  48% ] 1500/1500 VUs  1m07.5s/2m20.0s
+running (1m23.3s), 2006/2126 VUs, 9529 complete and 0 interrupted iterations
+viewers     [  51% ] 1000/1000 VUs  1m12.1s/2m20.0s
+staff       [  56% ] 5 VUs          1m07.1s/2m0s
+pollers     [  44% ] 1000/1000 VUs  1m02.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  31% ] 1 VUs          0m37.5s/2m0s
+operator    [  27% ] 1 VUs          0m32.1s/2m0s
 
-running (1m31.0s), 3006/3126 VUs, 14458 complete and 0 interrupted iterations
-viewers     [  56% ] 1500/1500 VUs  1m18.5s/2m20.0s
-staff       [  61% ] 5 VUs          1m13.5s/2m0s
-pollers     [  49% ] 1500/1500 VUs  1m08.5s/2m20.0s
+running (1m24.3s), 2006/2126 VUs, 9713 complete and 0 interrupted iterations
+viewers     [  52% ] 1000/1000 VUs  1m13.1s/2m20.0s
+staff       [  57% ] 5 VUs          1m08.1s/2m0s
+pollers     [  45% ] 1000/1000 VUs  1m03.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  32% ] 1 VUs          0m38.5s/2m0s
+operator    [  28% ] 1 VUs          0m33.1s/2m0s
 
-running (1m32.0s), 3006/3126 VUs, 14660 complete and 0 interrupted iterations
-viewers     [  57% ] 1500/1500 VUs  1m19.5s/2m20.0s
-staff       [  62% ] 5 VUs          1m14.5s/2m0s
-pollers     [  50% ] 1500/1500 VUs  1m09.5s/2m20.0s
+running (1m25.3s), 2006/2126 VUs, 9875 complete and 0 interrupted iterations
+viewers     [  53% ] 1000/1000 VUs  1m14.1s/2m20.0s
+staff       [  58% ] 5 VUs          1m09.1s/2m0s
+pollers     [  46% ] 1000/1000 VUs  1m04.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  33% ] 1 VUs          0m39.5s/2m0s
+operator    [  28% ] 1 VUs          0m34.1s/2m0s
 
-running (1m33.0s), 3006/3126 VUs, 14855 complete and 0 interrupted iterations
-viewers     [  58% ] 1500/1500 VUs  1m20.5s/2m20.0s
-staff       [  63% ] 5 VUs          1m15.5s/2m0s
-pollers     [  50% ] 1500/1500 VUs  1m10.5s/2m20.0s
+running (1m26.3s), 2006/2126 VUs, 10061 complete and 0 interrupted iterations
+viewers     [  54% ] 1000/1000 VUs  1m15.1s/2m20.0s
+staff       [  58% ] 5 VUs          1m10.1s/2m0s
+pollers     [  46% ] 1000/1000 VUs  1m05.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  34% ] 1 VUs          0m40.5s/2m0s
+operator    [  29% ] 1 VUs          0m35.1s/2m0s
 
-running (1m34.0s), 3006/3126 VUs, 15080 complete and 0 interrupted iterations
-viewers     [  58% ] 1500/1500 VUs  1m21.5s/2m20.0s
-staff       [  64% ] 5 VUs          1m16.5s/2m0s
-pollers     [  51% ] 1500/1500 VUs  1m11.5s/2m20.0s
+running (1m27.3s), 2006/2126 VUs, 10209 complete and 0 interrupted iterations
+viewers     [  54% ] 1000/1000 VUs  1m16.1s/2m20.0s
+staff       [  59% ] 5 VUs          1m11.1s/2m0s
+pollers     [  47% ] 1000/1000 VUs  1m06.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  35% ] 1 VUs          0m41.5s/2m0s
+operator    [  30% ] 1 VUs          0m36.1s/2m0s
 
-running (1m35.0s), 3006/3126 VUs, 15312 complete and 0 interrupted iterations
-viewers     [  59% ] 1500/1500 VUs  1m22.5s/2m20.0s
-staff       [  65% ] 5 VUs          1m17.5s/2m0s
-pollers     [  52% ] 1500/1500 VUs  1m12.5s/2m20.0s
+running (1m28.3s), 2006/2126 VUs, 10385 complete and 0 interrupted iterations
+viewers     [  55% ] 1000/1000 VUs  1m17.1s/2m20.0s
+staff       [  60% ] 5 VUs          1m12.1s/2m0s
+pollers     [  48% ] 1000/1000 VUs  1m07.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  35% ] 1 VUs          0m42.5s/2m0s
+operator    [  31% ] 1 VUs          0m37.1s/2m0s
 
-running (1m36.0s), 3006/3126 VUs, 15537 complete and 0 interrupted iterations
-viewers     [  60% ] 1500/1500 VUs  1m23.5s/2m20.0s
-staff       [  65% ] 5 VUs          1m18.5s/2m0s
-pollers     [  53% ] 1500/1500 VUs  1m13.5s/2m20.0s
+running (1m29.3s), 2006/2126 VUs, 10557 complete and 0 interrupted iterations
+viewers     [  56% ] 1000/1000 VUs  1m18.1s/2m20.0s
+staff       [  61% ] 5 VUs          1m13.1s/2m0s
+pollers     [  49% ] 1000/1000 VUs  1m08.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  36% ] 1 VUs          0m43.5s/2m0s
+operator    [  32% ] 1 VUs          0m38.1s/2m0s
 
-running (1m37.0s), 3006/3126 VUs, 15773 complete and 0 interrupted iterations
-viewers     [  60% ] 1500/1500 VUs  1m24.5s/2m20.0s
-staff       [  66% ] 5 VUs          1m19.5s/2m0s
-pollers     [  53% ] 1500/1500 VUs  1m14.5s/2m20.0s
+running (1m30.3s), 2006/2126 VUs, 10741 complete and 0 interrupted iterations
+viewers     [  56% ] 1000/1000 VUs  1m19.1s/2m20.0s
+staff       [  62% ] 5 VUs          1m14.1s/2m0s
+pollers     [  49% ] 1000/1000 VUs  1m09.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  37% ] 1 VUs          0m44.5s/2m0s
+operator    [  33% ] 1 VUs          0m39.1s/2m0s
 
-running (1m38.0s), 3006/3126 VUs, 15987 complete and 0 interrupted iterations
-viewers     [  61% ] 1500/1500 VUs  1m25.5s/2m20.0s
-staff       [  67% ] 5 VUs          1m20.5s/2m0s
-pollers     [  54% ] 1500/1500 VUs  1m15.5s/2m20.0s
+running (1m31.3s), 2006/2126 VUs, 10907 complete and 0 interrupted iterations
+viewers     [  57% ] 1000/1000 VUs  1m20.1s/2m20.0s
+staff       [  63% ] 5 VUs          1m15.1s/2m0s
+pollers     [  50% ] 1000/1000 VUs  1m10.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  38% ] 1 VUs          0m45.5s/2m0s
+operator    [  33% ] 1 VUs          0m40.1s/2m0s
 
-running (1m39.0s), 3006/3126 VUs, 16205 complete and 0 interrupted iterations
-viewers     [  62% ] 1500/1500 VUs  1m26.5s/2m20.0s
-staff       [  68% ] 5 VUs          1m21.5s/2m0s
-pollers     [  55% ] 1500/1500 VUs  1m16.5s/2m20.0s
+running (1m32.3s), 2006/2126 VUs, 11100 complete and 0 interrupted iterations
+viewers     [  58% ] 1000/1000 VUs  1m21.1s/2m20.0s
+staff       [  63% ] 5 VUs          1m16.1s/2m0s
+pollers     [  51% ] 1000/1000 VUs  1m11.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  39% ] 1 VUs          0m46.5s/2m0s
+operator    [  34% ] 1 VUs          0m41.1s/2m0s
 
-running (1m40.0s), 3006/3126 VUs, 16431 complete and 0 interrupted iterations
-viewers     [  63% ] 1500/1500 VUs  1m27.5s/2m20.0s
-staff       [  69% ] 5 VUs          1m22.5s/2m0s
-pollers     [  55% ] 1500/1500 VUs  1m17.5s/2m20.0s
+running (1m33.3s), 2006/2126 VUs, 11255 complete and 0 interrupted iterations
+viewers     [  59% ] 1000/1000 VUs  1m22.1s/2m20.0s
+staff       [  64% ] 5 VUs          1m17.1s/2m0s
+pollers     [  51% ] 1000/1000 VUs  1m12.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  40% ] 1 VUs          0m47.5s/2m0s
+operator    [  35% ] 1 VUs          0m42.1s/2m0s
 
-running (1m41.0s), 3006/3126 VUs, 16648 complete and 0 interrupted iterations
-viewers     [  63% ] 1500/1500 VUs  1m28.5s/2m20.0s
-staff       [  70% ] 5 VUs          1m23.5s/2m0s
-pollers     [  56% ] 1500/1500 VUs  1m18.5s/2m20.0s
+running (1m34.3s), 2006/2126 VUs, 11419 complete and 0 interrupted iterations
+viewers     [  59% ] 1000/1000 VUs  1m23.1s/2m20.0s
+staff       [  65% ] 5 VUs          1m18.1s/2m0s
+pollers     [  52% ] 1000/1000 VUs  1m13.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  40% ] 1 VUs          0m48.5s/2m0s
+operator    [  36% ] 1 VUs          0m43.1s/2m0s
 
-running (1m42.0s), 3006/3126 VUs, 16925 complete and 0 interrupted iterations
-viewers     [  64% ] 1500/1500 VUs  1m29.5s/2m20.0s
-staff       [  70% ] 5 VUs          1m24.5s/2m0s
-pollers     [  57% ] 1500/1500 VUs  1m19.5s/2m20.0s
+running (1m35.3s), 2006/2126 VUs, 11585 complete and 0 interrupted iterations
+viewers     [  60% ] 1000/1000 VUs  1m24.1s/2m20.0s
+staff       [  66% ] 5 VUs          1m19.1s/2m0s
+pollers     [  53% ] 1000/1000 VUs  1m14.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  41% ] 1 VUs          0m49.5s/2m0s
+operator    [  37% ] 1 VUs          0m44.1s/2m0s
 
-running (1m43.0s), 3006/3126 VUs, 17192 complete and 0 interrupted iterations
-viewers     [  65% ] 1500/1500 VUs  1m30.5s/2m20.0s
-staff       [  71% ] 5 VUs          1m25.5s/2m0s
-pollers     [  58% ] 1500/1500 VUs  1m20.5s/2m20.0s
+running (1m36.3s), 2006/2126 VUs, 11733 complete and 0 interrupted iterations
+viewers     [  61% ] 1000/1000 VUs  1m25.1s/2m20.0s
+staff       [  67% ] 5 VUs          1m20.1s/2m0s
+pollers     [  54% ] 1000/1000 VUs  1m15.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  42% ] 1 VUs          0m50.5s/2m0s
+operator    [  38% ] 1 VUs          0m45.1s/2m0s
 
-running (1m44.0s), 3006/3126 VUs, 17506 complete and 0 interrupted iterations
-viewers     [  65% ] 1500/1500 VUs  1m31.5s/2m20.0s
-staff       [  72% ] 5 VUs          1m26.5s/2m0s
-pollers     [  58% ] 1500/1500 VUs  1m21.5s/2m20.0s
+running (1m37.3s), 2006/2126 VUs, 11908 complete and 0 interrupted iterations
+viewers     [  61% ] 1000/1000 VUs  1m26.1s/2m20.0s
+staff       [  68% ] 5 VUs          1m21.1s/2m0s
+pollers     [  54% ] 1000/1000 VUs  1m16.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  43% ] 1 VUs          0m51.5s/2m0s
+operator    [  38% ] 1 VUs          0m46.1s/2m0s
 
-running (1m45.0s), 3006/3126 VUs, 17804 complete and 0 interrupted iterations
-viewers     [  66% ] 1500/1500 VUs  1m32.5s/2m20.0s
-staff       [  73% ] 5 VUs          1m27.5s/2m0s
-pollers     [  59% ] 1500/1500 VUs  1m22.5s/2m20.0s
+running (1m38.3s), 2006/2126 VUs, 12087 complete and 0 interrupted iterations
+viewers     [  62% ] 1000/1000 VUs  1m27.1s/2m20.0s
+staff       [  68% ] 5 VUs          1m22.1s/2m0s
+pollers     [  55% ] 1000/1000 VUs  1m17.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  44% ] 1 VUs          0m52.5s/2m0s
+operator    [  39% ] 1 VUs          0m47.1s/2m0s
 
-running (1m46.0s), 3006/3126 VUs, 18054 complete and 0 interrupted iterations
-viewers     [  67% ] 1500/1500 VUs  1m33.5s/2m20.0s
-staff       [  74% ] 5 VUs          1m28.5s/2m0s
-pollers     [  60% ] 1500/1500 VUs  1m23.5s/2m20.0s
+running (1m39.3s), 2006/2126 VUs, 12272 complete and 0 interrupted iterations
+viewers     [  63% ] 1000/1000 VUs  1m28.1s/2m20.0s
+staff       [  69% ] 5 VUs          1m23.1s/2m0s
+pollers     [  56% ] 1000/1000 VUs  1m18.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  45% ] 1 VUs          0m53.5s/2m0s
+operator    [  40% ] 1 VUs          0m48.1s/2m0s
 
-running (1m47.0s), 3006/3126 VUs, 18289 complete and 0 interrupted iterations
-viewers     [  68% ] 1500/1500 VUs  1m34.5s/2m20.0s
-staff       [  75% ] 5 VUs          1m29.5s/2m0s
-pollers     [  60% ] 1500/1500 VUs  1m24.5s/2m20.0s
+running (1m40.3s), 2006/2126 VUs, 12439 complete and 0 interrupted iterations
+viewers     [  64% ] 1000/1000 VUs  1m29.1s/2m20.0s
+staff       [  70% ] 5 VUs          1m24.1s/2m0s
+pollers     [  56% ] 1000/1000 VUs  1m19.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  45% ] 1 VUs          0m54.5s/2m0s
+operator    [  41% ] 1 VUs          0m49.1s/2m0s
 
-running (1m48.0s), 3006/3126 VUs, 18528 complete and 0 interrupted iterations
-viewers     [  68% ] 1500/1500 VUs  1m35.5s/2m20.0s
-staff       [  75% ] 5 VUs          1m30.5s/2m0s
-pollers     [  61% ] 1500/1500 VUs  1m25.5s/2m20.0s
+running (1m41.3s), 2006/2126 VUs, 12626 complete and 0 interrupted iterations
+viewers     [  64% ] 1000/1000 VUs  1m30.1s/2m20.0s
+staff       [  71% ] 5 VUs          1m25.1s/2m0s
+pollers     [  57% ] 1000/1000 VUs  1m20.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  46% ] 1 VUs          0m55.5s/2m0s
+operator    [  42% ] 1 VUs          0m50.1s/2m0s
 
-running (1m49.0s), 3006/3126 VUs, 18748 complete and 0 interrupted iterations
-viewers     [  69% ] 1500/1500 VUs  1m36.5s/2m20.0s
-staff       [  76% ] 5 VUs          1m31.5s/2m0s
-pollers     [  62% ] 1500/1500 VUs  1m26.5s/2m20.0s
+running (1m42.3s), 2006/2126 VUs, 12794 complete and 0 interrupted iterations
+viewers     [  65% ] 1000/1000 VUs  1m31.1s/2m20.0s
+staff       [  72% ] 5 VUs          1m26.1s/2m0s
+pollers     [  58% ] 1000/1000 VUs  1m21.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  47% ] 1 VUs          0m56.5s/2m0s
+operator    [  43% ] 1 VUs          0m51.1s/2m0s
 
-running (1m50.0s), 3006/3126 VUs, 18986 complete and 0 interrupted iterations
-viewers     [  70% ] 1500/1500 VUs  1m37.5s/2m20.0s
-staff       [  77% ] 5 VUs          1m32.5s/2m0s
-pollers     [  63% ] 1500/1500 VUs  1m27.5s/2m20.0s
+running (1m43.3s), 2006/2126 VUs, 12963 complete and 0 interrupted iterations
+viewers     [  66% ] 1000/1000 VUs  1m32.1s/2m20.0s
+staff       [  73% ] 5 VUs          1m27.1s/2m0s
+pollers     [  59% ] 1000/1000 VUs  1m22.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  48% ] 1 VUs          0m57.5s/2m0s
+operator    [  43% ] 1 VUs          0m52.1s/2m0s
 
-running (1m51.0s), 3006/3126 VUs, 19254 complete and 0 interrupted iterations
-viewers     [  70% ] 1500/1500 VUs  1m38.5s/2m20.0s
-staff       [  78% ] 5 VUs          1m33.5s/2m0s
-pollers     [  63% ] 1500/1500 VUs  1m28.5s/2m20.0s
+running (1m44.3s), 2006/2126 VUs, 13130 complete and 0 interrupted iterations
+viewers     [  66% ] 1000/1000 VUs  1m33.1s/2m20.0s
+staff       [  73% ] 5 VUs          1m28.1s/2m0s
+pollers     [  59% ] 1000/1000 VUs  1m23.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  49% ] 1 VUs          0m58.5s/2m0s
+operator    [  44% ] 1 VUs          0m53.1s/2m0s
 
-running (1m52.0s), 3006/3126 VUs, 19525 complete and 0 interrupted iterations
-viewers     [  71% ] 1500/1500 VUs  1m39.5s/2m20.0s
-staff       [  79% ] 5 VUs          1m34.5s/2m0s
-pollers     [  64% ] 1500/1500 VUs  1m29.5s/2m20.0s
+running (1m45.3s), 2006/2126 VUs, 13289 complete and 0 interrupted iterations
+viewers     [  67% ] 1000/1000 VUs  1m34.1s/2m20.0s
+staff       [  74% ] 5 VUs          1m29.1s/2m0s
+pollers     [  60% ] 1000/1000 VUs  1m24.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  50% ] 1 VUs          0m59.5s/2m0s
+operator    [  45% ] 1 VUs          0m54.1s/2m0s
 
-running (1m53.0s), 3006/3126 VUs, 19799 complete and 0 interrupted iterations
-viewers     [  72% ] 1500/1500 VUs  1m40.5s/2m20.0s
-staff       [  80% ] 5 VUs          1m35.5s/2m0s
-pollers     [  65% ] 1500/1500 VUs  1m30.5s/2m20.0s
+running (1m46.3s), 2006/2126 VUs, 13468 complete and 0 interrupted iterations
+viewers     [  68% ] 1000/1000 VUs  1m35.1s/2m20.0s
+staff       [  75% ] 5 VUs          1m30.1s/2m0s
+pollers     [  61% ] 1000/1000 VUs  1m25.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  50% ] 1 VUs          1m00.5s/2m0s
+operator    [  46% ] 1 VUs          0m55.1s/2m0s
 
-running (1m54.0s), 3006/3126 VUs, 20064 complete and 0 interrupted iterations
-viewers     [  73% ] 1500/1500 VUs  1m41.5s/2m20.0s
-staff       [  80% ] 5 VUs          1m36.5s/2m0s
-pollers     [  65% ] 1500/1500 VUs  1m31.5s/2m20.0s
+running (1m47.3s), 2006/2126 VUs, 13665 complete and 0 interrupted iterations
+viewers     [  69% ] 1000/1000 VUs  1m36.1s/2m20.0s
+staff       [  76% ] 5 VUs          1m31.1s/2m0s
+pollers     [  61% ] 1000/1000 VUs  1m26.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  51% ] 1 VUs          1m01.5s/2m0s
+operator    [  47% ] 1 VUs          0m56.1s/2m0s
 
-running (1m55.0s), 3006/3126 VUs, 20319 complete and 0 interrupted iterations
-viewers     [  73% ] 1500/1500 VUs  1m42.5s/2m20.0s
-staff       [  81% ] 5 VUs          1m37.5s/2m0s
-pollers     [  66% ] 1500/1500 VUs  1m32.5s/2m20.0s
+running (1m48.3s), 2006/2126 VUs, 13844 complete and 0 interrupted iterations
+viewers     [  69% ] 1000/1000 VUs  1m37.1s/2m20.0s
+staff       [  77% ] 5 VUs          1m32.1s/2m0s
+pollers     [  62% ] 1000/1000 VUs  1m27.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  52% ] 1 VUs          1m02.5s/2m0s
+operator    [  48% ] 1 VUs          0m57.1s/2m0s
 
-running (1m56.0s), 3006/3126 VUs, 20567 complete and 0 interrupted iterations
-viewers     [  74% ] 1500/1500 VUs  1m43.5s/2m20.0s
-staff       [  82% ] 5 VUs          1m38.5s/2m0s
-pollers     [  67% ] 1500/1500 VUs  1m33.5s/2m20.0s
+running (1m49.3s), 2006/2126 VUs, 14017 complete and 0 interrupted iterations
+viewers     [  70% ] 1000/1000 VUs  1m38.1s/2m20.0s
+staff       [  78% ] 5 VUs          1m33.1s/2m0s
+pollers     [  63% ] 1000/1000 VUs  1m28.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  53% ] 1 VUs          1m03.5s/2m0s
+operator    [  48% ] 1 VUs          0m58.1s/2m0s
 
-running (1m57.0s), 3006/3126 VUs, 20809 complete and 0 interrupted iterations
-viewers     [  75% ] 1500/1500 VUs  1m44.5s/2m20.0s
-staff       [  83% ] 5 VUs          1m39.5s/2m0s
-pollers     [  68% ] 1500/1500 VUs  1m34.5s/2m20.0s
+running (1m50.3s), 2006/2126 VUs, 14194 complete and 0 interrupted iterations
+viewers     [  71% ] 1000/1000 VUs  1m39.1s/2m20.0s
+staff       [  78% ] 5 VUs          1m34.1s/2m0s
+pollers     [  64% ] 1000/1000 VUs  1m29.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  54% ] 1 VUs          1m04.5s/2m0s
+operator    [  49% ] 1 VUs          0m59.1s/2m0s
 
-running (1m58.0s), 3006/3126 VUs, 21024 complete and 0 interrupted iterations
-viewers     [  75% ] 1500/1500 VUs  1m45.5s/2m20.0s
-staff       [  84% ] 5 VUs          1m40.5s/2m0s
-pollers     [  68% ] 1500/1500 VUs  1m35.5s/2m20.0s
+running (1m51.3s), 2006/2126 VUs, 14394 complete and 0 interrupted iterations
+viewers     [  71% ] 1000/1000 VUs  1m40.1s/2m20.0s
+staff       [  79% ] 5 VUs          1m35.1s/2m0s
+pollers     [  64% ] 1000/1000 VUs  1m30.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  55% ] 1 VUs          1m05.5s/2m0s
+operator    [  50% ] 1 VUs          1m00.1s/2m0s
 
-running (1m59.0s), 3006/3126 VUs, 21277 complete and 0 interrupted iterations
-viewers     [  76% ] 1500/1500 VUs  1m46.5s/2m20.0s
-staff       [  85% ] 5 VUs          1m41.5s/2m0s
-pollers     [  69% ] 1500/1500 VUs  1m36.5s/2m20.0s
+running (1m52.3s), 2006/2126 VUs, 14564 complete and 0 interrupted iterations
+viewers     [  72% ] 1000/1000 VUs  1m41.1s/2m20.0s
+staff       [  80% ] 5 VUs          1m36.1s/2m0s
+pollers     [  65% ] 1000/1000 VUs  1m31.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  55% ] 1 VUs          1m06.5s/2m0s
+operator    [  51% ] 1 VUs          1m01.1s/2m0s
 
-running (2m00.0s), 3006/3126 VUs, 21565 complete and 0 interrupted iterations
-viewers     [  77% ] 1500/1500 VUs  1m47.5s/2m20.0s
-staff       [  85% ] 5 VUs          1m42.5s/2m0s
-pollers     [  70% ] 1500/1500 VUs  1m37.5s/2m20.0s
+running (1m53.3s), 2006/2126 VUs, 14697 complete and 0 interrupted iterations
+viewers     [  73% ] 1000/1000 VUs  1m42.1s/2m20.0s
+staff       [  81% ] 5 VUs          1m37.1s/2m0s
+pollers     [  66% ] 1000/1000 VUs  1m32.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  56% ] 1 VUs          1m07.5s/2m0s
+operator    [  52% ] 1 VUs          1m02.1s/2m0s
 
-running (2m01.0s), 3006/3126 VUs, 21834 complete and 0 interrupted iterations
-viewers     [  78% ] 1500/1500 VUs  1m48.5s/2m20.0s
-staff       [  86% ] 5 VUs          1m43.5s/2m0s
-pollers     [  70% ] 1500/1500 VUs  1m38.5s/2m20.0s
+running (1m54.3s), 2006/2126 VUs, 14870 complete and 0 interrupted iterations
+viewers     [  74% ] 1000/1000 VUs  1m43.1s/2m20.0s
+staff       [  82% ] 5 VUs          1m38.1s/2m0s
+pollers     [  66% ] 1000/1000 VUs  1m33.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  57% ] 1 VUs          1m08.5s/2m0s
+operator    [  53% ] 1 VUs          1m03.1s/2m0s
 
-running (2m02.0s), 3006/3126 VUs, 22088 complete and 0 interrupted iterations
-viewers     [  78% ] 1500/1500 VUs  1m49.5s/2m20.0s
-staff       [  87% ] 5 VUs          1m44.5s/2m0s
-pollers     [  71% ] 1500/1500 VUs  1m39.5s/2m20.0s
+running (1m55.3s), 2006/2126 VUs, 15054 complete and 0 interrupted iterations
+viewers     [  74% ] 1000/1000 VUs  1m44.1s/2m20.0s
+staff       [  83% ] 5 VUs          1m39.1s/2m0s
+pollers     [  67% ] 1000/1000 VUs  1m34.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  58% ] 1 VUs          1m09.5s/2m0s
+operator    [  53% ] 1 VUs          1m04.1s/2m0s
 
-running (2m03.0s), 3006/3126 VUs, 22327 complete and 0 interrupted iterations
-viewers     [  79% ] 1500/1500 VUs  1m50.5s/2m20.0s
-staff       [  88% ] 5 VUs          1m45.5s/2m0s
-pollers     [  72% ] 1500/1500 VUs  1m40.5s/2m20.0s
+running (1m56.3s), 2006/2126 VUs, 15226 complete and 0 interrupted iterations
+viewers     [  75% ] 1000/1000 VUs  1m45.1s/2m20.0s
+staff       [  83% ] 5 VUs          1m40.1s/2m0s
+pollers     [  68% ] 1000/1000 VUs  1m35.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  59% ] 1 VUs          1m10.5s/2m0s
+operator    [  54% ] 1 VUs          1m05.1s/2m0s
 
-running (2m04.0s), 3006/3126 VUs, 22598 complete and 0 interrupted iterations
-viewers     [  80% ] 1500/1500 VUs  1m51.5s/2m20.0s
-staff       [  89% ] 5 VUs          1m46.5s/2m0s
-pollers     [  73% ] 1500/1500 VUs  1m41.5s/2m20.0s
+running (1m57.3s), 2006/2126 VUs, 15375 complete and 0 interrupted iterations
+viewers     [  76% ] 1000/1000 VUs  1m46.1s/2m20.0s
+staff       [  84% ] 5 VUs          1m41.1s/2m0s
+pollers     [  69% ] 1000/1000 VUs  1m36.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  60% ] 1 VUs          1m11.5s/2m0s
+operator    [  55% ] 1 VUs          1m06.1s/2m0s
 
-running (2m05.0s), 3006/3126 VUs, 22850 complete and 0 interrupted iterations
-viewers     [  80% ] 1500/1500 VUs  1m52.5s/2m20.0s
-staff       [  90% ] 5 VUs          1m47.5s/2m0s
-pollers     [  73% ] 1500/1500 VUs  1m42.5s/2m20.0s
+running (1m58.3s), 2006/2126 VUs, 15561 complete and 0 interrupted iterations
+viewers     [  76% ] 1000/1000 VUs  1m47.1s/2m20.0s
+staff       [  85% ] 5 VUs          1m42.1s/2m0s
+pollers     [  69% ] 1000/1000 VUs  1m37.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  60% ] 1 VUs          1m12.5s/2m0s
+operator    [  56% ] 1 VUs          1m07.1s/2m0s
 
-running (2m06.0s), 3006/3126 VUs, 23108 complete and 0 interrupted iterations
-viewers     [  81% ] 1500/1500 VUs  1m53.5s/2m20.0s
-staff       [  90% ] 5 VUs          1m48.5s/2m0s
-pollers     [  74% ] 1500/1500 VUs  1m43.5s/2m20.0s
+running (1m59.3s), 2006/2126 VUs, 15721 complete and 0 interrupted iterations
+viewers     [  77% ] 1000/1000 VUs  1m48.1s/2m20.0s
+staff       [  86% ] 5 VUs          1m43.1s/2m0s
+pollers     [  70% ] 1000/1000 VUs  1m38.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  61% ] 1 VUs          1m13.5s/2m0s
+operator    [  57% ] 1 VUs          1m08.1s/2m0s
 
-running (2m07.0s), 3006/3126 VUs, 23358 complete and 0 interrupted iterations
-viewers     [  82% ] 1500/1500 VUs  1m54.5s/2m20.0s
-staff       [  91% ] 5 VUs          1m49.5s/2m0s
-pollers     [  75% ] 1500/1500 VUs  1m44.5s/2m20.0s
+running (2m00.3s), 2006/2126 VUs, 15893 complete and 0 interrupted iterations
+viewers     [  78% ] 1000/1000 VUs  1m49.1s/2m20.0s
+staff       [  87% ] 5 VUs          1m44.1s/2m0s
+pollers     [  71% ] 1000/1000 VUs  1m39.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  62% ] 1 VUs          1m14.5s/2m0s
+operator    [  58% ] 1 VUs          1m09.1s/2m0s
 
-running (2m08.0s), 3006/3126 VUs, 23583 complete and 0 interrupted iterations
-viewers     [  83% ] 1500/1500 VUs  1m55.5s/2m20.0s
-staff       [  92% ] 5 VUs          1m50.5s/2m0s
-pollers     [  75% ] 1500/1500 VUs  1m45.5s/2m20.0s
+running (2m01.3s), 2006/2126 VUs, 16070 complete and 0 interrupted iterations
+viewers     [  79% ] 1000/1000 VUs  1m50.1s/2m20.0s
+staff       [  88% ] 5 VUs          1m45.1s/2m0s
+pollers     [  71% ] 1000/1000 VUs  1m40.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  63% ] 1 VUs          1m15.5s/2m0s
+operator    [  58% ] 1 VUs          1m10.1s/2m0s
 
-running (2m09.0s), 3006/3126 VUs, 23849 complete and 0 interrupted iterations
-viewers     [  83% ] 1500/1500 VUs  1m56.5s/2m20.0s
-staff       [  93% ] 5 VUs          1m51.5s/2m0s
-pollers     [  76% ] 1500/1500 VUs  1m46.5s/2m20.0s
+running (2m02.3s), 2006/2126 VUs, 16243 complete and 0 interrupted iterations
+viewers     [  79% ] 1000/1000 VUs  1m51.1s/2m20.0s
+staff       [  88% ] 5 VUs          1m46.1s/2m0s
+pollers     [  72% ] 1000/1000 VUs  1m41.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  64% ] 1 VUs          1m16.5s/2m0s
+operator    [  59% ] 1 VUs          1m11.1s/2m0s
 
-running (2m10.0s), 3006/3126 VUs, 24157 complete and 0 interrupted iterations
-viewers     [  84% ] 1500/1500 VUs  1m57.5s/2m20.0s
-staff       [  94% ] 5 VUs          1m52.5s/2m0s
-pollers     [  77% ] 1500/1500 VUs  1m47.5s/2m20.0s
+running (2m03.3s), 2006/2126 VUs, 16406 complete and 0 interrupted iterations
+viewers     [  80% ] 1000/1000 VUs  1m52.1s/2m20.0s
+staff       [  89% ] 5 VUs          1m47.1s/2m0s
+pollers     [  73% ] 1000/1000 VUs  1m42.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  65% ] 1 VUs          1m17.5s/2m0s
+operator    [  60% ] 1 VUs          1m12.1s/2m0s
 
-running (2m11.0s), 3006/3126 VUs, 24409 complete and 0 interrupted iterations
-viewers     [  85% ] 1500/1500 VUs  1m58.5s/2m20.0s
-staff       [  95% ] 5 VUs          1m53.5s/2m0s
-pollers     [  78% ] 1500/1500 VUs  1m48.5s/2m20.0s
+running (2m04.3s), 2006/2126 VUs, 16585 complete and 0 interrupted iterations
+viewers     [  81% ] 1000/1000 VUs  1m53.1s/2m20.0s
+staff       [  90% ] 5 VUs          1m48.1s/2m0s
+pollers     [  74% ] 1000/1000 VUs  1m43.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  65% ] 1 VUs          1m18.5s/2m0s
+operator    [  61% ] 1 VUs          1m13.1s/2m0s
 
-running (2m12.0s), 3006/3126 VUs, 24654 complete and 0 interrupted iterations
-viewers     [  85% ] 1500/1500 VUs  1m59.5s/2m20.0s
-staff       [  95% ] 5 VUs          1m54.5s/2m0s
-pollers     [  78% ] 1500/1500 VUs  1m49.5s/2m20.0s
+running (2m05.3s), 2006/2126 VUs, 16760 complete and 0 interrupted iterations
+viewers     [  81% ] 1000/1000 VUs  1m54.1s/2m20.0s
+staff       [  91% ] 5 VUs          1m49.1s/2m0s
+pollers     [  74% ] 1000/1000 VUs  1m44.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  66% ] 1 VUs          1m19.5s/2m0s
+operator    [  62% ] 1 VUs          1m14.1s/2m0s
 
-running (2m13.0s), 3006/3126 VUs, 24913 complete and 0 interrupted iterations
-viewers     [  86% ] 1500/1500 VUs  2m00.5s/2m20.0s
-staff       [  96% ] 5 VUs          1m55.5s/2m0s
-pollers     [  79% ] 1500/1500 VUs  1m50.5s/2m20.0s
+running (2m06.3s), 2006/2126 VUs, 16952 complete and 0 interrupted iterations
+viewers     [  82% ] 1000/1000 VUs  1m55.1s/2m20.0s
+staff       [  92% ] 5 VUs          1m50.1s/2m0s
+pollers     [  75% ] 1000/1000 VUs  1m45.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  67% ] 1 VUs          1m20.5s/2m0s
+operator    [  63% ] 1 VUs          1m15.1s/2m0s
 
-running (2m14.0s), 3006/3126 VUs, 25161 complete and 0 interrupted iterations
-viewers     [  87% ] 1500/1500 VUs  2m01.5s/2m20.0s
-staff       [  97% ] 5 VUs          1m56.5s/2m0s
-pollers     [  80% ] 1500/1500 VUs  1m51.5s/2m20.0s
+running (2m07.3s), 2006/2126 VUs, 17135 complete and 0 interrupted iterations
+viewers     [  83% ] 1000/1000 VUs  1m56.1s/2m20.0s
+staff       [  93% ] 5 VUs          1m51.1s/2m0s
+pollers     [  76% ] 1000/1000 VUs  1m46.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  68% ] 1 VUs          1m21.5s/2m0s
+operator    [  63% ] 1 VUs          1m16.1s/2m0s
 
-running (2m15.0s), 3006/3126 VUs, 25413 complete and 0 interrupted iterations
-viewers     [  88% ] 1500/1500 VUs  2m02.5s/2m20.0s
-staff       [  98% ] 5 VUs          1m57.5s/2m0s
-pollers     [  80% ] 1500/1500 VUs  1m52.5s/2m20.0s
+running (2m08.3s), 2006/2126 VUs, 17310 complete and 0 interrupted iterations
+viewers     [  84% ] 1000/1000 VUs  1m57.1s/2m20.0s
+staff       [  93% ] 5 VUs          1m52.1s/2m0s
+pollers     [  76% ] 1000/1000 VUs  1m47.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  69% ] 1 VUs          1m22.5s/2m0s
+operator    [  64% ] 1 VUs          1m17.1s/2m0s
 
-running (2m16.0s), 3006/3126 VUs, 25675 complete and 0 interrupted iterations
-viewers     [  88% ] 1500/1500 VUs  2m03.5s/2m20.0s
-staff       [  99% ] 5 VUs          1m58.5s/2m0s
-pollers     [  81% ] 1500/1500 VUs  1m53.5s/2m20.0s
+running (2m09.3s), 2006/2126 VUs, 17452 complete and 0 interrupted iterations
+viewers     [  84% ] 1000/1000 VUs  1m58.1s/2m20.0s
+staff       [  94% ] 5 VUs          1m53.1s/2m0s
+pollers     [  77% ] 1000/1000 VUs  1m48.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  70% ] 1 VUs          1m23.5s/2m0s
+operator    [  65% ] 1 VUs          1m18.1s/2m0s
 
-running (2m17.0s), 3006/3126 VUs, 25937 complete and 0 interrupted iterations
-viewers     [  89% ] 1500/1500 VUs  2m04.5s/2m20.0s
-staff       [ 100% ] 5 VUs          1m59.5s/2m0s
-pollers     [  82% ] 1500/1500 VUs  1m54.5s/2m20.0s
+running (2m10.3s), 2006/2126 VUs, 17634 complete and 0 interrupted iterations
+viewers     [  85% ] 1000/1000 VUs  1m59.1s/2m20.0s
+staff       [  95% ] 5 VUs          1m54.1s/2m0s
+pollers     [  78% ] 1000/1000 VUs  1m49.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  70% ] 1 VUs          1m24.5s/2m0s
+operator    [  66% ] 1 VUs          1m19.1s/2m0s
 
-running (2m18.0s), 3002/3126 VUs, 26216 complete and 0 interrupted iterations
-viewers     [  90% ] 1500/1500 VUs  2m05.5s/2m20.0s
+running (2m11.3s), 2006/2126 VUs, 17816 complete and 0 interrupted iterations
+viewers     [  86% ] 1000/1000 VUs  2m00.1s/2m20.0s
+staff       [  96% ] 5 VUs          1m55.1s/2m0s
+pollers     [  79% ] 1000/1000 VUs  1m50.1s/2m20.0s
+joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
+reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
+walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
+operator    [  67% ] 1 VUs          1m20.1s/2m0s
+
+running (2m12.3s), 2006/2126 VUs, 17980 complete and 0 interrupted iterations
+viewers     [  86% ] 1000/1000 VUs  2m01.1s/2m20.0s
+staff       [  97% ] 5 VUs          1m56.1s/2m0s
+pollers     [  79% ] 1000/1000 VUs  1m51.1s/2m20.0s
+joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
+reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
+walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
+operator    [  68% ] 1 VUs          1m21.1s/2m0s
+
+running (2m13.3s), 2006/2126 VUs, 18149 complete and 0 interrupted iterations
+viewers     [  87% ] 1000/1000 VUs  2m02.1s/2m20.0s
+staff       [  98% ] 5 VUs          1m57.1s/2m0s
+pollers     [  80% ] 1000/1000 VUs  1m52.1s/2m20.0s
+joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
+reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
+walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
+operator    [  68% ] 1 VUs          1m22.1s/2m0s
+
+running (2m14.3s), 2006/2126 VUs, 18333 complete and 0 interrupted iterations
+viewers     [  88% ] 1000/1000 VUs  2m03.1s/2m20.0s
+staff       [  98% ] 5 VUs          1m58.1s/2m0s
+pollers     [  81% ] 1000/1000 VUs  1m53.1s/2m20.0s
+joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
+reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
+walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
+operator    [  69% ] 1 VUs          1m23.1s/2m0s
+
+running (2m15.3s), 2006/2126 VUs, 18499 complete and 0 interrupted iterations
+viewers     [  89% ] 1000/1000 VUs  2m04.1s/2m20.0s
+staff       [  99% ] 5 VUs          1m59.1s/2m0s
+pollers     [  81% ] 1000/1000 VUs  1m54.1s/2m20.0s
+joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
+reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
+walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
+operator    [  70% ] 1 VUs          1m24.1s/2m0s
+
+running (2m16.3s), 2006/2126 VUs, 18668 complete and 0 interrupted iterations
+viewers     [  89% ] 1000/1000 VUs  2m05.1s/2m20.0s
 staff     ↓ [ 100% ] 5 VUs          2m0s
-pollers     [  83% ] 1500/1500 VUs  1m55.5s/2m20.0s
+pollers     [  82% ] 1000/1000 VUs  1m55.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  71% ] 1 VUs          1m25.5s/2m0s
+operator    [  71% ] 1 VUs          1m25.1s/2m0s
 
-running (2m19.0s), 3001/3126 VUs, 26480 complete and 0 interrupted iterations
-viewers     [  90% ] 1500/1500 VUs  2m06.5s/2m20.0s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  83% ] 1500/1500 VUs  1m56.5s/2m20.0s
+running (2m17.3s), 2004/2126 VUs, 18845 complete and 0 interrupted iterations
+viewers     [  90% ] 1000/1000 VUs  2m06.1s/2m20.0s
+staff     ↓ [ 100% ] 5 VUs          2m0s
+pollers     [  83% ] 1000/1000 VUs  1m56.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  72% ] 1 VUs          1m26.5s/2m0s
+operator    [  72% ] 1 VUs          1m26.1s/2m0s
 
-running (2m20.0s), 3001/3126 VUs, 26739 complete and 0 interrupted iterations
-viewers     [  91% ] 1500/1500 VUs  2m07.5s/2m20.0s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  84% ] 1500/1500 VUs  1m57.5s/2m20.0s
+running (2m18.3s), 2003/2126 VUs, 19016 complete and 0 interrupted iterations
+viewers     [  91% ] 1000/1000 VUs  2m07.1s/2m20.0s
+staff     ↓ [ 100% ] 5 VUs          2m0s
+pollers     [  84% ] 1000/1000 VUs  1m57.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  73% ] 1 VUs          1m27.5s/2m0s
+operator    [  73% ] 1 VUs          1m27.1s/2m0s
 
-running (2m21.0s), 3001/3126 VUs, 26990 complete and 0 interrupted iterations
-viewers     [  92% ] 1500/1500 VUs  2m08.5s/2m20.0s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  85% ] 1500/1500 VUs  1m58.5s/2m20.0s
+running (2m19.3s), 2003/2126 VUs, 19182 complete and 0 interrupted iterations
+viewers     [  91% ] 1000/1000 VUs  2m08.1s/2m20.0s
+staff     ↓ [ 100% ] 5 VUs          2m0s
+pollers     [  84% ] 1000/1000 VUs  1m58.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  74% ] 1 VUs          1m28.5s/2m0s
+operator    [  73% ] 1 VUs          1m28.1s/2m0s
 
-running (2m22.0s), 3001/3126 VUs, 27239 complete and 0 interrupted iterations
-viewers     [  93% ] 1500/1500 VUs  2m09.5s/2m20.0s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  85% ] 1500/1500 VUs  1m59.5s/2m20.0s
+running (2m20.3s), 2003/2126 VUs, 19354 complete and 0 interrupted iterations
+viewers     [  92% ] 1000/1000 VUs  2m09.1s/2m20.0s
+staff     ↓ [ 100% ] 5 VUs          2m0s
+pollers     [  85% ] 1000/1000 VUs  1m59.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  75% ] 1 VUs          1m29.5s/2m0s
+operator    [  74% ] 1 VUs          1m29.1s/2m0s
 
-running (2m23.0s), 3001/3126 VUs, 27507 complete and 0 interrupted iterations
-viewers     [  93% ] 1500/1500 VUs  2m10.5s/2m20.0s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  86% ] 1500/1500 VUs  2m00.5s/2m20.0s
+running (2m21.3s), 2002/2126 VUs, 19529 complete and 0 interrupted iterations
+viewers     [  93% ] 1000/1000 VUs  2m10.1s/2m20.0s
+staff     ↓ [ 100% ] 5 VUs          2m0s
+pollers     [  86% ] 1000/1000 VUs  2m00.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  75% ] 1 VUs          1m30.5s/2m0s
+operator    [  75% ] 1 VUs          1m30.1s/2m0s
 
-running (2m24.0s), 3001/3126 VUs, 27741 complete and 0 interrupted iterations
-viewers     [  94% ] 1500/1500 VUs  2m11.5s/2m20.0s
+running (2m22.3s), 2001/2126 VUs, 19692 complete and 0 interrupted iterations
+viewers     [  94% ] 1000/1000 VUs  2m11.1s/2m20.0s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  87% ] 1500/1500 VUs  2m01.5s/2m20.0s
+pollers     [  86% ] 1000/1000 VUs  2m01.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  76% ] 1 VUs          1m31.5s/2m0s
+operator    [  76% ] 1 VUs          1m31.1s/2m0s
 
-running (2m25.0s), 3001/3126 VUs, 28007 complete and 0 interrupted iterations
-viewers     [  95% ] 1500/1500 VUs  2m12.5s/2m20.0s
+running (2m23.3s), 2001/2126 VUs, 19877 complete and 0 interrupted iterations
+viewers     [  94% ] 1000/1000 VUs  2m12.1s/2m20.0s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  88% ] 1500/1500 VUs  2m02.5s/2m20.0s
+pollers     [  87% ] 1000/1000 VUs  2m02.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  77% ] 1 VUs          1m32.5s/2m0s
+operator    [  77% ] 1 VUs          1m32.1s/2m0s
 
-running (2m26.0s), 3001/3126 VUs, 28265 complete and 0 interrupted iterations
-viewers     [  95% ] 1500/1500 VUs  2m13.5s/2m20.0s
+running (2m24.3s), 2001/2126 VUs, 20067 complete and 0 interrupted iterations
+viewers     [  95% ] 1000/1000 VUs  2m13.1s/2m20.0s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  88% ] 1500/1500 VUs  2m03.5s/2m20.0s
+pollers     [  88% ] 1000/1000 VUs  2m03.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  78% ] 1 VUs          1m33.5s/2m0s
+operator    [  78% ] 1 VUs          1m33.1s/2m0s
 
-running (2m27.0s), 3001/3126 VUs, 28534 complete and 0 interrupted iterations
-viewers     [  96% ] 1500/1500 VUs  2m14.5s/2m20.0s
+running (2m25.3s), 2001/2126 VUs, 20230 complete and 0 interrupted iterations
+viewers     [  96% ] 1000/1000 VUs  2m14.1s/2m20.0s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  89% ] 1500/1500 VUs  2m04.5s/2m20.0s
+pollers     [  89% ] 1000/1000 VUs  2m04.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  79% ] 1 VUs          1m34.5s/2m0s
+operator    [  78% ] 1 VUs          1m34.1s/2m0s
 
-running (2m28.0s), 3001/3126 VUs, 28791 complete and 0 interrupted iterations
-viewers     [  97% ] 1500/1500 VUs  2m15.5s/2m20.0s
+running (2m26.3s), 2001/2126 VUs, 20410 complete and 0 interrupted iterations
+viewers     [  96% ] 1000/1000 VUs  2m15.1s/2m20.0s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  90% ] 1500/1500 VUs  2m05.5s/2m20.0s
+pollers     [  89% ] 1000/1000 VUs  2m05.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  80% ] 1 VUs          1m35.5s/2m0s
+operator    [  79% ] 1 VUs          1m35.1s/2m0s
 
-running (2m29.0s), 3001/3126 VUs, 29033 complete and 0 interrupted iterations
-viewers     [  98% ] 1500/1500 VUs  2m16.5s/2m20.0s
+running (2m27.3s), 2001/2126 VUs, 20581 complete and 0 interrupted iterations
+viewers     [  97% ] 1000/1000 VUs  2m16.1s/2m20.0s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  90% ] 1500/1500 VUs  2m06.5s/2m20.0s
+pollers     [  90% ] 1000/1000 VUs  2m06.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  80% ] 1 VUs          1m36.5s/2m0s
+operator    [  80% ] 1 VUs          1m36.1s/2m0s
 
-running (2m30.0s), 3001/3126 VUs, 29292 complete and 0 interrupted iterations
-viewers     [  98% ] 1500/1500 VUs  2m17.5s/2m20.0s
+running (2m28.3s), 2001/2126 VUs, 20754 complete and 0 interrupted iterations
+viewers     [  98% ] 1000/1000 VUs  2m17.1s/2m20.0s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  91% ] 1500/1500 VUs  2m07.5s/2m20.0s
+pollers     [  91% ] 1000/1000 VUs  2m07.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  81% ] 1 VUs          1m37.5s/2m0s
+operator    [  81% ] 1 VUs          1m37.1s/2m0s
 
-running (2m31.0s), 3001/3126 VUs, 29526 complete and 0 interrupted iterations
-viewers     [  99% ] 1500/1500 VUs  2m18.5s/2m20.0s
+running (2m29.3s), 2001/2126 VUs, 20941 complete and 0 interrupted iterations
+viewers     [  99% ] 1000/1000 VUs  2m18.1s/2m20.0s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  92% ] 1500/1500 VUs  2m08.5s/2m20.0s
+pollers     [  91% ] 1000/1000 VUs  2m08.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  82% ] 1 VUs          1m38.5s/2m0s
+operator    [  82% ] 1 VUs          1m38.1s/2m0s
 
-running (2m32.0s), 3001/3126 VUs, 29777 complete and 0 interrupted iterations
-viewers     [ 100% ] 1500/1500 VUs  2m19.5s/2m20.0s
+running (2m30.3s), 2001/2126 VUs, 21085 complete and 0 interrupted iterations
+viewers     [  99% ] 1000/1000 VUs  2m19.1s/2m20.0s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  93% ] 1500/1500 VUs  2m09.5s/2m20.0s
+pollers     [  92% ] 1000/1000 VUs  2m09.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  83% ] 1 VUs          1m39.5s/2m0s
+operator    [  83% ] 1 VUs          1m39.1s/2m0s
 
-running (2m33.0s), 2957/3126 VUs, 30050 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m31.3s), 1997/2126 VUs, 21266 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  93% ] 1500/1500 VUs  2m10.5s/2m20.0s
+pollers     [  93% ] 1000/1000 VUs  2m10.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  84% ] 1 VUs          1m40.5s/2m0s
+operator    [  83% ] 1 VUs          1m40.1s/2m0s
 
-running (2m34.0s), 2886/3126 VUs, 30332 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m32.3s), 1948/2126 VUs, 21425 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  94% ] 1500/1500 VUs  2m11.5s/2m20.0s
+pollers     [  94% ] 1000/1000 VUs  2m11.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  85% ] 1 VUs          1m41.5s/2m0s
+operator    [  84% ] 1 VUs          1m41.1s/2m0s
 
-running (2m35.0s), 2815/3126 VUs, 30596 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m33.3s), 1901/2126 VUs, 21584 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  95% ] 1500/1500 VUs  2m12.5s/2m20.0s
+pollers     [  94% ] 1000/1000 VUs  2m12.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  85% ] 1 VUs          1m42.5s/2m0s
+operator    [  85% ] 1 VUs          1m42.1s/2m0s
 
-running (2m36.0s), 2730/3126 VUs, 30875 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m34.3s), 1846/2126 VUs, 21759 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  95% ] 1500/1500 VUs  2m13.5s/2m20.0s
+pollers     [  95% ] 1000/1000 VUs  2m13.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  86% ] 1 VUs          1m43.5s/2m0s
+operator    [  86% ] 1 VUs          1m43.1s/2m0s
 
-running (2m37.0s), 2648/3126 VUs, 31119 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m35.3s), 1811/2126 VUs, 21916 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  96% ] 1500/1500 VUs  2m14.5s/2m20.0s
+pollers     [  96% ] 1000/1000 VUs  2m14.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  87% ] 1 VUs          1m44.5s/2m0s
+operator    [  87% ] 1 VUs          1m44.1s/2m0s
 
-running (2m38.0s), 2567/3126 VUs, 31379 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m36.3s), 1749/2126 VUs, 22103 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  97% ] 1500/1500 VUs  2m15.5s/2m20.0s
+pollers     [  96% ] 1000/1000 VUs  2m15.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  88% ] 1 VUs          1m45.5s/2m0s
+operator    [  88% ] 1 VUs          1m45.1s/2m0s
 
-running (2m39.0s), 2492/3126 VUs, 31618 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m37.3s), 1698/2126 VUs, 22282 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  98% ] 1500/1500 VUs  2m16.5s/2m20.0s
+pollers     [  97% ] 1000/1000 VUs  2m16.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  89% ] 1 VUs          1m46.5s/2m0s
+operator    [  88% ] 1 VUs          1m46.1s/2m0s
 
-running (2m40.0s), 2413/3126 VUs, 31898 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m38.3s), 1649/2126 VUs, 22468 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  98% ] 1500/1500 VUs  2m17.5s/2m20.0s
+pollers     [  98% ] 1000/1000 VUs  2m17.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  90% ] 1 VUs          1m47.5s/2m0s
+operator    [  89% ] 1 VUs          1m47.1s/2m0s
 
-running (2m41.0s), 2347/3126 VUs, 32129 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m39.3s), 1604/2126 VUs, 22630 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [  99% ] 1500/1500 VUs  2m18.5s/2m20.0s
+pollers     [  99% ] 1000/1000 VUs  2m18.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  90% ] 1 VUs          1m48.5s/2m0s
+operator    [  90% ] 1 VUs          1m48.1s/2m0s
 
-running (2m42.0s), 2269/3126 VUs, 32406 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m40.3s), 1542/2126 VUs, 22797 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers     [ 100% ] 1500/1500 VUs  2m19.5s/2m20.0s
+pollers     [  99% ] 1000/1000 VUs  2m19.1s/2m20.0s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  91% ] 1 VUs          1m49.5s/2m0s
+operator    [  91% ] 1 VUs          1m49.1s/2m0s
 
-running (2m43.0s), 2099/3126 VUs, 32678 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m41.3s), 1493/2126 VUs, 22948 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  92% ] 1 VUs          1m50.5s/2m0s
+operator    [  92% ] 1 VUs          1m50.1s/2m0s
 
-running (2m44.0s), 1839/3126 VUs, 32938 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m42.3s), 1316/2126 VUs, 23125 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  93% ] 1 VUs          1m51.5s/2m0s
+operator    [  93% ] 1 VUs          1m51.1s/2m0s
 
-running (2m45.0s), 1594/3126 VUs, 33183 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m43.3s), 1137/2126 VUs, 23304 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  94% ] 1 VUs          1m52.5s/2m0s
+operator    [  93% ] 1 VUs          1m52.1s/2m0s
 
-running (2m46.0s), 1349/3126 VUs, 33429 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m44.3s), 0945/2126 VUs, 23497 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  95% ] 1 VUs          1m53.5s/2m0s
+operator    [  94% ] 1 VUs          1m53.1s/2m0s
 
-running (2m47.0s), 1093/3126 VUs, 33685 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m45.3s), 0793/2126 VUs, 23649 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  95% ] 1 VUs          1m54.5s/2m0s
+operator    [  95% ] 1 VUs          1m54.1s/2m0s
 
-running (2m48.0s), 0864/3126 VUs, 33914 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m46.3s), 0611/2126 VUs, 23831 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  96% ] 1 VUs          1m55.5s/2m0s
+operator    [  96% ] 1 VUs          1m55.1s/2m0s
 
-running (2m49.0s), 0590/3126 VUs, 34188 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m47.3s), 0445/2126 VUs, 23997 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  97% ] 1 VUs          1m56.5s/2m0s
+operator    [  97% ] 1 VUs          1m56.1s/2m0s
 
-running (2m50.0s), 0386/3126 VUs, 34393 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m48.3s), 0293/2126 VUs, 24150 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  98% ] 1 VUs          1m57.5s/2m0s
+operator    [  98% ] 1 VUs          1m57.1s/2m0s
 
-running (2m51.0s), 0241/3126 VUs, 34538 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m49.3s), 0179/2126 VUs, 24264 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [  99% ] 1 VUs          1m58.5s/2m0s
+operator    [  98% ] 1 VUs          1m58.1s/2m0s
 
-running (2m52.0s), 0140/3126 VUs, 34639 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m50.3s), 0100/2126 VUs, 24343 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator    [ 100% ] 1 VUs          1m59.5s/2m0s
+operator    [  99% ] 1 VUs          1m59.1s/2m0s
 
-running (2m53.0s), 0090/3126 VUs, 34689 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m51.3s), 0059/2126 VUs, 24385 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ✓ [ 100% ] 0000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
 operator  ↓ [ 100% ] 1 VUs          2m0s
 
-running (2m54.0s), 0056/3126 VUs, 34723 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m52.3s), 0040/2126 VUs, 24404 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ✓ [ 100% ] 0000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
+operator  ↓ [ 100% ] 1 VUs          2m0s
 
-running (2m55.0s), 0036/3126 VUs, 34743 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m53.3s), 0019/2126 VUs, 24425 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ✓ [ 100% ] 0000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
+operator  ↓ [ 100% ] 1 VUs          2m0s
 
-running (2m56.0s), 0014/3126 VUs, 34765 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m54.3s), 0011/2126 VUs, 24433 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ✓ [ 100% ] 0000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
+operator  ↓ [ 100% ] 1 VUs          2m0s
 
-running (2m57.0s), 0004/3126 VUs, 34775 complete and 0 interrupted iterations
-viewers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+running (2m55.3s), 0003/2126 VUs, 24441 complete and 0 interrupted iterations
+viewers   ↓ [ 100% ] 1000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (2m58.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (2m59.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m00.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m01.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m02.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m03.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m04.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m05.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m06.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m07.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m08.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m09.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m10.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m11.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
-joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
-reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
-walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
-operator  ✓ [ 100% ] 1 VUs          2m0s
-
-running (3m12.0s), 0002/3126 VUs, 34777 complete and 0 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
-staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ↓ [ 100% ] 1500/1500 VUs  2m20s
+pollers   ✓ [ 100% ] 0000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s
@@ -1759,44 +1606,45 @@ operator  ✓ [ 100% ] 1 VUs          2m0s
      ✓ viewer 200
      ✓ staff 200
      ✓ poll 200
-     ✓ walkin 200
-     ✓ join 200
+     ✗ walkin 200
+      ↳  99% — ✓ 150 / ✗ 1
      ✓ reserve ok|full
+     ✓ join 200
      ✓ call_next 200
      ✓ checkin 200
 
-     checks.........................: 100.00% ✓ 34803      ✗ 0     
-     data_received..................: 77 MB   400 kB/s
-     data_sent......................: 9.4 MB  49 kB/s
-     http_req_blocked...............: avg=905.3µs  min=120ns    med=320ns    max=239.35ms p(90)=641ns    p(95)=8.74ms  
-     http_req_connecting............: avg=149.84µs min=0s       med=0s       max=9.73ms   p(90)=0s       p(95)=1.49ms  
-     http_req_duration..............: avg=537.38ms min=4.36ms   med=210.55ms max=53.39s   p(90)=1.71s    p(95)=2.64s   
-       { expected_response:true }...: avg=537.38ms min=4.36ms   med=210.55ms max=53.39s   p(90)=1.71s    p(95)=2.64s   
-     ✗ { scenario:joiners }.........: avg=1.26s    min=149.36ms med=630.58ms max=8.08s    p(90)=3.05s    p(95)=3.76s   
-     ✗ { scenario:pollers }.........: avg=742.98ms min=143.62ms med=296.01ms max=53.39s   p(90)=2.2s     p(95)=2.98s   
-     ✗ { scenario:reservers }.......: avg=1.08s    min=146.79ms med=502.15ms max=9.8s     p(90)=2.57s    p(95)=3.13s   
-     ✗ { scenario:staff }...........: avg=1.01s    min=149.13ms med=481.23ms max=7.36s    p(90)=2.89s    p(95)=3.33s   
-     ✓ { scenario:viewers }.........: avg=18.79ms  min=4.36ms   med=8.14ms   max=1.45s    p(90)=17.88ms  p(95)=26.05ms 
-     http_req_failed................: 0.00%   ✓ 0          ✗ 34879 
-     ✓ { scenario:joiners }.........: 0.00%   ✓ 0          ✗ 600   
-     ✓ { scenario:operator }........: 0.00%   ✓ 0          ✗ 72    
-     ✓ { scenario:pollers }.........: 0.00%   ✓ 0          ✗ 23064 
-     ✓ { scenario:staff }...........: 0.00%   ✓ 0          ✗ 100   
-     ✓ { scenario:viewers }.........: 0.00%   ✓ 0          ✗ 10539 
-     ✓ { scenario:walkins }.........: 0.00%   ✓ 0          ✗ 151   
-     http_req_receiving.............: avg=115.38µs min=15.4µs   med=67.26µs  max=27.67ms  p(90)=200.25µs p(95)=272.79µs
-     http_req_sending...............: avg=56.04µs  min=12.73µs  med=52.86µs  max=1.56ms   p(90)=79.32µs  p(95)=87.96µs 
-     http_req_tls_handshaking.......: avg=717.62µs min=0s       med=0s       max=82.05ms  p(90)=0s       p(95)=7.18ms  
-     http_req_waiting...............: avg=537.21ms min=4.23ms   med=210.41ms max=53.39s   p(90)=1.71s    p(95)=2.64s   
-     http_reqs......................: 34879   181.226869/s
-     iteration_duration.............: avg=11.88s   min=151.33ms med=9.48s    max=1m0s     p(90)=21.61s   p(95)=23.36s  
-     iterations.....................: 34777   180.69689/s
-     vus............................: 2       min=0        max=3099
-     vus_max........................: 3126    min=3081     max=3126
-running (3m12.5s), 0000/3126 VUs, 34777 complete and 2 interrupted iterations
-viewers   ✓ [ 100% ] 0000/1500 VUs  2m20s
+     checks.........................: 99.99% ✓ 24475      ✗ 1     
+     data_received..................: 73 MB  414 kB/s
+     data_sent......................: 6.6 MB 38 kB/s
+     http_req_blocked...............: avg=4.28ms   min=140ns    med=291ns    max=361.89ms p(90)=510ns    p(95)=30.89ms 
+     http_req_connecting............: avg=1.38ms   min=0s       med=0s       max=37.88ms  p(90)=0s       p(95)=12.92ms 
+     http_req_duration..............: avg=178.69ms min=34.4ms   med=202.09ms max=1.55s    p(90)=252.4ms  p(95)=299.56ms
+       { expected_response:true }...: avg=178.68ms min=34.4ms   med=202.09ms max=1.55s    p(90)=252.4ms  p(95)=299.56ms
+     ✓ { scenario:joiners }.........: avg=275.61ms min=185.29ms med=226.53ms max=1.21s    p(90)=388.26ms p(95)=600.04ms
+     ✓ { scenario:pollers }.........: avg=225.28ms min=179.23ms med=210.15ms max=932.78ms p(90)=260.8ms  p(95)=304.49ms
+     ✓ { scenario:reservers }.......: avg=254.18ms min=182.74ms med=223.42ms max=763.3ms  p(90)=319.26ms p(95)=483.49ms
+     ✓ { scenario:staff }...........: avg=467.6ms  min=208.25ms med=448.35ms max=1.27s    p(90)=635.45ms p(95)=733.3ms 
+     ✓ { scenario:viewers }.........: avg=50.76ms  min=34.4ms   med=40.84ms  max=1.55s    p(90)=53.99ms  p(95)=65.32ms 
+     http_req_failed................: 0.00%  ✓ 1          ✗ 24559 
+     ✓ { scenario:joiners }.........: 0.00%  ✓ 0          ✗ 600   
+     ✓ { scenario:operator }........: 0.00%  ✓ 0          ✗ 96    
+     ✓ { scenario:pollers }.........: 0.00%  ✓ 0          ✗ 16259 
+     ✓ { scenario:staff }...........: 0.00%  ✓ 0          ✗ 112   
+     ✓ { scenario:viewers }.........: 0.00%  ✓ 0          ✗ 6989  
+     ✓ { scenario:walkins }.........: 0.66%  ✓ 1          ✗ 150   
+     http_req_receiving.............: avg=137.9µs  min=13.91µs  med=65.85µs  max=25.44ms  p(90)=168.71µs p(95)=231.58µs
+     http_req_sending...............: avg=50.22µs  min=11.8µs   med=46.61µs  max=298.07µs p(90)=70.8µs   p(95)=78.3µs  
+     http_req_tls_handshaking.......: avg=2.84ms   min=0s       med=0s       max=183.17ms p(90)=0s       p(95)=18.2ms  
+     http_req_waiting...............: avg=178.5ms  min=34.35ms  med=201.96ms max=1.55s    p(90)=252.26ms p(95)=299.24ms
+     http_reqs......................: 24560  139.546431/s
+     iteration_duration.............: avg=11.26s   min=182.88ms med=8.96s    max=25.86s   p(90)=21.58s   p(95)=23.33s  
+     iterations.....................: 24444  138.887335/s
+     vus............................: 3      min=0        max=2033
+     vus_max........................: 2126   min=2126     max=2126
+running (2m56.0s), 0000/2126 VUs, 24444 complete and 0 interrupted iterations
+viewers   ✓ [ 100% ] 0000/1000 VUs  2m20s
 staff     ✓ [ 100% ] 5 VUs          2m0s
-pollers   ✓ [ 100% ] 0001/1500 VUs  2m20s
+pollers   ✓ [ 100% ] 0000/1000 VUs  2m20s
 joiners   ✓ [ 100% ] 00/60 VUs      30s  20.00 iters/s
 reservers ✓ [ 100% ] 00/40 VUs      30s  10.00 iters/s
 walkins   ✓ [ 100% ] 00/20 VUs      30s  5.00 iters/s

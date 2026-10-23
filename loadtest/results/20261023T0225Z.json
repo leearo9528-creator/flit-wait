@@ -1,0 +1,45 @@
+{
+  "at": "2026-10-23T02:25:29.840Z",
+  "vus": 1000,
+  "duration": "2m",
+  "slug": "test",
+  "booth": "t-tech-2",
+  "viewers": {
+    "p95": 65,
+    "avg": 51,
+    "max": 1559,
+    "fail_pct": 0
+  },
+  "pollers": {
+    "p95": 304,
+    "avg": 225,
+    "max": 933,
+    "fail_pct": 0
+  },
+  "joiners": {
+    "p95": 600,
+    "avg": 276,
+    "max": 1211,
+    "fail_pct": 0
+  },
+  "staff": {
+    "p95": 733,
+    "avg": 468,
+    "max": 1271,
+    "fail_pct": 0
+  },
+  "reservers": {
+    "p95": 483,
+    "avg": 254,
+    "max": 763,
+    "fail_pct": null
+  },
+  "walkins": {
+    "fail_pct": 0.66
+  },
+  "operator": {
+    "fail_pct": 0
+  },
+  "total_requests": 24560,
+  "thresholds_passed": true
+}
