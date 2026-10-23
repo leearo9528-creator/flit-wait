@@ -58,6 +58,8 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
   const closedToday = booth.is_paused && booth.settings.pause_mode === 'closed_today'
   // 상단 상태 판정 — 마감·일시중단 > 오늘 수동 오픈(open_override_date) > 시간대 설정(대기표) / 오늘 회차 예약 오픈 시각(예약 전용)
   const noun = booth.mode === 'slot' ? '예약' : '접수'
+  const nounObj = booth.mode === 'slot' ? '예약을' : '접수를'   // 목적격 조사
+  const nounSubj = booth.mode === 'slot' ? '예약이' : '접수가'  // 주격 조사
   const today = kstYmd(new Date())
   const ws = queueWindowState(booth.settings)
   const slotOpenAt = booth.mode === 'slot' ? openAtFor(booth.settings, today) : null
@@ -70,10 +72,10 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
   /** 오픈 = 오늘 하루 시간대·예약 오픈 시각보다 우선해서 받음(마감·일시중단 해제) · 마감 = '오늘 마감'(자정 자동 해제) */
   async function setOpen(open: boolean) {
     const q = open
-      ? state === 'before_open' ? `예정 시각(${openHm}) 전입니다. 지금 바로 ${noun}을 열까요?\n오늘 하루는 시간 설정보다 우선합니다.`
+      ? state === 'before_open' ? `예정 시각(${openHm}) 전입니다. 지금 바로 ${nounObj} 열까요?\n오늘 하루는 시간 설정보다 우선합니다.`
         : state === 'after_close' ? `오늘 ${noun} 시간(${closeHm} 마감)이 끝났습니다. 다시 열까요?`
-        : `오늘 마감을 취소하고 다시 ${noun}을 받을까요?`
-      : `오늘 ${noun}을 마감할까요?\n손님 화면에 "오늘 ${noun}이 마감되었습니다"로 표시되고, 내일 자정에 자동으로 풀립니다. (이미 ${noun}된 손님 호출·입장은 계속 가능)`
+        : `오늘 마감을 취소하고 다시 ${nounObj} 받을까요?`
+      : `오늘 ${nounObj} 마감할까요?\n손님 화면에 "오늘 ${nounSubj} 마감되었습니다"로 표시되고, 내일 자정에 자동으로 풀립니다. (이미 ${noun}된 손님 호출·입장은 계속 가능)`
     if (!confirm(q)) return
     try { await rpc('staff_set_open', { p_booth: sess.booth_id, p_token: sess.staff_token, p_open: open }); reload() }
     catch (e: any) { setErr(e.message) }

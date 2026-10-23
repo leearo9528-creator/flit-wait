@@ -14,9 +14,9 @@ export async function rpc<T = any>(fn: string, args?: Record<string, unknown>): 
   return data as T
 }
 
-/** Postgres RAISE 메시지에서 사람이 읽을 부분만 */
+/** Postgres RAISE 메시지에서 사람이 읽을 부분만 — 앞에 붙는 오류 코드(`P0001: `)만 떼고, 'PIN이 …' 처럼 영문으로 시작하는 본문은 그대로 둔다 */
 export function cleanError(msg: string) {
-  return msg.replace(/^.*?(?=[가-힣])/s, '').trim() || msg
+  return msg.replace(/^[A-Z0-9]{5}:\s*/, '').trim() || msg
 }
 
 /** 모두에게 같은 공개 읽기 (event_summary / booth_summary / event_board) → 엣지 캐시 경유.
