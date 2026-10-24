@@ -21,7 +21,9 @@ export default function AdminEvent() {
     const { data, error } = await supabase.from('booths').select('*').eq('event_id', eventId).order('sort_order'); if (error) throw error; return data as Booth[]
   }, [eventId])
   const stats = useAsync<Stats[]>(async () => {
-    const { data, error } = await supabase.from('tickets').select('booth_id,status,party_size,slot_id').eq('event_id', eventId)
+    // 오늘(KST) 티켓만 — 전에는 행사 전체를 합산해 어제 노쇼·대기가 섞여 보였다 (2026-10-24 현장 지적)
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
+    const { data, error } = await supabase.from('tickets').select('booth_id,status,party_size,slot_id').eq('event_id', eventId).eq('ticket_date', today)
     if (error) throw error
     const m = new Map<string, Stats>()
     for (const t of data) {
@@ -70,7 +72,7 @@ export default function AdminEvent() {
                     <Link to={`/admin/booths/${b.id}`} className="text-sm font-semibold underline">설정</Link>
                   </div>
                   <div className="mt-3 grid grid-cols-4 gap-2 text-center text-sm">
-                    <Stat label="대기" v={s?.waiting ?? 0} /><Stat label="호출" v={s?.called ?? 0} /><Stat label="완료" v={s?.done ?? 0} /><Stat label="노쇼" v={s?.no_show ?? 0} />
+                    <Stat label="오늘 대기" v={s?.waiting ?? 0} /><Stat label="오늘 호출" v={s?.called ?? 0} /><Stat label="오늘 완료" v={s?.done ?? 0} /><Stat label="오늘 노쇼" v={s?.no_show ?? 0} />
                   </div>
                   {b.mode !== 'queue' && <div className="mt-2 text-xs text-gray-500">예약 좌석 합계 {s?.reserved ?? 0}</div>}
                   <div className="mt-3 flex flex-wrap gap-2 text-xs">
