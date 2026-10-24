@@ -2,6 +2,8 @@
 
 export interface BoothLike {
   id: string; name: string; mode: 'queue' | 'slot' | 'hybrid'; is_paused: boolean; pause_mode?: string | null; image_url: string | null; icon_url?: string | null; group_name?: string | null; total_left?: number
+  /** 오늘 남은 회차 수 · 오늘 잔여석 (event_summary) — 오늘 회차가 있는데 잔여 0이면 '예약 마감' */
+  today_slots?: number; today_left?: number
   reserve_open_at?: string | null; reserve_open_daily_time?: string | null; next_slot_at?: string | null
   /** 대기표 접수 일별 시간대 + 스태프 수동 오픈(그 날짜) — event_summary / booth.settings 양쪽에서 같은 이름으로 온다 */
   queue_open_daily_time?: string | null; queue_close_daily_time?: string | null; open_override_date?: string | null
@@ -63,6 +65,8 @@ export function boothStatus(b: BoothLike, eventClosed: boolean | 'before'): Boot
   if (b.mode !== 'queue') {
     const openAt = nextOpenAt(b)
     if (openAt && openAt.getTime() > Date.now()) return { kind: 'upcoming', label: '예약 오픈 예정' }
+    // 오늘 회차가 남아 있는데 오늘 잔여석이 0 → '예약 마감' (내일 회차는 내일 12:00 오픈이라 지금은 어차피 못 잡는다)
+    if ((b.today_slots ?? 0) > 0 && (b.today_left ?? 1) <= 0) return { kind: 'soldout', label: '예약 마감' }
     if ((b.total_left ?? 1) <= 0) return { kind: 'soldout', label: '매진' }
     return { kind: 'open', label: '예약 중' }
   }

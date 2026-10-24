@@ -141,6 +141,7 @@ function BoothListItem({ b, closed }: { b: BoothCard; closed: boolean | 'before'
     : ws === 'after_close' ? <>오늘 접수 마감</>
     : <>대기손님 현황 <b className="tabular-nums">{b.waiting_teams}팀</b></>
     : notYet ? <>예약 오픈 {fmtDateTime(openAt!.toISOString())}</>
+    : b.today_slots > 0 && b.today_left <= 0 ? <>오늘 예약 마감{b.waiting_teams > 0 ? ` · 현장 대기 ${b.waiting_teams}팀` : ''}</>
     : b.total_left <= 0 ? <>전 회차 매진{b.waiting_teams > 0 ? ` · 현장 대기 ${b.waiting_teams}팀` : ''}</>
     : <>{b.today_slots > 0 ? '오늘 잔여' : '잔여'} <b className="tabular-nums">{left}석</b>{b.waiting_teams > 0 ? ` · 현장 대기 ${b.waiting_teams}팀` : ''}</>
 
