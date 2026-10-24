@@ -25,7 +25,9 @@ export default async function handler(req: Request) {
     status: r.status,
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': r.ok ? 'public, s-maxage=5, stale-while-revalidate=60' : 'no-store',
+      // swr 60→15 (2026-10-24 현장): 손님 화면 최악 지연 75초→35초. 15초는 손님 폴링 간격(15~18초)보다 길어 한 명만 봐도 캐시가 비지 않는다.
+      // 10초 이하로 줄이면 캐시가 비는 순간 요청이 DB 로 몰린다(10/08 2.2초 스파이크). DB 조회 횟수는 키당 5초에 1회로 동일.
+      'Cache-Control': r.ok ? 'public, s-maxage=5, stale-while-revalidate=15' : 'no-store',
       'Access-Control-Allow-Origin': '*',
     },
   })
