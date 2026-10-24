@@ -64,6 +64,7 @@ const NUM: Array<[keyof BoothSettings, string, string]> = [
   ['queue_close_before_min', '대기 접수 마감 (행사 종료 N분 전)', '분'],
   ['notify_ahead_teams', '순서 임박 알림 (앞 N팀)', '팀'],
   ['call_valid_min', '호출 후 유효시간 → 노쇼', '분'],
+  ['service_min', '1팀당 소요 시간 → 예상 대기 (0이면 자동 측정)', '분'],
   ['reserve_close_before_min', '사전 예약 마감 (회차 시작 N분 전)', '분'],
   ['noshow_after_start_min', '회차 시작 후 미체크인 노쇼', '분'],
   ['cancel_until_before_min', '손님 자체 취소 가능 (시작 N분 전까지)', '분'],
