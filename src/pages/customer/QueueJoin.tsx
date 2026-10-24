@@ -61,9 +61,8 @@ export default function QueueJoin() {
             <div className="mt-1 text-sm text-gray-600">오늘은 더 이상 접수를 받지 않아요.<br />내일 운영 시간에 다시 만나요.</div>
           </div>
         : <div className="mb-4 rounded-2xl bg-red-50 p-5 text-center ring-1 ring-red-200">
-            <div className="text-2xl">⏸️</div>
-            <div className="mt-1 text-lg font-bold text-red-800">지금은 접수를 잠시 멈췄어요</div>
-            <div className="mt-1 text-sm text-red-700">대기 인원이 많아 운영진이 접수를 일시 중단했습니다.<br />잠시 후 이 화면에서 다시 접수할 수 있어요. (자동으로 갱신됩니다)</div>
+            <div className="text-lg font-bold text-red-800">대기 인원이 많아 접수가 일시 중단 되었습니다.</div>
+            <div className="mt-1 text-sm text-red-700">원활한 운영을 위해 최선을 다하겠습니다.</div>
           </div>
       )}
 
