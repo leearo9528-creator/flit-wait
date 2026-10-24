@@ -69,6 +69,16 @@ export const LS = {
   del(k: string) { try { localStorage.removeItem(k) } catch {} },
 }
 
+/**
+ * 예상 대기 표시 — 60분 넘으면 숫자 대신 '60분 이상' (2026-10-24 현장 지시: "약 1395분" 같은 숫자가 나가지 않게).
+ * 추정치가 없어도 대기가 20팀 이상이면 '60분 이상'. 그 외 추정 불가는 null.
+ */
+export const fmtWait = (estMin: number | null | undefined, waiting = 0): string | null => {
+  if (estMin == null) return waiting >= 20 ? '60분 이상' : null
+  const m = Math.max(1, Math.round(estMin))
+  return m >= 60 ? '60분 이상' : `약 ${m}분`
+}
+
 /** 분 → '30분' / '2시간' / '1시간 30분' */
 export const fmtDur = (min: number) => {
   const m = Math.max(0, Math.round(min))

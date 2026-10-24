@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { cachedRpc, supabase } from '../../lib/supabase'
-import { useAsync, fmtTime, useTick } from '../../lib/util'
+import { useAsync, fmtTime, useTick, fmtWait } from '../../lib/util'
 
 interface B { id: string; name: string; mode: string; is_paused: boolean; pause_mode?: string | null; window_state?: 'open' | 'before_open' | 'after_close'; queue_open_daily_time?: string | null; queue_close_daily_time?: string | null; waiting_teams: number; called: number[]; last_in: number | null; avg_service_min: number | null; next_slot: { starts_at: string; left: number } | null; current_slot?: { starts_at: string; ends_at: string } | null }
 interface Data { event: { name: string; notice: string | null; status: string }; now: string; booths: B[] }
@@ -55,7 +55,7 @@ export default function Board() {
             <div className="grid grid-cols-3 gap-3 text-center">
               <Stat label="대기" v={`${b.waiting_teams}팀`} />
               <Stat label="마지막 입장" v={b.last_in ? `${b.last_in}번` : '—'} />
-              <Stat label="예상 대기" v={b.avg_service_min ? `약 ${Math.round(b.waiting_teams * b.avg_service_min)}분` : '—'} />
+              <Stat label="예상 대기" v={fmtWait(b.avg_service_min ? b.waiting_teams * b.avg_service_min : null, b.waiting_teams) ?? '—'} />
             </div>
           </div>
         ))}

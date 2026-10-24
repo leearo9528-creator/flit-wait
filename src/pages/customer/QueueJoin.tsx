@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { rpc, cachedRpc } from '../../lib/supabase'
-import { useAsync, useBoothLive, fmtPhone, fmtDateTime, LS } from '../../lib/util'
+import { useAsync, useBoothLive, fmtPhone, fmtDateTime, fmtWait, LS } from '../../lib/util'
 import { BoothSummary } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
@@ -52,7 +52,7 @@ export default function QueueJoin() {
   return (
     <Page>
       <BoothHeader booth={booth} event={event} closed={closed ? true : beforeStart && ws === 'open' ? 'before' : false}
-        live={<>대기손님 현황 <b className="tabular-nums">{waiting_teams}팀</b>{data.avg_service_min && waiting_teams > 0 ? <span className="ml-1 font-normal text-gray-500">· 예상 약 {Math.max(1, Math.round(waiting_teams * data.avg_service_min))}분</span> : null}</>} />
+        live={<>대기손님 현황 <b className="tabular-nums">{waiting_teams}팀</b>{waiting_teams > 0 && fmtWait(data.avg_service_min ? waiting_teams * data.avg_service_min : null, waiting_teams) ? <span className="ml-1 font-normal text-gray-500">· 예상 {fmtWait(data.avg_service_min ? waiting_teams * data.avg_service_min : null, waiting_teams)}</span> : null}</>} />
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
       {booth.is_paused && (booth.settings.pause_mode === 'closed_today'
         ? <div className="mb-4 rounded-2xl bg-gray-100 p-5 text-center ring-1 ring-gray-300">

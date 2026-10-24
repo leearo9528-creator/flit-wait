@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { rpc } from '../../lib/supabase'
-import { useAsync, fmtTime, fmtDate, fmtDur, STATUS_LABEL, useTick, LS } from '../../lib/util'
+import { useAsync, fmtTime, fmtDate, fmtDur, fmtWait, STATUS_LABEL, useTick, LS } from '../../lib/util'
 import { Ticket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
@@ -87,7 +87,7 @@ export default function MyTicket() {
               <div className="mt-4 rounded-xl bg-gray-50 py-3">
                 <div className="text-sm text-gray-500">내 앞 대기</div>
                 <div className="text-3xl font-bold tabular-nums">{t.ahead}<span className="ml-1 text-base font-medium text-gray-500">팀</span></div>
-                {t.est_wait_min != null && t.ahead! > 0 && <div className="text-sm text-gray-500">예상 약 {Math.max(1, t.est_wait_min)}분</div>}
+                {t.ahead! > 0 && fmtWait(t.est_wait_min, t.ahead!) && <div className="text-sm text-gray-500">예상 {fmtWait(t.est_wait_min, t.ahead!)}</div>}
                 {t.ahead !== null && t.ahead <= (t.booth.settings.notify_ahead_teams ?? 2) && <div className="mt-1 text-sm font-semibold text-amber-700">곧 차례예요. 부스 근처로 와주세요.</div>}
               </div>
             )}
