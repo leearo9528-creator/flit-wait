@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { cachedRpc, supabase } from '../../lib/supabase'
 import { useAsync, fmtTime, useTick } from '../../lib/util'
 
-interface B { id: string; name: string; mode: string; is_paused: boolean; pause_mode?: string | null; window_state?: 'open' | 'before_open' | 'after_close'; queue_open_daily_time?: string | null; queue_close_daily_time?: string | null; waiting_teams: number; called: number[]; last_in: number | null; avg_service_min: number | null; next_slot: { starts_at: string; left: number } | null }
+interface B { id: string; name: string; mode: string; is_paused: boolean; pause_mode?: string | null; window_state?: 'open' | 'before_open' | 'after_close'; queue_open_daily_time?: string | null; queue_close_daily_time?: string | null; waiting_teams: number; called: number[]; last_in: number | null; avg_service_min: number | null; next_slot: { starts_at: string; left: number } | null; current_slot?: { starts_at: string; ends_at: string } | null }
 interface Data { event: { name: string; notice: string | null; status: string }; now: string; booths: B[] }
 
 /** 안내부스 모니터용 현황판 — 큰 글씨, 다크, 자동 갱신 */
@@ -61,7 +61,11 @@ export default function Board() {
         ))}
         {slots.map(b => (
           <div key={b.id} className="rounded-3xl bg-gray-900 p-6 ring-1 ring-gray-800">
-            <div className="mb-4 text-2xl font-bold">{b.name}</div>
+            <div className="mb-4 flex items-center justify-between">
+              <div className="text-2xl font-bold">{b.name}</div>
+              {/* 진행 중 회차는 '다음 회차'와 분리 — 전에는 시작된 회차가 '다음 회차 · 잔여 1석'으로 보였다 */}
+              {b.current_slot && <span className="rounded-full bg-emerald-600 px-3 py-1 text-sm font-bold">{fmtTime(b.current_slot.starts_at)} 회차 진행 중</span>}
+            </div>
             {b.next_slot ? (
               <>
                 <div className="text-sm text-gray-400">다음 회차</div>
@@ -72,7 +76,9 @@ export default function Board() {
                 </div>
                 <div className="mt-3 text-sm text-gray-500">{b.mode === 'hybrid' ? '사전 예약제 · 노쇼 자리는 현장 대기 순으로 안내' : '사전 예약제 · 빈자리는 부스에서 현장 안내'}</div>
               </>
-            ) : <div className="py-8 text-center text-2xl text-gray-600">오늘 회차 종료</div>}
+            ) : b.current_slot
+              ? <div className="py-6 text-center text-2xl text-gray-400">마지막 회차 진행 중 <span className="text-gray-500">(~{fmtTime(b.current_slot.ends_at)})</span></div>
+              : <div className="py-8 text-center text-2xl text-gray-600">오늘 회차 종료</div>}
           </div>
         ))}
       </div>
