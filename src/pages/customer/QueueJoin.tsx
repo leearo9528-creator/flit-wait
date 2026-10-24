@@ -103,7 +103,7 @@ export default function QueueJoin() {
           </label>
           {err && <Alert kind="error">{err}</Alert>}
           <Button type="submit" size="lg" loading={busy} disabled={closed || beforeStart || booth.is_paused || windowBlocked || !consent}>
-            {booth.is_paused ? (booth.settings.pause_mode === 'closed_today' ? '오늘 접수 마감' : '접수 일시중단') : windowBlocked ? (ws === 'before_open' ? '접수 예정' : '오늘 접수 마감') : closed ? '운영 시간이 아닙니다' : beforeStart ? '행사 시작 전' : '대기 접수하기'}
+            {booth.is_paused ? (booth.settings.pause_mode === 'closed_today' ? '오늘 접수 마감' : '일시 중단') : windowBlocked ? (ws === 'before_open' ? '접수 예정' : '오늘 접수 마감') : closed ? '운영 시간이 아닙니다' : beforeStart ? '행사 시작 전' : '대기 접수하기'}
           </Button>
         </form>
       </Card>

@@ -61,7 +61,7 @@ export function showGroupTag(group?: string | null, category?: string | null) {
 export function boothStatus(b: BoothLike, eventClosed: boolean | 'before'): BoothStatus {
   if (eventClosed === 'before') return { kind: 'closed', label: '시작 전' }
   if (eventClosed) return { kind: 'closed', label: '운영 종료' }
-  if (b.is_paused) return { kind: 'paused', label: b.pause_mode === 'closed_today' ? '오늘 마감' : '접수 중단' }
+  if (b.is_paused) return { kind: 'paused', label: b.pause_mode === 'closed_today' ? '오늘 마감' : '일시 중단' }
   if (b.mode !== 'queue') {
     const openAt = nextOpenAt(b)
     if (openAt && openAt.getTime() > Date.now()) return { kind: 'upcoming', label: '예약 오픈 예정' }
