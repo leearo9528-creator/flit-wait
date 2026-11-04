@@ -29,7 +29,9 @@
 ## 축제 앱 (2026-11-04 확장)
 
 기획자가 직접 넣는 콘텐츠: 지도 핀(`places`)·타임테이블(`programs`)·공지(`notices`)·안내문·스탬프 투어(`stamp_*`). 마이그레이션 0036~0039. '새 행사' 템플릿(`src/lib/templates.ts`): **겨울 페어·연말 마켓** / 축제 / 아파트 야시장 — 샘플 핀·일정·공지·추첨·설문을 깔고 시작. 행사 설정에 테마 색(`accent_color`).
-관리자 탭: 부스 / 지도 / 일정·안내 / 스탬프 / 통계 / **리포트**(`admin_event_report` 집계 한 장, 인쇄→PDF) / 행사 설정 / 접속 코드 / 발송 로그.
+관리자 탭: **운영안**(자동 생성) / 부스 / 지도 / 일정·안내 / 스탬프 / 참여·셀러 / 통계 / **리포트**(`admin_event_report` 집계 한 장, 인쇄→PDF) / 행사 설정 / 접속 코드 / 발송 로그.
+**준비 체크리스트** (`AdminChecklist`): 준비 중(draft) 행사 상단에 배치도·핀·일정·안내·스탬프·셀러 링크 진행 상태를 DB 에서 세어 보여주고, '운영 시작' 으로 `status='open'` (그 전엔 손님 화면 `/e/:slug` 가 안 열린다).
+**운영안 자동 생성** (`AdminPlan` + `api/plan-import.ts`): 운영안을 붙여 넣거나 PDF(브라우저에서 `pdfjs-dist` 로 텍스트 추출)를 올리면 Edge 함수가 Claude API(tool use 로 스키마 강제)로 핀·타임테이블·공지·안내·럭키드로우·설문·스탬프 초안을 뽑아 돌려주고, 미리보기에서 체크한 것만 브라우저가 RLS 로 insert. 호출자는 세션 토큰을 `my_admin_scope` 로 검증. **Vercel 환경변수 `ANTHROPIC_API_KEY` 필수**(`ANTHROPIC_MODEL` 선택, 기본 `claude-sonnet-5-5`). 적용은 추가만 하므로 두 번 누르면 중복.
 방문 집계 `event_views`(`track_view`, 개인정보 없음). ⚠️ 카카오 로그인은 Supabase Auth > Providers > Kakao 설정(REST 키·리다이렉트) 후에 동작, 이메일 매직링크는 Site URL/Redirect 에 `/admin` 허용 필요.
 
 ## 구조

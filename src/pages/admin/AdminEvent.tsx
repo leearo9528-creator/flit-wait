@@ -11,6 +11,10 @@ import AdminSchedule from './AdminSchedule'
 import AdminStamp from './AdminStamp'
 import AdminReport from './AdminReport'
 import AdminEngage from './AdminEngage'
+import AdminChecklist from './AdminChecklist'
+import AdminPlan from './AdminPlan'
+
+type Tab = 'plan' | 'booths' | 'map' | 'schedule' | 'stamp' | 'engage' | 'stats' | 'report' | 'settings' | 'codes' | 'notify'
 
 interface Stats { booth_id: string; waiting: number; called: number; done: number; no_show: number; reserved: number }
 
@@ -44,7 +48,7 @@ export default function AdminEvent() {
   }, [eventId])
   useEffect(() => { const i = setInterval(stats.reload, 10000); return () => clearInterval(i) }, [stats.reload])
 
-  const [tab, setTab] = useState<'booths' | 'map' | 'schedule' | 'stamp' | 'engage' | 'stats' | 'report' | 'settings' | 'codes' | 'notify'>('booths')
+  const [tab, setTab] = useState<Tab>('booths')
   if (ev.loading || booths.loading) return <Spinner />
   if (ev.error || !ev.data) return <Page><Alert kind="error">{ev.error}</Alert></Page>
   const e = ev.data
@@ -56,12 +60,15 @@ export default function AdminEvent() {
         <a className="rounded-lg bg-gray-100 px-2 py-1 text-xs" href={`${PUBLIC_BASE_URL}/e/${e.slug}`} target="_blank" rel="noreferrer">손님 링크(통합 QR) /e/{e.slug}</a>
         <a className="rounded-lg bg-gray-100 px-2 py-1 text-xs" href={`${PUBLIC_BASE_URL}/board/${e.slug}`} target="_blank" rel="noreferrer">현황판 /board/{e.slug}</a>
         <div className="flex w-full flex-wrap gap-1 rounded-xl bg-gray-100 p-1 text-sm md:ml-auto md:w-auto">
-          {(['booths', 'map', 'schedule', 'stamp', 'engage', 'stats', 'report', 'settings', 'codes', 'notify'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)} className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-semibold ${tab === t ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{{ booths: '부스', map: '지도', schedule: '일정·안내', stamp: '스탬프', engage: '참여·셀러', stats: '통계', report: '리포트', settings: '행사 설정', codes: '접속 코드', notify: '발송 로그' }[t]}</button>
+          {(['plan', 'booths', 'map', 'schedule', 'stamp', 'engage', 'stats', 'report', 'settings', 'codes', 'notify'] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)} className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-semibold ${tab === t ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{{ plan: '운영안', booths: '부스', map: '지도', schedule: '일정·안내', stamp: '스탬프', engage: '참여·셀러', stats: '통계', report: '리포트', settings: '행사 설정', codes: '접속 코드', notify: '발송 로그' }[t]}</button>
           ))}
         </div>
       </div>
 
+      <AdminChecklist e={e} onSaved={ev.reload} onGo={t => setTab(t as Tab)} />
+
+      {tab === 'plan' && <AdminPlan e={e} onSaved={() => { ev.reload(); booths.reload() }} />}
       {tab === 'booths' && (
         <>
           <div className="grid gap-3 md:grid-cols-2">
