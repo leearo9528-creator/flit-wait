@@ -13,9 +13,9 @@ const SCHEMA = {
   properties: {
     summary: { type: 'string', description: '운영안을 두 문장으로 요약 (기획자에게 보여줄 확인용)' },
     places: {
-      type: 'array', description: '지도 핀. 부스·먹거리·마켓·무대·시설(화장실·주차)·안내소. 위치는 운영안에 배치 정보가 있을 때만 0~100 퍼센트로 추정, 없으면 격자로 적당히 펼친다',
+      type: 'array', description: '지도 핀. 부스·먹거리·마켓·무대·편의시설(화장실)·안내소·주차장(parking)·셔틀 정류장(shuttle)·의무실(medical). 위치는 운영안에 배치 정보가 있을 때만 0~100 퍼센트로 추정, 없으면 격자로 적당히 펼친다',
       items: { type: 'object', properties: {
-        kind: { type: 'string', enum: ['booth', 'food', 'market', 'stage', 'facility', 'info', 'other'] },
+        kind: { type: 'string', enum: ['booth', 'food', 'market', 'stage', 'facility', 'info', 'parking', 'shuttle', 'medical', 'other'] },
         name: { type: 'string' }, description: { type: 'string' }, hours: { type: 'string', description: '운영 시간 예: 11:00~20:00' },
         x: { type: 'number' }, y: { type: 'number' },
         menu: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, price: { type: 'string' } }, required: ['name'] } },
@@ -35,6 +35,7 @@ const SCHEMA = {
     },
     info_text: { type: 'string', description: '행사 안내 (운영시간·주차·우천·반려동물 등). 줄바꿈으로 항목 구분, 운영안에 있는 것만' },
     contact_text: { type: 'string', description: '문의처 (운영안에 전화·카톡이 있으면)' },
+    directions_text: { type: 'string', description: '오시는 길 — 대중교통·셔틀 운행·주차 안내. 운영안에 있는 것만, 줄바꿈으로 항목 구분' },
     draws: {
       type: 'array', description: '럭키드로우·경품 추첨이 운영안에 있을 때만',
       items: { type: 'object', properties: { title: { type: 'string' }, prize: { type: 'string' }, description: { type: 'string' }, draw_at: { type: 'string' }, winners_count: { type: 'integer' } }, required: ['title'] },

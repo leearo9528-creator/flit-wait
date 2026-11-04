@@ -66,6 +66,7 @@ export interface EventRow {
   lng?: number | null
   info_text?: string | null
   contact_text?: string | null
+  directions_text?: string | null
   stamp_enabled?: boolean
   stamp_goal?: number | null
   stamp_reward_text?: string | null
@@ -150,10 +151,13 @@ export interface StaffSession {
 }
 
 // ───────── 행사장 지도 (0036_map_guide)
-export type PlaceKind = 'booth' | 'food' | 'market' | 'stage' | 'facility' | 'info' | 'other'
+export type PlaceKind = 'booth' | 'food' | 'market' | 'stage' | 'facility' | 'info' | 'parking' | 'shuttle' | 'medical' | 'other'
 export const PLACE_KIND_LABEL: Record<PlaceKind, string> = {
-  booth: '체험부스', food: '먹거리', market: '마켓', stage: '무대·공연', facility: '편의시설', info: '안내소', other: '기타',
+  booth: '체험부스', food: '먹거리', market: '마켓', stage: '무대·공연', facility: '편의시설', info: '안내소', parking: '주차장', shuttle: '셔틀 정류장', medical: '의무실', other: '기타',
 }
+/** 수동 혼잡도 — 스태프가 관리자 화면에서 누른다 (센서 없음). 주차장·푸드존·인기 부스용 */
+export type Crowd = 'low' | 'mid' | 'high'
+export const CROWD_LABEL: Record<Crowd, string> = { low: '여유', mid: '보통', high: '혼잡' }
 
 export interface PlaceRow {
   id: string
@@ -161,6 +165,8 @@ export interface PlaceRow {
   booth_id: string | null
   kind: PlaceKind
   name: string
+  crowd?: Crowd | null
+  crowd_updated_at?: string | null
   description: string | null
   hours: string | null
   image_url: string | null
@@ -174,12 +180,13 @@ export interface PlaceRow {
 export interface MenuItem { name: string; price?: string }
 
 export interface GuidePlace extends Omit<PlaceRow, 'event_id'> {
+  crowd?: Crowd | null; crowd_updated_at?: string | null
   booth: { id: string; slug: string; mode: BoothMode; is_paused: boolean; location: string | null; waiting_teams: number; today_left: number } | null
 }
 
 export interface EventGuide {
   event: Pick<EventRow, 'id' | 'name' | 'slug' | 'status' | 'notice' | 'starts_at' | 'ends_at' | 'image_url'> & {
-    map_image_url: string | null; map_note: string | null; lat: number | null; lng: number | null; stamp_enabled?: boolean
+    map_image_url: string | null; map_note: string | null; lat: number | null; lng: number | null; stamp_enabled?: boolean; directions_text?: string | null
   }
   places: GuidePlace[]
 }
@@ -195,7 +202,7 @@ export interface NoticeRow {
   id: string; event_id: string; title: string; body: string | null; urgent: boolean; pinned: boolean; publish_at: string; expires_at: string | null
 }
 export interface EventSchedule {
-  event: Pick<EventRow, 'id' | 'name' | 'slug' | 'status' | 'notice' | 'starts_at' | 'ends_at' | 'info_text' | 'contact_text' | 'stamp_enabled' | 'image_url' | 'map_image_url' | 'accent_color'> & { booth_count: number; survey_enabled?: boolean; draw_open?: boolean }
+  event: Pick<EventRow, 'id' | 'name' | 'slug' | 'status' | 'notice' | 'starts_at' | 'ends_at' | 'info_text' | 'contact_text' | 'stamp_enabled' | 'image_url' | 'map_image_url' | 'accent_color'> & { booth_count: number; survey_enabled?: boolean; draw_open?: boolean; directions_text?: string | null; lat?: number | null; lng?: number | null }
   programs: Array<Omit<ProgramRow, 'event_id' | 'place_id'> & { place: { id: string; name: string } | null }>
   notices: Array<Pick<NoticeRow, 'id' | 'title' | 'body' | 'urgent' | 'pinned' | 'publish_at'>>
 }

@@ -108,6 +108,12 @@ export default function EventHub() {
           </div>
         )}
 
+        {(event.directions_text || event.lat != null) && (
+          <Link to={`/e/${slug}/map`} className="block rounded-2xl bg-gray-50 p-4 ring-1 ring-gray-200">
+            <div className="text-xs font-semibold text-gray-500">오시는 길 · 주차</div>
+            <p className="mt-1 line-clamp-2 whitespace-pre-line text-sm text-gray-800">{event.directions_text || '지도에서 길찾기'}</p>
+          </Link>
+        )}
         {latest && (
           <Link to={`/e/${slug}/schedule`} className="block rounded-xl px-1 py-1 text-sm text-gray-600">
             <span className="mr-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700">공지</span>{latest.title}

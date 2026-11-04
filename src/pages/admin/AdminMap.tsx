@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAsync } from '../../lib/util'
 import { Card, Button, Field, Input, Alert, Spinner, Empty } from '../../components/ui'
 import ImageUpload from '../../components/ImageUpload'
-import { PLACE_KIND_LABEL, type Booth, type EventRow, type PlaceKind, type PlaceRow } from '../../lib/types'
+import { PLACE_KIND_LABEL, CROWD_LABEL, type Booth, type EventRow, type PlaceKind, type PlaceRow, type Crowd } from '../../lib/types'
 
 const KINDS = Object.keys(PLACE_KIND_LABEL) as PlaceKind[]
 
@@ -152,6 +152,13 @@ function PlaceEditor({ p, booths, selected, onSelect, onSave, onRemove }: { p: P
         <div className="min-w-0 flex-1">
           <div className="text-xs text-gray-500">{PLACE_KIND_LABEL[p.kind]}{booth ? ` · 부스 연결: ${booth.name}` : ''}{Number(p.x) === 50 && Number(p.y) === 50 ? ' · 아직 지도에 안 놓음' : ''}</div>
           <div className="truncate font-semibold">{p.name}</div>
+        </div>
+        {/* 현장 혼잡도 — 스태프가 누른다. 손님 지도에 '여유/보통/혼잡' 배지 */}
+        <div className="flex shrink-0 rounded-lg bg-gray-100 p-0.5 text-[11px] font-semibold">
+          {(['low', 'mid', 'high'] as Crowd[]).map(c => (
+            <button key={c} type="button" title="혼잡도" onClick={() => onSave({ crowd: p.crowd === c ? null : c })}
+              className={`rounded-md px-2 py-1 ${p.crowd === c ? (c === 'low' ? 'bg-green-600 text-white' : c === 'mid' ? 'bg-amber-500 text-white' : 'bg-red-600 text-white') : 'text-gray-500'}`}>{CROWD_LABEL[c]}</button>
+          ))}
         </div>
         <Button variant="ghost" size="sm" className="!w-auto" onClick={() => setEdit(o => !o)}>{edit ? '접기' : '편집'}</Button>
         <Button variant="ghost" size="sm" className="!w-auto text-red-600" onClick={onRemove}>삭제</Button>

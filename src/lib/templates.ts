@@ -21,7 +21,7 @@ export async function applyTemplate(id: TemplateId, eventId: string, startsAt: s
   const ev: Record<string, unknown> = { template: id, stamp_enabled: true, stamp_reward_text: '안내소에서 작은 선물을 드려요' }
   // 목표 개수는 비워 둔다(= 지점 전부). 숫자를 박으면 지점 수와 어긋나 헷갈린다
   const places: any[] = [], programs: any[] = [], notices: any[] = [], draws: any[] = []
-  let survey: any = null, vendorOpen = false, infoText = '', contactText = ''
+  let survey: any = null, vendorOpen = false, infoText = '', contactText = '', directionsText = ''
 
   if (id === 'winter-fair') {
     ev.accent_color = '#b91c1c'; ev.stamp_goal = null; vendorOpen = true
@@ -60,7 +60,9 @@ export async function applyTemplate(id: TemplateId, eventId: string, startsAt: s
     programs.push({ title: '개막식', kind: 'stage', starts_at: at(0), ends_at: at(1) }, { title: '폐막 공연', kind: 'stage', starts_at: at(8), ends_at: at(9) })
     notices.push({ title: '안전 안내', body: '미아 발생 시 안내소로 와 주세요. 우천 시 야외 공연은 취소될 수 있어요.', pinned: true })
     survey = { enabled: true, title: '축제, 어떠셨어요?', questions: [{ id: 'q1', type: 'rating', label: '전체 만족도' }, { id: 'q2', type: 'choice', label: '가장 좋았던 건?', options: ['체험 부스', '먹거리', '공연', '마켓'] }, { id: 'q3', type: 'text', label: '한마디' }] }
-    infoText = '주차: 행사장 인근 공영주차장\n우천 시: 체험 부스는 정상 운영, 야외 공연 취소'
+    infoText = '우천 시: 체험 부스는 정상 운영, 야외 공연 취소\n분실물·미아: 안내소'
+    directionsText = '주차: 행사장 인근 공영주차장 (만차 시 셔틀 주차장)\n셔틀: 역 ↔ 행사장 15분 간격'
+    places.push({ kind: 'parking', name: '공영주차장', x: 8, y: 92, sort_order: 90 }, { kind: 'shuttle', name: '셔틀 정류장', x: 20, y: 92, sort_order: 91 })
   }
   if (id === 'apt-night') {
     ev.accent_color = '#7c3aed'; ev.stamp_enabled = false
@@ -76,7 +78,7 @@ export async function applyTemplate(id: TemplateId, eventId: string, startsAt: s
     infoText = '운영: 17:00~21:00\n주차: 입주민 외 차량은 단지 밖 공영주차장'
   }
 
-  await supabase.from('events').update({ ...ev, vendor_open: vendorOpen, info_text: infoText || null, contact_text: contactText || null }).eq('id', eventId)
+  await supabase.from('events').update({ ...ev, vendor_open: vendorOpen, info_text: infoText || null, contact_text: contactText || null, directions_text: directionsText || null }).eq('id', eventId)
   if (places.length) await supabase.from('places').insert(places.map(p => ({ ...p, event_id: eventId })))
   if (programs.length) await supabase.from('programs').insert(programs.map(p => ({ ...p, event_id: eventId })))
   if (notices.length) await supabase.from('notices').insert(notices.map(n => ({ ...n, event_id: eventId })))

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { cachedRpc } from '../../lib/supabase'
-import { useAsync, fmtTime } from '../../lib/util'
+import { useAsync, fmtTime, LS } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import { PROGRAM_KIND_LABEL, type EventSchedule as Schedule } from '../../lib/types'
@@ -25,8 +25,12 @@ export default function EventSchedule() {
   }, [data?.programs])
   const today = kstYmd(new Date())
   const [day, setDay] = useState<string>('')
+  // ★ 찜 — 기기(localStorage)에만 저장. 페스티벌 타임테이블 앱들의 기본 기능
+  const [fav, setFav] = useState<string[]>(() => LS.get<string[]>(`fav:${slug}`) ?? [])
+  const [onlyFav, setOnlyFav] = useState(false)
+  const toggleFav = (id: string) => setFav(f => { const n = f.includes(id) ? f.filter(x => x !== id) : [...f, id]; LS.set(`fav:${slug}`, n); return n })
   const curDay = day || (days.includes(today) ? today : days[0] ?? '')
-  const list = useMemo(() => (data?.programs ?? []).filter(p => kstYmd(p.starts_at) === curDay), [data?.programs, curDay])
+  const list = useMemo(() => (data?.programs ?? []).filter(p => kstYmd(p.starts_at) === curDay && (!onlyFav || fav.includes(p.id))), [data?.programs, curDay, onlyFav, fav])
 
   if (loading) return <Spinner />
   if (!data?.event) return <div className="p-6"><Alert kind="error">{error ?? '행사를 찾을 수 없습니다.'}</Alert></div>
@@ -63,7 +67,10 @@ export default function EventSchedule() {
 
         {/* 타임테이블 */}
         <section className="mb-6">
-          <h2 className="mb-2 text-sm font-semibold text-gray-500">타임테이블</h2>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-500">타임테이블</h2>
+            {fav.length > 0 && <button type="button" onClick={() => setOnlyFav(v => !v)} className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${onlyFav ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-700 ring-gray-300'}`}>★ 찜한 것만 {fav.length}</button>}
+          </div>
           {days.length > 1 && (
             <div className="mb-3 flex flex-wrap gap-2">
               {days.map(d => (
@@ -74,7 +81,7 @@ export default function EventSchedule() {
               ))}
             </div>
           )}
-          {list.length === 0 ? <p className="py-10 text-center text-sm text-gray-400">등록된 일정이 없어요.</p> : (
+          {list.length === 0 ? <p className="py-10 text-center text-sm text-gray-400">{onlyFav ? '이 날엔 찜한 일정이 없어요.' : '등록된 일정이 없어요.'}</p> : (
             <ol className="relative ml-2 border-l-2 border-gray-200 pl-5">
               {list.map(p => {
                 const s = new Date(p.starts_at).getTime(), e = new Date(p.ends_at).getTime()
@@ -88,7 +95,10 @@ export default function EventSchedule() {
                       {p.place && <span>· {p.place.name}</span>}
                       {live && <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[11px] font-bold text-white">진행 중</span>}
                     </div>
-                    <div className="mt-0.5 text-[17px] font-bold text-gray-900">{p.title}</div>
+                    <div className="mt-0.5 flex items-start gap-2">
+                      <div className="flex-1 text-[17px] font-bold text-gray-900">{p.title}</div>
+                      <button type="button" onClick={() => toggleFav(p.id)} aria-label="찜" className={`-mr-1 -mt-1 rounded-full p-1.5 text-lg leading-none ${fav.includes(p.id) ? 'text-amber-500' : 'text-gray-300'}`}>{fav.includes(p.id) ? '★' : '☆'}</button>
+                    </div>
                     {p.description && <p className="mt-0.5 text-sm text-gray-600">{p.description}</p>}
                   </li>
                 )

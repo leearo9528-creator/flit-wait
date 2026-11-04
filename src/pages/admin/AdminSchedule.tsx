@@ -118,16 +118,17 @@ function Notices({ e }: { e: EventRow }) {
 }
 
 function Info({ e, onSaved }: { e: EventRow; onSaved: () => void }) {
-  const [f, setF] = useState({ info_text: e.info_text ?? '', contact_text: e.contact_text ?? '' })
+  const [f, setF] = useState({ info_text: e.info_text ?? '', contact_text: e.contact_text ?? '', directions_text: e.directions_text ?? '' })
   const [msg, setMsg] = useState<string | null>(null)
   async function save() {
-    const { error } = await supabase.from('events').update({ info_text: f.info_text || null, contact_text: f.contact_text || null }).eq('id', e.id)
+    const { error } = await supabase.from('events').update({ info_text: f.info_text || null, contact_text: f.contact_text || null, directions_text: f.directions_text || null }).eq('id', e.id)
     setMsg(error ? error.message : '저장했어요.'); onSaved()
   }
   return (
     <Card>
-      <h3 className="mb-3 font-bold">행사 안내 · 연락처</h3>
-      <div className="grid gap-3 md:grid-cols-2">
+      <h3 className="mb-3 font-bold">행사 안내 · 오시는 길 · 연락처</h3>
+      <div className="grid gap-3 md:grid-cols-3">
+        <Field label="오시는 길 (대중교통·셔틀·주차)" hint="홈 카드와 지도 상단에 '오시는 길'로 떠요. 길찾기 버튼은 행사 설정의 좌표를 써요"><textarea value={f.directions_text} onChange={x => setF({ ...f, directions_text: x.target.value })} rows={6} className="w-full rounded-xl border border-gray-300 p-3 text-sm" placeholder={'지하철: 분당선 야탑역 1번 출구 도보 10분\n셔틀: 야탑역 ↔ 행사장 15분 간격 (10:30~20:30)\n주차: 탄천 공영주차장 (무료, 300대) · 만차 시 시청 주차장'} /></Field>
         <Field label="행사 안내 (주차·화장실·셔틀·반입 금지 등)" hint="줄바꿈 그대로 보여요"><textarea value={f.info_text} onChange={x => setF({ ...f, info_text: x.target.value })} rows={6} className="w-full rounded-xl border border-gray-300 p-3 text-sm" placeholder={'주차: 탄천주차장 (무료, 300대)\n화장실: 안내소 옆 · 사송교 아래\n우천 시: 야외 공연 취소, 체험은 정상 운영'} /></Field>
         <Field label="주최·운영 연락처" hint="전화번호는 자동으로 눌러서 걸 수 있게 돼요"><textarea value={f.contact_text} onChange={x => setF({ ...f, contact_text: x.target.value })} rows={6} className="w-full rounded-xl border border-gray-300 p-3 text-sm" placeholder={'운영 본부 010-2244-3585\n분실물 안내소 (메인 무대 옆)'} /></Field>
       </div>

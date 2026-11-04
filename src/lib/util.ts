@@ -86,3 +86,9 @@ export const fmtDur = (min: number) => {
   const h = Math.floor(m / 60), r = m % 60
   return r ? `${h}시간 ${r}분` : `${h}시간`
 }
+
+/** 길찾기 링크 — 카카오맵(앱 있으면 앱), 네이버지도(검색). 좌표 없으면 이름 검색으로 */
+export const mapLinks = (name: string, lat?: number | null, lng?: number | null) => ({
+  kakao: lat != null && lng != null ? `https://map.kakao.com/link/to/${encodeURIComponent(name)},${lat},${lng}` : `https://map.kakao.com/link/search/${encodeURIComponent(name)}`,
+  naver: lat != null && lng != null ? `https://map.naver.com/p/directions/-/${lng},${lat},${encodeURIComponent(name)}/-/transit` : `https://map.naver.com/p/search/${encodeURIComponent(name)}`,
+})

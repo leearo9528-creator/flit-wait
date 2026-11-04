@@ -4,7 +4,8 @@ import { cachedRpc } from '../../lib/supabase'
 import { useAsync } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
-import { PLACE_KIND_LABEL, type EventGuide, type GuidePlace, type PlaceKind } from '../../lib/types'
+import { PLACE_KIND_LABEL, CROWD_LABEL, type EventGuide, type GuidePlace, type PlaceKind, type Crowd } from '../../lib/types'
+import { mapLinks } from '../../lib/util'
 
 /**
  * 행사장 지도 — 배치도 이미지 위에 핀, 핀을 누르면 아래에서 카드가 올라온다.
@@ -42,7 +43,7 @@ export default function EventMap() {
   if (loading) return <Spinner />
   if (!data?.event) return <div className="p-6"><Alert kind="error">{error ?? '행사를 찾을 수 없습니다.'}</Alert></div>
   const { event } = data
-  const toEvent = event.lat != null && event.lng != null ? kakaoTo(event.name, event.lat, event.lng) : null
+  const links = mapLinks(event.name, event.lat, event.lng)
 
   return (
     <div className="mx-auto min-h-dvh max-w-md bg-white pb-28">
@@ -81,11 +82,14 @@ export default function EventMap() {
       {event.map_note && <p className="px-4 pt-2 text-xs text-gray-500">{event.map_note}</p>}
 
       {/* 행사장까지 길찾기 */}
-      {toEvent && (
-        <div className="px-4 pt-3">
-          <a href={toEvent} target="_blank" rel="noreferrer" className="flex h-12 items-center justify-center rounded-xl bg-gray-900 text-[15px] font-semibold text-white active:bg-gray-800">
-            행사장까지 길찾기 (카카오맵)
-          </a>
+      {(event.directions_text || event.lat != null) && (
+        <div className="mx-4 mt-3 rounded-2xl bg-gray-50 p-4 ring-1 ring-gray-200">
+          <div className="text-sm font-semibold text-gray-500">오시는 길</div>
+          {event.directions_text && <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-gray-800">{event.directions_text}</p>}
+          <div className="mt-3 flex gap-2">
+            <a href={links.kakao} target="_blank" rel="noreferrer" className="flex h-11 flex-1 items-center justify-center rounded-xl bg-gray-900 text-[15px] font-semibold text-white active:bg-gray-800">카카오맵 길찾기</a>
+            <a href={links.naver} target="_blank" rel="noreferrer" className="flex h-11 flex-1 items-center justify-center rounded-xl bg-white text-[15px] font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">네이버지도</a>
+          </div>
         </div>
       )}
 
@@ -101,6 +105,7 @@ export default function EventMap() {
                 {p.menu?.length > 0 && <div className="truncate text-xs text-gray-500">{p.menu.slice(0, 4).map(m => m.name).join(' · ')}{p.menu.length > 4 ? ' …' : ''}</div>}
               </div>
               {p.booth && <LiveLine b={p.booth} compact />}
+              {!p.booth && <CrowdBadge c={p.crowd} />}
             </button>
           </li>
         ))}
@@ -117,9 +122,16 @@ export default function EventMap() {
 }
 
 const KIND_COLOR: Record<PlaceKind, string> = {
-  booth: 'bg-orange-500', food: 'bg-red-500', market: 'bg-amber-500', stage: 'bg-purple-500', facility: 'bg-sky-500', info: 'bg-gray-800', other: 'bg-gray-500',
+  booth: 'bg-orange-500', food: 'bg-red-500', market: 'bg-amber-500', stage: 'bg-purple-500', facility: 'bg-sky-500', info: 'bg-gray-800', parking: 'bg-blue-700', shuttle: 'bg-teal-600', medical: 'bg-rose-600', other: 'bg-gray-500',
 }
-const KIND_INITIAL: Record<PlaceKind, string> = { booth: '체', food: '식', market: '마', stage: '무', facility: '편', info: '안', other: '·' }
+const KIND_INITIAL: Record<PlaceKind, string> = { booth: '체', food: '식', market: '마', stage: '무', facility: '편', info: '안', parking: 'P', shuttle: '셔', medical: '+', other: '·' }
+const CROWD_CLS: Record<Crowd, string> = { low: 'bg-green-100 text-green-800', mid: 'bg-amber-100 text-amber-800', high: 'bg-red-100 text-red-800' }
+const CROWD_RING: Record<Crowd, string> = { low: 'ring-green-400', mid: 'ring-amber-400', high: 'ring-red-500' }
+function CrowdBadge({ c, at }: { c?: Crowd | null; at?: string | null }) {
+  if (!c) return null
+  const min = at ? Math.round((Date.now() - new Date(at).getTime()) / 60000) : null
+  return <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${CROWD_CLS[c]}`}>{CROWD_LABEL[c]}{min != null && min >= 1 ? ` · ${min}분 전` : ''}</span>
+}
 
 function Pin({ p, on, onClick }: { p: GuidePlace; on: boolean; onClick: () => void }) {
   return (
@@ -127,7 +139,7 @@ function Pin({ p, on, onClick }: { p: GuidePlace; on: boolean; onClick: () => vo
       className="absolute -translate-x-1/2 -translate-y-full"
       style={{ left: `${p.x}%`, top: `${p.y}%` }}>
       <span className={`flex flex-col items-center ${on ? 'scale-125' : ''} transition-transform`}>
-        <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white shadow-md ring-2 ring-white ${KIND_COLOR[p.kind]}`}>{KIND_INITIAL[p.kind]}</span>
+        <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white shadow-md ring-2 ${p.crowd ? CROWD_RING[p.crowd] : 'ring-white'} ${KIND_COLOR[p.kind]}`}>{KIND_INITIAL[p.kind]}</span>
         <span className={`-mt-0.5 h-0 w-0 border-x-[5px] border-t-[6px] border-x-transparent border-t-white`} />
       </span>
       {on && <span className="absolute left-1/2 top-full mt-0.5 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-0.5 text-[11px] font-semibold text-white">{p.name}</span>}
@@ -159,6 +171,7 @@ function PlaceSheet({ p, eventName, onClose }: { p: GuidePlace; eventName: strin
             <div className="text-lg font-bold leading-tight text-gray-900">{p.name}</div>
             {p.description && <p className="mt-1 text-sm leading-snug text-gray-600">{p.description}</p>}
             {p.booth && <div className="mt-1.5"><LiveLine b={p.booth} /></div>}
+            {p.crowd && <div className="mt-1.5"><CrowdBadge c={p.crowd} at={p.crowd_updated_at} /></div>}
             {p.menu?.length > 0 && (
               <ul className="mt-2 max-h-40 space-y-0.5 overflow-y-auto text-sm">
                 {p.menu.map((m, i) => <li key={i} className="flex justify-between gap-3"><span className="text-gray-800">{m.name}</span>{m.price && <span className="shrink-0 tabular-nums text-gray-500">{m.price}</span>}</li>)}

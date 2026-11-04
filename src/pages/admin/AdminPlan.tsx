@@ -13,7 +13,7 @@ interface PlanNotice { title: string; body: string; pinned?: boolean; urgent?: b
 interface PlanDraw { title: string; prize?: string; description?: string; draw_at?: string; winners_count?: number }
 interface Plan {
   summary: string; places: PlanPlace[]; programs: PlanProgram[]; notices: PlanNotice[]
-  info_text?: string; contact_text?: string; draws?: PlanDraw[]
+  info_text?: string; contact_text?: string; directions_text?: string; draws?: PlanDraw[]
   survey: { title: string; questions: { type: 'rating' | 'choice' | 'text'; label: string; options?: string[] }[] }
   stamp?: { enabled?: boolean; reward_text?: string; spot_names?: string[] }
 }
@@ -144,7 +144,7 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
         }
         if (prune) await del('notices', missing(ex.notices, plan.notices.map(n => n.title)).map(n => n.id))
       }
-      if (sel.info) { if (plan.info_text) ev.info_text = plan.info_text; if (plan.contact_text) ev.contact_text = plan.contact_text }
+      if (sel.info) { if (plan.info_text) ev.info_text = plan.info_text; if (plan.contact_text) ev.contact_text = plan.contact_text; if (plan.directions_text) ev.directions_text = plan.directions_text }
       if (sel.draws && plan.draws?.length) {
         for (const d of plan.draws) {
           const row = { prize: d.prize || null, description: d.description || null, draw_at: d.draw_at && !isNaN(new Date(d.draw_at).getTime()) ? d.draw_at : null, winners_count: Math.min(500, Math.max(1, d.winners_count ?? 1)) }
@@ -216,8 +216,9 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
             <Sec k="notices" title="공지" n={plan.notices.length}>
               <ul className="space-y-1">{plan.notices.map((n, i) => <li key={i}><b>{n.title}</b><Tag isNew={!has(existing?.notices, n.title)} />{n.pinned && <span className="ml-1 text-xs text-gray-500">고정</span>}<div className="text-xs text-gray-500">{n.body}</div></li>)}</ul>
             </Sec>
-            <Sec k="info" title="행사 안내·문의처" n={(plan.info_text ? 1 : 0) + (plan.contact_text ? 1 : 0)}>
+            <Sec k="info" title="행사 안내·오시는 길·문의처" n={(plan.info_text ? 1 : 0) + (plan.contact_text ? 1 : 0) + (plan.directions_text ? 1 : 0)}>
               <pre className="whitespace-pre-wrap font-sans text-xs text-gray-700">{plan.info_text || '(없음)'}</pre>
+              {plan.directions_text && <pre className="mt-1 whitespace-pre-wrap font-sans text-xs text-gray-700">오시는 길: {plan.directions_text}</pre>}
               {plan.contact_text && <div className="mt-1 text-xs text-gray-700">문의: {plan.contact_text}</div>}
             </Sec>
             <Sec k="draws" title="럭키드로우" n={plan.draws?.length ?? 0}>
