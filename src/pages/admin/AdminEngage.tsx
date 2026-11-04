@@ -132,6 +132,11 @@ const DEFAULT_Q: SurveyQuestion[] = [
   { id: 'q2', type: 'choice', label: '가장 좋았던 건?', options: ['마켓·셀러', '먹거리', '공연', '체험 부스', '분위기'] },
   { id: 'q3', type: 'choice', label: '다음에 또 오실 건가요?', options: ['꼭 올게요', '아마도', '글쎄요'] },
   { id: 'q4', type: 'text', label: '아쉬웠던 점이나 바라는 점이 있다면' },
+  // 표준 4문항 — 데이터 리포트의 '외지 방문 비율·연령·동반·유입 경로' 가 여기서 나온다. 라벨의 키워드(어디서·연령·누구와·알게)로 리포트가 찾으니 바꾸지 말 것
+  { id: 'q_res', type: 'choice', label: '어디서 오셨어요?', options: ['시내(관내)', '도내 다른 시·군', '수도권', '그 외 지역'] },
+  { id: 'q_age', type: 'choice', label: '연령대', options: ['10대', '20대', '30대', '40대', '50대 이상'] },
+  { id: 'q_with', type: 'choice', label: '누구와 오셨어요?', options: ['가족(아이 동반)', '친구', '연인', '혼자', '단체'] },
+  { id: 'q_via', type: 'choice', label: '어떻게 알게 되셨어요?', options: ['현수막·포스터', 'SNS', '지인', '뉴스·블로그', '지나가다'] },
 ]
 function SurveyEditor({ e }: { e: EventRow }) {
   const q = useAsync<{ enabled: boolean; title: string; questions: SurveyQuestion[]; thanks: string | null } | null>(async () => { const { data, error } = await supabase.from('surveys').select('*').eq('event_id', e.id).maybeSingle(); if (error) throw error; return data }, [e.id])

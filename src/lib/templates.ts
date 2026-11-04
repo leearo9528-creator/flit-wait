@@ -13,6 +13,13 @@ export const TEMPLATES: { id: TemplateId; name: string; desc: string; accent: st
   { id: 'blank', name: '빈 행사', desc: '아무것도 깔지 않아요.', accent: null },
 ]
 
+const STD_Q = [
+  // 표준 4문항 — 데이터 리포트의 '외지 방문 비율·연령·동반·유입 경로' 가 여기서 나온다. 라벨의 키워드(어디서·연령·누구와·알게)로 리포트가 찾으니 바꾸지 말 것
+  { id: 'q_res', type: 'choice', label: '어디서 오셨어요?', options: ['시내(관내)', '도내 다른 시·군', '수도권', '그 외 지역'] },
+  { id: 'q_age', type: 'choice', label: '연령대', options: ['10대', '20대', '30대', '40대', '50대 이상'] },
+  { id: 'q_with', type: 'choice', label: '누구와 오셨어요?', options: ['가족(아이 동반)', '친구', '연인', '혼자', '단체'] },
+  { id: 'q_via', type: 'choice', label: '어떻게 알게 되셨어요?', options: ['현수막·포스터', 'SNS', '지인', '뉴스·블로그', '지나가다'] },
+]
 const H = 3600_000
 export async function applyTemplate(id: TemplateId, eventId: string, startsAt: string) {
   if (id === 'blank') return
@@ -46,6 +53,7 @@ export async function applyTemplate(id: TemplateId, eventId: string, startsAt: s
       { id: 'q2', type: 'choice', label: '가장 좋았던 건?', options: ['셀러 부스', '먹거리', '공연', '포토존', '분위기'] },
       { id: 'q3', type: 'choice', label: '내년에도 열리면?', options: ['꼭 올게요', '아마도', '글쎄요'] },
       { id: 'q4', type: 'text', label: '아쉬웠던 점이나 바라는 점' },
+      ...STD_Q,
     ] }
     infoText = '운영: 11:00~20:00\n주차: 건물 주차장 2시간 무료 (안내소 도장)\n결제: 부스별 카드·계좌이체 (현금은 일부 부스만)\n반려동물: 켄넬·유모차 동반 가능'
     contactText = '운영 본부 010-2244-3585'
@@ -59,7 +67,7 @@ export async function applyTemplate(id: TemplateId, eventId: string, startsAt: s
     )
     programs.push({ title: '개막식', kind: 'stage', starts_at: at(0), ends_at: at(1) }, { title: '폐막 공연', kind: 'stage', starts_at: at(8), ends_at: at(9) })
     notices.push({ title: '안전 안내', body: '미아 발생 시 안내소로 와 주세요. 우천 시 야외 공연은 취소될 수 있어요.', pinned: true })
-    survey = { enabled: true, title: '축제, 어떠셨어요?', questions: [{ id: 'q1', type: 'rating', label: '전체 만족도' }, { id: 'q2', type: 'choice', label: '가장 좋았던 건?', options: ['체험 부스', '먹거리', '공연', '마켓'] }, { id: 'q3', type: 'text', label: '한마디' }] }
+    survey = { enabled: true, title: '축제, 어떠셨어요?', questions: [{ id: 'q1', type: 'rating', label: '전체 만족도' }, { id: 'q2', type: 'choice', label: '가장 좋았던 건?', options: ['체험 부스', '먹거리', '공연', '마켓'] }, { id: 'q3', type: 'text', label: '한마디' }, ...STD_Q] }
     infoText = '우천 시: 체험 부스는 정상 운영, 야외 공연 취소\n분실물·미아: 안내소'
     directionsText = '주차: 행사장 인근 공영주차장 (만차 시 셔틀 주차장)\n셔틀: 역 ↔ 행사장 15분 간격'
     places.push({ kind: 'parking', name: '공영주차장', x: 8, y: 92, sort_order: 90 }, { kind: 'shuttle', name: '셔틀 정류장', x: 20, y: 92, sort_order: 91 })
@@ -74,7 +82,7 @@ export async function applyTemplate(id: TemplateId, eventId: string, startsAt: s
     )
     programs.push({ title: '버블쇼', kind: 'stage', starts_at: at(1), ends_at: at(1.5) }, { title: '마술 공연', kind: 'stage', starts_at: at(3), ends_at: at(3.5) })
     notices.push({ title: '소음·주차 안내', body: '21시 이후 음향을 줄여요. 단지 내 임시 주차는 관리사무소 안내를 따라 주세요.', pinned: true })
-    survey = { enabled: true, title: '야시장, 어떠셨어요?', questions: [{ id: 'q1', type: 'rating', label: '전체 만족도' }, { id: 'q2', type: 'choice', label: '또 열리면?', options: ['꼭 올게요', '아마도', '글쎄요'] }, { id: 'q3', type: 'text', label: '한마디' }] }
+    survey = { enabled: true, title: '야시장, 어떠셨어요?', questions: [{ id: 'q1', type: 'rating', label: '전체 만족도' }, { id: 'q2', type: 'choice', label: '또 열리면?', options: ['꼭 올게요', '아마도', '글쎄요'] }, { id: 'q3', type: 'text', label: '한마디' }, ...STD_Q] }
     infoText = '운영: 17:00~21:00\n주차: 입주민 외 차량은 단지 밖 공영주차장'
   }
 
