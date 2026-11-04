@@ -1,5 +1,7 @@
 // 운영안 자동 생성 — 운영안(붙여넣기 or PDF) → /api/plan-import (Claude) → 미리보기 → "적용" 으로 DB 에 넣는다.
-// 적용은 추가만 한다(기존 핀·일정을 지우지 않는다). 두 번 적용하면 두 번 들어가니 미리보기에서 체크를 풀어 고른다.
+// 적용은 '이름 매칭 갱신' — 운영안은 초안→확정안으로 두 번 이상 오고, 그 사이에 QR(통합 /e/슬러그·스탬프 지점 code)은 이미 뽑혀 있다.
+// 같은 이름 핀은 설명·시간·메뉴만 덮어쓰고 위치·스탬프 코드·대기 부스 연결은 유지, 같은 제목 일정은 시간만 갱신, 새 이름은 추가.
+// 운영안에서 사라진 것은 지우지 않고 미리보기에 '운영안에 없음' 으로만 보여준다 (삭제는 사람이).
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Card, Button, Alert, Field } from '../../components/ui'
@@ -50,6 +52,22 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
   const [plan, setPlan] = useState<Plan | null>(null)
   const [sel, setSel] = useState<Record<Section, boolean>>({ places: true, programs: true, notices: true, info: true, draws: true, survey: true, stamp: true })
   const [done, setDone] = useState<string | null>(null)
+  const [existing, setExisting] = useState<{ places: { id: string; name: string }[]; programs: { id: string; title: string }[]; notices: { id: string; title: string }[]; draws: { id: string; title: string }[]; spots: { id: string; name: string; place_id: string | null }[] } | null>(null)
+  const norm = (x: string) => x.replace(/\s+/g, '').toLowerCase()
+  const has = (list: { name?: string; title?: string }[] | undefined, key: string) => !!list?.some(r => norm(r.name ?? r.title ?? '') === norm(key))
+  const missing = (list: { name?: string; title?: string }[] | undefined, keys: string[]) => (list ?? []).filter(r => !keys.some(k => norm(k) === norm(r.name ?? r.title ?? '')))
+
+  async function loadExisting() {
+    const [pl, pr, no, dr, sp] = await Promise.all([
+      supabase.from('places').select('id,name').eq('event_id', e.id),
+      supabase.from('programs').select('id,title').eq('event_id', e.id),
+      supabase.from('notices').select('id,title').eq('event_id', e.id),
+      supabase.from('draws').select('id,title').eq('event_id', e.id),
+      supabase.from('stamp_spots').select('id,name,place_id').eq('event_id', e.id),
+    ])
+    const ex = { places: pl.data ?? [], programs: pr.data ?? [], notices: no.data ?? [], draws: dr.data ?? [], spots: sp.data ?? [] }
+    setExisting(ex); return ex
+  }
 
   async function onFile(f: File | null) {
     if (!f) return
@@ -72,6 +90,7 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
       })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) throw new Error(j.error ?? `실패 (${r.status})`)
+      await loadExisting()
       setPlan(j.plan as Plan)
     } catch (x: any) { setErr(x.message ?? String(x)) }
     setBusy(null)
@@ -81,26 +100,45 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
     if (!plan) return
     setErr(null); setBusy('적용 중…')
     try {
+      const ex = await loadExisting()
       const ev: Record<string, unknown> = {}
       const nameToId = new Map<string, string>()
+      for (const p of ex.places) nameToId.set(norm(p.name), p.id)
+      const find = <T extends { name?: string; title?: string }>(list: T[], key: string) => list.find(r => norm(r.name ?? r.title ?? '') === norm(key))
       if (sel.places && plan.places.length) {
-        const { data: existing } = await supabase.from('places').select('id').eq('event_id', e.id)
-        const base = (existing?.length ?? 0) * 10
-        const rows = plan.places.map((p, i) => ({ event_id: e.id, kind: p.kind, name: p.name, description: p.description || null, hours: p.hours || null, x: clamp(p.x), y: clamp(p.y), menu: p.menu?.length ? p.menu : [], sort_order: base + (i + 1) * 10 }))
-        const { data, error } = await supabase.from('places').insert(rows).select('id,name'); if (error) throw error
-        for (const r of data ?? []) nameToId.set(r.name, r.id)
+        let i = ex.places.length
+        for (const p of plan.places) {
+          const hit = find(ex.places, p.name)
+          const common = { description: p.description || null, hours: p.hours || null, menu: p.menu?.length ? p.menu : [] }
+          if (hit) { const { error } = await supabase.from('places').update({ ...common, kind: p.kind }).eq('id', hit.id); if (error) throw error }   // 위치(x,y)·booth_id 는 유지
+          else { const { data, error } = await supabase.from('places').insert({ event_id: e.id, kind: p.kind, name: p.name, ...common, x: clamp(p.x), y: clamp(p.y), sort_order: (++i) * 10 }).select('id,name').single(); if (error) throw error; nameToId.set(norm(data.name), data.id) }
+        }
       }
       if (sel.programs && plan.programs.length) {
-        const rows = plan.programs.map(p => ({ event_id: e.id, title: p.title, kind: p.kind, description: p.description || null, place_id: p.place_name ? nameToId.get(p.place_name) ?? null : null, starts_at: p.starts_at, ends_at: p.ends_at }))
-          .filter(r => !isNaN(new Date(r.starts_at).getTime()) && new Date(r.ends_at) > new Date(r.starts_at))
-        if (rows.length) { const { error } = await supabase.from('programs').insert(rows); if (error) throw error }
+        for (const p of plan.programs) {
+          if (isNaN(new Date(p.starts_at).getTime()) || !(new Date(p.ends_at) > new Date(p.starts_at))) continue
+          const row = { kind: p.kind, description: p.description || null, place_id: p.place_name ? nameToId.get(norm(p.place_name)) ?? null : null, starts_at: p.starts_at, ends_at: p.ends_at }
+          const hit = find(ex.programs, p.title)
+          const { error } = hit ? await supabase.from('programs').update(row).eq('id', hit.id) : await supabase.from('programs').insert({ event_id: e.id, title: p.title, ...row })
+          if (error) throw error
+        }
       }
       if (sel.notices && plan.notices.length) {
-        const { error } = await supabase.from('notices').insert(plan.notices.map(n => ({ event_id: e.id, title: n.title, body: n.body, pinned: !!n.pinned, urgent: !!n.urgent }))); if (error) throw error
+        for (const n of plan.notices) {
+          const row = { body: n.body, pinned: !!n.pinned, urgent: !!n.urgent }
+          const hit = find(ex.notices, n.title)
+          const { error } = hit ? await supabase.from('notices').update(row).eq('id', hit.id) : await supabase.from('notices').insert({ event_id: e.id, title: n.title, ...row })
+          if (error) throw error
+        }
       }
       if (sel.info) { if (plan.info_text) ev.info_text = plan.info_text; if (plan.contact_text) ev.contact_text = plan.contact_text }
       if (sel.draws && plan.draws?.length) {
-        const { error } = await supabase.from('draws').insert(plan.draws.map(d => ({ event_id: e.id, title: d.title, prize: d.prize || null, description: d.description || null, draw_at: d.draw_at && !isNaN(new Date(d.draw_at).getTime()) ? d.draw_at : null, winners_count: Math.min(500, Math.max(1, d.winners_count ?? 1)), status: 'open' }))); if (error) throw error
+        for (const d of plan.draws) {
+          const row = { prize: d.prize || null, description: d.description || null, draw_at: d.draw_at && !isNaN(new Date(d.draw_at).getTime()) ? d.draw_at : null, winners_count: Math.min(500, Math.max(1, d.winners_count ?? 1)) }
+          const hit = find(ex.draws, d.title)
+          const { error } = hit ? await supabase.from('draws').update(row).eq('id', hit.id) : await supabase.from('draws').insert({ event_id: e.id, title: d.title, ...row, status: 'open' })   // 이미 추첨한 건 status 안 건드림
+          if (error) throw error
+        }
       }
       if (sel.survey && plan.survey?.questions?.length) {
         const questions = plan.survey.questions.map((q, i) => ({ id: `q${i + 1}`, type: q.type, label: q.label, options: q.type === 'choice' ? (q.options ?? []) : undefined }))
@@ -108,15 +146,19 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
       }
       if (sel.stamp && plan.stamp?.enabled) {
         ev.stamp_enabled = true; if (plan.stamp.reward_text) ev.stamp_reward_text = plan.stamp.reward_text
-        const spots = (plan.stamp.spot_names ?? []).filter(n => nameToId.has(n))
-        if (spots.length) { const { error } = await supabase.from('stamp_spots').insert(spots.map((n, i) => ({ event_id: e.id, place_id: nameToId.get(n), name: n, sort_order: (i + 1) * 10 }))); if (error) throw error }
+        // 지점은 이미 있으면 그대로(QR code 유지). 핀 이름이 지점에 없을 때만 추가
+        const newSpots = (plan.stamp.spot_names ?? []).filter(n => nameToId.has(norm(n)) && !find(ex.spots, n))
+        if (newSpots.length) { const { error } = await supabase.from('stamp_spots').insert(newSpots.map((n, i) => ({ event_id: e.id, place_id: nameToId.get(norm(n)), name: n, sort_order: (ex.spots.length + i + 1) * 10 }))); if (error) throw error }
       }
       if (Object.keys(ev).length) { const { error } = await supabase.from('events').update(ev).eq('id', e.id); if (error) throw error }
-      setDone('들어갔어요. 지도·일정·안내 탭에서 다듬어 주세요. 핀 위치는 지도 탭에서 끌어서 맞추면 돼요.')
+      setDone('들어갔어요. 이미 있던 핀은 위치와 스탬프 QR 을 그대로 두고 내용만 바꿨어요. 지도·일정·안내 탭에서 다듬어 주세요.')
       setPlan(null); onSaved()
     } catch (x: any) { setErr(x.message ?? String(x)) }
     setBusy(null)
   }
+
+  const Tag = ({ isNew }: { isNew: boolean }) => <span className={`ml-1 rounded px-1 text-[10px] ${isNew ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>{isNew ? '추가' : '갱신'}</span>
+  const Gone = ({ items }: { items: { name?: string; title?: string }[] }) => items.length ? <div className="mt-2 text-xs text-amber-700">운영안에 없음 (지우진 않아요): {items.map(i => i.name ?? i.title).join(', ')}</div> : null
 
   const Sec = ({ k, title, n, children }: { k: Section; title: string; n: number; children: React.ReactNode }) => (
     <div className={`rounded-xl border p-3 ${sel[k] ? 'border-gray-200' : 'border-dashed border-gray-200 opacity-50'}`}>
@@ -149,22 +191,24 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <Sec k="places" title="지도 핀" n={plan.places.length}>
-              <ul className="space-y-1">{plan.places.map((p, i) => <li key={i}><span className="rounded bg-gray-100 px-1 text-xs">{PLACE_KIND_LABEL[p.kind] ?? p.kind}</span> <b>{p.name}</b> {p.hours && <span className="text-gray-500">{p.hours}</span>}{p.description && <div className="text-xs text-gray-500">{p.description}</div>}{p.menu?.length ? <div className="text-xs text-gray-500">{p.menu.map(m => `${m.name}${m.price ? ` ${m.price}` : ''}`).join(' · ')}</div> : null}</li>)}</ul>
+              <ul className="space-y-1">{plan.places.map((p, i) => <li key={i}><span className="rounded bg-gray-100 px-1 text-xs">{PLACE_KIND_LABEL[p.kind] ?? p.kind}</span> <b>{p.name}</b><Tag isNew={!has(existing?.places, p.name)} /> {p.hours && <span className="text-gray-500">{p.hours}</span>}{p.description && <div className="text-xs text-gray-500">{p.description}</div>}{p.menu?.length ? <div className="text-xs text-gray-500">{p.menu.map(m => `${m.name}${m.price ? ` ${m.price}` : ''}`).join(' · ')}</div> : null}</li>)}</ul>
               {plan.places.length === 0 && <div className="text-gray-400">없음</div>}
+              <Gone items={missing(existing?.places, plan.places.map(p => p.name))} />
             </Sec>
             <Sec k="programs" title="타임테이블" n={plan.programs.length}>
-              <ul className="space-y-1">{plan.programs.map((p, i) => <li key={i}><span className="tabular-nums text-gray-500">{fmt(p.starts_at)}~{fmt(p.ends_at).split(' ').pop()}</span> <b>{p.title}</b> <span className="text-xs text-gray-500">{PROGRAM_KIND_LABEL[p.kind] ?? p.kind}{p.place_name ? ` · ${p.place_name}` : ''}</span></li>)}</ul>
+              <ul className="space-y-1">{plan.programs.map((p, i) => <li key={i}><span className="tabular-nums text-gray-500">{fmt(p.starts_at)}~{fmt(p.ends_at).split(' ').pop()}</span> <b>{p.title}</b><Tag isNew={!has(existing?.programs, p.title)} /> <span className="text-xs text-gray-500">{PROGRAM_KIND_LABEL[p.kind] ?? p.kind}{p.place_name ? ` · ${p.place_name}` : ''}</span></li>)}</ul>
               {plan.programs.length === 0 && <div className="text-gray-400">없음</div>}
+              <Gone items={missing(existing?.programs, plan.programs.map(p => p.title))} />
             </Sec>
             <Sec k="notices" title="공지" n={plan.notices.length}>
-              <ul className="space-y-1">{plan.notices.map((n, i) => <li key={i}><b>{n.title}</b>{n.pinned && <span className="ml-1 text-xs text-gray-500">고정</span>}<div className="text-xs text-gray-500">{n.body}</div></li>)}</ul>
+              <ul className="space-y-1">{plan.notices.map((n, i) => <li key={i}><b>{n.title}</b><Tag isNew={!has(existing?.notices, n.title)} />{n.pinned && <span className="ml-1 text-xs text-gray-500">고정</span>}<div className="text-xs text-gray-500">{n.body}</div></li>)}</ul>
             </Sec>
             <Sec k="info" title="행사 안내·문의처" n={(plan.info_text ? 1 : 0) + (plan.contact_text ? 1 : 0)}>
               <pre className="whitespace-pre-wrap font-sans text-xs text-gray-700">{plan.info_text || '(없음)'}</pre>
               {plan.contact_text && <div className="mt-1 text-xs text-gray-700">문의: {plan.contact_text}</div>}
             </Sec>
             <Sec k="draws" title="럭키드로우" n={plan.draws?.length ?? 0}>
-              <ul className="space-y-1">{(plan.draws ?? []).map((d, i) => <li key={i}><b>{d.title}</b> <span className="text-xs text-gray-500">{d.prize ?? ''} · {d.winners_count ?? 1}명{d.draw_at ? ` · ${fmt(d.draw_at)}` : ''}</span></li>)}</ul>
+              <ul className="space-y-1">{(plan.draws ?? []).map((d, i) => <li key={i}><b>{d.title}</b><Tag isNew={!has(existing?.draws, d.title)} /> <span className="text-xs text-gray-500">{d.prize ?? ''} · {d.winners_count ?? 1}명{d.draw_at ? ` · ${fmt(d.draw_at)}` : ''}</span></li>)}</ul>
               {!plan.draws?.length && <div className="text-gray-400">없음</div>}
             </Sec>
             <Sec k="survey" title="만족도 설문" n={plan.survey?.questions?.length ?? 0}>
@@ -175,7 +219,7 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
               {plan.stamp?.enabled ? <div>{plan.stamp.reward_text && <div>보상: {plan.stamp.reward_text}</div>}<div className="text-xs text-gray-500">지점: {(plan.stamp.spot_names ?? []).join(', ') || '(지도 핀 중에서 골라야 해요)'}</div></div> : <div className="text-gray-400">운영안에 없음</div>}
             </Sec>
           </div>
-          <p className="mt-3 text-xs text-gray-500">적용은 추가만 해요 — 이미 있는 핀·일정은 지우지 않아요. 한 번 더 적용하면 중복으로 들어가니 체크를 풀어 고르세요.</p>
+          <p className="mt-3 text-xs text-gray-500">같은 이름은 갱신, 새 이름은 추가, 운영안에서 빠진 건 그대로 둬요. 핀 위치·스탬프 QR·대기 부스 연결은 안 바뀌니 초안으로 QR 을 먼저 뽑고 확정안으로 다시 돌려도 돼요.</p>
         </Card>
       )}
     </div>
