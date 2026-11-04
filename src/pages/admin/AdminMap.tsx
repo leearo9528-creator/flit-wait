@@ -7,6 +7,14 @@ import { PLACE_KIND_LABEL, type Booth, type EventRow, type PlaceKind, type Place
 
 const KINDS = Object.keys(PLACE_KIND_LABEL) as PlaceKind[]
 
+/** '떡볶이 5,000원' → {name:'떡볶이', price:'5,000원'} — 마지막 토큰에 숫자가 있으면 가격 */
+function parseMenu(text: string) {
+  return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+    const m = l.match(/^(.*?)\s+(\S*\d\S*)$/)
+    return m ? { name: m[1].trim(), price: m[2] } : { name: l }
+  })
+}
+
 /**
  * 행사장 지도 편집 — 배치도 올리고, 지도 위를 눌러 핀을 찍는다.
  * 1) 배치도 이미지 업로드(events.map_image_url) 2) 아래 '핀 추가' 로 장소 만들고 3) 목록에서 장소를 고른 뒤 지도를 누르면 그 자리로 이동.
@@ -135,7 +143,7 @@ function NewPlace({ booths, onAdd }: { booths: Booth[]; onAdd: (f: Partial<Place
 
 function PlaceEditor({ p, booths, selected, onSelect, onSave, onRemove }: { p: PlaceRow; booths: Booth[]; selected: boolean; onSelect: () => void; onSave: (f: Partial<PlaceRow>) => void; onRemove: () => void }) {
   const [edit, setEdit] = useState(false)
-  const [f, setF] = useState({ kind: p.kind, name: p.name, description: p.description ?? '', hours: p.hours ?? '', booth_id: p.booth_id ?? '', lat: p.lat ?? '', lng: p.lng ?? '', sort_order: p.sort_order, image_url: p.image_url })
+  const [f, setF] = useState({ kind: p.kind, name: p.name, description: p.description ?? '', hours: p.hours ?? '', booth_id: p.booth_id ?? '', lat: p.lat ?? '', lng: p.lng ?? '', sort_order: p.sort_order, image_url: p.image_url, menu: (p.menu ?? []).map(m => m.price ? `${m.name} ${m.price}` : m.name).join('\n') })
   const booth = booths.find(b => b.id === p.booth_id)
   return (
     <li className={`py-2.5 ${selected ? 'bg-orange-50' : ''}`}>
@@ -149,7 +157,7 @@ function PlaceEditor({ p, booths, selected, onSelect, onSave, onRemove }: { p: P
         <Button variant="ghost" size="sm" className="!w-auto text-red-600" onClick={onRemove}>삭제</Button>
       </div>
       {edit && (
-        <form className="mt-3 grid gap-3 px-1 md:grid-cols-3" onSubmit={ev => { ev.preventDefault(); onSave({ kind: f.kind, name: f.name.trim(), description: f.description || null, hours: f.hours || null, booth_id: f.booth_id || null, lat: f.lat === '' ? null : Number(f.lat), lng: f.lng === '' ? null : Number(f.lng), sort_order: Number(f.sort_order) || 0, image_url: f.image_url }); setEdit(false) }}>
+        <form className="mt-3 grid gap-3 px-1 md:grid-cols-3" onSubmit={ev => { ev.preventDefault(); onSave({ kind: f.kind, name: f.name.trim(), description: f.description || null, hours: f.hours || null, booth_id: f.booth_id || null, lat: f.lat === '' ? null : Number(f.lat), lng: f.lng === '' ? null : Number(f.lng), sort_order: Number(f.sort_order) || 0, image_url: f.image_url, menu: parseMenu(f.menu) }); setEdit(false) }}>
           <Field label="종류">
             <select value={f.kind} onChange={x => setF({ ...f, kind: x.target.value as PlaceKind })} className="h-12 w-full rounded-xl border border-gray-300 bg-white px-3">
               {KINDS.map(k => <option key={k} value={k}>{PLACE_KIND_LABEL[k]}</option>)}
@@ -166,6 +174,9 @@ function PlaceEditor({ p, booths, selected, onSelect, onSave, onRemove }: { p: P
           <Field label="위도 (길찾기용, 선택)"><Input value={f.lat} onChange={x => setF({ ...f, lat: x.target.value as any })} inputMode="decimal" /></Field>
           <Field label="경도"><Input value={f.lng} onChange={x => setF({ ...f, lng: x.target.value as any })} inputMode="decimal" /></Field>
           <Field label="정렬"><Input type="number" value={f.sort_order} onChange={x => setF({ ...f, sort_order: +x.target.value })} /></Field>
+          {(f.kind === 'food' || f.kind === 'market') && (
+            <div className="md:col-span-3"><Field label="메뉴 (한 줄에 하나, '이름 가격' — 가격은 선택)" hint="예: 떡볶이 5,000원 / 핫도그 4,000원"><textarea value={f.menu} onChange={x => setF({ ...f, menu: x.target.value })} rows={4} className="w-full rounded-xl border border-gray-300 p-3 text-sm" /></Field></div>
+          )}
           <div className="md:col-span-3"><Field label="사진 (선택)"><ImageUpload value={f.image_url} folder={`events/${p.event_id}/places`} onChange={u => setF({ ...f, image_url: u })} aspect="aspect-[3/1] max-w-xs" /></Field></div>
           <div className="md:col-span-3 flex gap-2"><Button type="submit" className="!w-auto px-6">저장</Button><Button type="button" variant="ghost" className="!w-auto" onClick={() => setEdit(false)}>취소</Button></div>
         </form>

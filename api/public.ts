@@ -4,7 +4,7 @@
 // regions: 기본값이면 싱가포르(sin1)에서 실행돼 서울 Supabase 왕복이 매번 국외 경유 → 서울(icn1) 고정
 export const config = { runtime: 'edge', regions: ['icn1'] }
 
-const ALLOWED: Record<string, string> = { event_summary: 'p_slug', booth_summary: 'p_slug', event_board: 'p_slug', event_guide: 'p_slug' }
+const ALLOWED: Record<string, string> = { event_summary: 'p_slug', booth_summary: 'p_slug', event_board: 'p_slug', event_guide: 'p_slug', event_schedule: 'p_slug' }
 
 export default async function handler(req: Request) {
   const url = new URL(req.url)

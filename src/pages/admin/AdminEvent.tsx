@@ -7,6 +7,8 @@ import { Page, Card, Button, Field, Input, Alert, Spinner, Badge, Empty } from '
 import AdminStats from './AdminStats'
 import ImageUpload from '../../components/ImageUpload'
 import AdminMap from './AdminMap'
+import AdminSchedule from './AdminSchedule'
+import AdminStamp from './AdminStamp'
 
 interface Stats { booth_id: string; waiting: number; called: number; done: number; no_show: number; reserved: number }
 
@@ -40,7 +42,7 @@ export default function AdminEvent() {
   }, [eventId])
   useEffect(() => { const i = setInterval(stats.reload, 10000); return () => clearInterval(i) }, [stats.reload])
 
-  const [tab, setTab] = useState<'booths' | 'map' | 'stats' | 'settings' | 'codes' | 'notify'>('booths')
+  const [tab, setTab] = useState<'booths' | 'map' | 'schedule' | 'stamp' | 'stats' | 'settings' | 'codes' | 'notify'>('booths')
   if (ev.loading || booths.loading) return <Spinner />
   if (ev.error || !ev.data) return <Page><Alert kind="error">{ev.error}</Alert></Page>
   const e = ev.data
@@ -52,8 +54,8 @@ export default function AdminEvent() {
         <a className="rounded-lg bg-gray-100 px-2 py-1 text-xs" href={`${PUBLIC_BASE_URL}/e/${e.slug}`} target="_blank" rel="noreferrer">통합 QR 링크 /e/{e.slug}</a>
         <a className="rounded-lg bg-gray-100 px-2 py-1 text-xs" href={`${PUBLIC_BASE_URL}/board/${e.slug}`} target="_blank" rel="noreferrer">현황판 /board/{e.slug}</a>
         <div className="ml-auto flex gap-1 rounded-xl bg-gray-100 p-1 text-sm">
-          {(['booths', 'map', 'stats', 'settings', 'codes', 'notify'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)} className={`rounded-lg px-3 py-1.5 font-semibold ${tab === t ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{{ booths: '부스', map: '지도', stats: '통계', settings: '행사 설정', codes: '접속 코드', notify: '발송 로그' }[t]}</button>
+          {(['booths', 'map', 'schedule', 'stamp', 'stats', 'settings', 'codes', 'notify'] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)} className={`rounded-lg px-3 py-1.5 font-semibold ${tab === t ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{{ booths: '부스', map: '지도', schedule: '일정·안내', stamp: '스탬프', stats: '통계', settings: '행사 설정', codes: '접속 코드', notify: '발송 로그' }[t]}</button>
           ))}
         </div>
       </div>
@@ -90,6 +92,8 @@ export default function AdminEvent() {
         </>
       )}
       {tab === 'map' && <AdminMap e={e} booths={booths.data ?? []} onSaved={ev.reload} />}
+      {tab === 'schedule' && <AdminSchedule e={e} onSaved={ev.reload} />}
+      {tab === 'stamp' && <AdminStamp e={e} onSaved={ev.reload} />}
       {tab === 'stats' && <AdminStats eventId={eventId} eventName={e.name} />}
       {tab === 'settings' && <EventSettings e={e} onSaved={ev.reload} />}
       {tab === 'codes' && <AdminCodes eventId={eventId} />}

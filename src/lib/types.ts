@@ -64,6 +64,11 @@ export interface EventRow {
   map_note?: string | null
   lat?: number | null
   lng?: number | null
+  info_text?: string | null
+  contact_text?: string | null
+  stamp_enabled?: boolean
+  stamp_goal?: number | null
+  stamp_reward_text?: string | null
 }
 
 export interface SlotPublic {
@@ -160,7 +165,9 @@ export interface PlaceRow {
   lat: number | null
   lng: number | null
   sort_order: number
+  menu: MenuItem[]
 }
+export interface MenuItem { name: string; price?: string }
 
 export interface GuidePlace extends Omit<PlaceRow, 'event_id'> {
   booth: { id: string; slug: string; mode: BoothMode; is_paused: boolean; location: string | null; waiting_teams: number; today_left: number } | null
@@ -168,7 +175,29 @@ export interface GuidePlace extends Omit<PlaceRow, 'event_id'> {
 
 export interface EventGuide {
   event: Pick<EventRow, 'id' | 'name' | 'slug' | 'status' | 'notice' | 'starts_at' | 'ends_at' | 'image_url'> & {
-    map_image_url: string | null; map_note: string | null; lat: number | null; lng: number | null
+    map_image_url: string | null; map_note: string | null; lat: number | null; lng: number | null; stamp_enabled?: boolean
   }
   places: GuidePlace[]
+}
+
+// ───────── 일정·공지·안내 / 스탬프 (0037)
+export type ProgramKind = 'stage' | 'event' | 'workshop' | 'other'
+export const PROGRAM_KIND_LABEL: Record<ProgramKind, string> = { stage: '공연', event: '이벤트', workshop: '체험·워크숍', other: '기타' }
+export interface ProgramRow {
+  id: string; event_id: string; place_id: string | null; title: string; description: string | null
+  starts_at: string; ends_at: string; kind: ProgramKind
+}
+export interface NoticeRow {
+  id: string; event_id: string; title: string; body: string | null; urgent: boolean; pinned: boolean; publish_at: string; expires_at: string | null
+}
+export interface EventSchedule {
+  event: Pick<EventRow, 'id' | 'name' | 'slug' | 'status' | 'notice' | 'starts_at' | 'ends_at' | 'info_text' | 'contact_text' | 'stamp_enabled'>
+  programs: Array<Omit<ProgramRow, 'event_id' | 'place_id'> & { place: { id: string; name: string } | null }>
+  notices: Array<Pick<NoticeRow, 'id' | 'title' | 'body' | 'urgent' | 'pinned' | 'publish_at'>>
+}
+export interface StampSpotRow { id: string; event_id: string; place_id: string | null; name: string; code: string; sort_order: number }
+export interface StampStatus {
+  enabled: boolean; goal: number; total: number; reward_text: string | null
+  spots: Array<{ id: string; name: string; got: boolean }>
+  count: number; reward_code: string | null; completed_at: string | null; redeemed_at: string | null
 }

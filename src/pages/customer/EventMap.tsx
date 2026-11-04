@@ -98,6 +98,7 @@ export default function EventMap() {
               <div className="min-w-0 flex-1">
                 <div className="text-xs text-gray-500">{PLACE_KIND_LABEL[p.kind]}{p.hours ? ` · ${p.hours}` : ''}</div>
                 <div className="truncate text-[17px] font-bold text-gray-900">{p.name}</div>
+                {p.menu?.length > 0 && <div className="truncate text-xs text-gray-500">{p.menu.slice(0, 4).map(m => m.name).join(' · ')}{p.menu.length > 4 ? ' …' : ''}</div>}
               </div>
               {p.booth && <LiveLine b={p.booth} compact />}
             </button>
@@ -110,7 +111,7 @@ export default function EventMap() {
       {/* 선택 카드 (바텀 시트) */}
       {selected && <PlaceSheet p={selected} eventName={event.name} onClose={() => setSel(null)} />}
 
-      <CustomerNav slug={event.slug} active="map" />
+      <CustomerNav slug={event.slug} active="map" stamp={!!event.stamp_enabled} />
     </div>
   )
 }
@@ -158,6 +159,11 @@ function PlaceSheet({ p, eventName, onClose }: { p: GuidePlace; eventName: strin
             <div className="text-lg font-bold leading-tight text-gray-900">{p.name}</div>
             {p.description && <p className="mt-1 text-sm leading-snug text-gray-600">{p.description}</p>}
             {p.booth && <div className="mt-1.5"><LiveLine b={p.booth} /></div>}
+            {p.menu?.length > 0 && (
+              <ul className="mt-2 max-h-40 space-y-0.5 overflow-y-auto text-sm">
+                {p.menu.map((m, i) => <li key={i} className="flex justify-between gap-3"><span className="text-gray-800">{m.name}</span>{m.price && <span className="shrink-0 tabular-nums text-gray-500">{m.price}</span>}</li>)}
+              </ul>
+            )}
           </div>
           <button type="button" onClick={onClose} aria-label="닫기" className="-mr-1 -mt-1 rounded-full p-1.5 text-gray-400 active:bg-gray-100">✕</button>
         </div>
