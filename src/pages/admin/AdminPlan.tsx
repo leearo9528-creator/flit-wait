@@ -53,9 +53,13 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
   const [sel, setSel] = useState<Record<Section, boolean>>({ places: true, programs: true, notices: true, info: true, draws: true, survey: true, stamp: true })
   const [done, setDone] = useState<string | null>(null)
   const [existing, setExisting] = useState<{ places: { id: string; name: string }[]; programs: { id: string; title: string }[]; notices: { id: string; title: string }[]; draws: { id: string; title: string }[]; spots: { id: string; name: string; place_id: string | null }[] } | null>(null)
+  // 이름 매칭: 공백·기호 무시, '안내소 · 경품 교환' 과 '안내소' 처럼 구분자(· / ( —) 앞 머리가 같으면 같은 것으로 본다 (템플릿 샘플 ↔ 운영안)
   const norm = (x: string) => x.replace(/\s+/g, '').toLowerCase()
-  const has = (list: { name?: string; title?: string }[] | undefined, key: string) => !!list?.some(r => norm(r.name ?? r.title ?? '') === norm(key))
-  const missing = (list: { name?: string; title?: string }[] | undefined, keys: string[]) => (list ?? []).filter(r => !keys.some(k => norm(k) === norm(r.name ?? r.title ?? '')))
+  const head = (x: string) => norm(x.split(/[·(—\-/:]/)[0])
+  const same = (a: string, b: string) => norm(a) === norm(b) || (head(a).length >= 2 && head(a) === head(b))
+  const has = (list: { name?: string; title?: string }[] | undefined, key: string) => !!list?.some(r => same(r.name ?? r.title ?? '', key))
+  const missing = <T extends { name?: string; title?: string }>(list: T[] | undefined, keys: string[]) => (list ?? []).filter(r => !keys.some(k => same(k, r.name ?? r.title ?? '')))
+  const [prune, setPrune] = useState(false)   // 운영안에 없는 기존 항목 지우기 (템플릿 샘플 정리용)
 
   async function loadExisting() {
     const [pl, pr, no, dr, sp] = await Promise.all([
@@ -104,7 +108,9 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
       const ev: Record<string, unknown> = {}
       const nameToId = new Map<string, string>()
       for (const p of ex.places) nameToId.set(norm(p.name), p.id)
-      const find = <T extends { name?: string; title?: string }>(list: T[], key: string) => list.find(r => norm(r.name ?? r.title ?? '') === norm(key))
+      const idOf = (name: string) => nameToId.get(norm(name)) ?? [...nameToId.entries()].find(([k]) => same(k, name))?.[1]
+      const find = <T extends { name?: string; title?: string }>(list: T[], key: string) => list.find(r => same(r.name ?? r.title ?? '', key))
+      const del = async (table: string, ids: string[]) => { if (!ids.length) return; const { error } = await supabase.from(table).delete().in('id', ids); if (error) throw error }
       if (sel.places && plan.places.length) {
         let i = ex.places.length
         for (const p of plan.places) {
@@ -113,15 +119,21 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
           if (hit) { const { error } = await supabase.from('places').update({ ...common, kind: p.kind }).eq('id', hit.id); if (error) throw error }   // 위치(x,y)·booth_id 는 유지
           else { const { data, error } = await supabase.from('places').insert({ event_id: e.id, kind: p.kind, name: p.name, ...common, x: clamp(p.x), y: clamp(p.y), sort_order: (++i) * 10 }).select('id,name').single(); if (error) throw error; nameToId.set(norm(data.name), data.id) }
         }
+        if (prune) {
+          const gone = missing(ex.places, plan.places.map(p => p.name)).map(p => p.id)
+          await del('stamp_spots', ex.spots.filter(s => s.place_id && gone.includes(s.place_id)).map(s => s.id))   // 핀이 지워지면 그 지점 QR 도 무효
+          await del('places', gone)
+        }
       }
       if (sel.programs && plan.programs.length) {
         for (const p of plan.programs) {
           if (isNaN(new Date(p.starts_at).getTime()) || !(new Date(p.ends_at) > new Date(p.starts_at))) continue
-          const row = { kind: p.kind, description: p.description || null, place_id: p.place_name ? nameToId.get(norm(p.place_name)) ?? null : null, starts_at: p.starts_at, ends_at: p.ends_at }
+          const row = { kind: p.kind, description: p.description || null, place_id: p.place_name ? idOf(p.place_name) ?? null : null, starts_at: p.starts_at, ends_at: p.ends_at }
           const hit = find(ex.programs, p.title)
           const { error } = hit ? await supabase.from('programs').update(row).eq('id', hit.id) : await supabase.from('programs').insert({ event_id: e.id, title: p.title, ...row })
           if (error) throw error
         }
+        if (prune) await del('programs', missing(ex.programs, plan.programs.map(p => p.title)).map(p => p.id))
       }
       if (sel.notices && plan.notices.length) {
         for (const n of plan.notices) {
@@ -130,6 +142,7 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
           const { error } = hit ? await supabase.from('notices').update(row).eq('id', hit.id) : await supabase.from('notices').insert({ event_id: e.id, title: n.title, ...row })
           if (error) throw error
         }
+        if (prune) await del('notices', missing(ex.notices, plan.notices.map(n => n.title)).map(n => n.id))
       }
       if (sel.info) { if (plan.info_text) ev.info_text = plan.info_text; if (plan.contact_text) ev.contact_text = plan.contact_text }
       if (sel.draws && plan.draws?.length) {
@@ -147,8 +160,8 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
       if (sel.stamp && plan.stamp?.enabled) {
         ev.stamp_enabled = true; if (plan.stamp.reward_text) ev.stamp_reward_text = plan.stamp.reward_text
         // 지점은 이미 있으면 그대로(QR code 유지). 핀 이름이 지점에 없을 때만 추가
-        const newSpots = (plan.stamp.spot_names ?? []).filter(n => nameToId.has(norm(n)) && !find(ex.spots, n))
-        if (newSpots.length) { const { error } = await supabase.from('stamp_spots').insert(newSpots.map((n, i) => ({ event_id: e.id, place_id: nameToId.get(norm(n)), name: n, sort_order: (ex.spots.length + i + 1) * 10 }))); if (error) throw error }
+        const newSpots = (plan.stamp.spot_names ?? []).filter(n => idOf(n) && !find(ex.spots, n))
+        if (newSpots.length) { const { error } = await supabase.from('stamp_spots').insert(newSpots.map((n, i) => ({ event_id: e.id, place_id: idOf(n), name: n, sort_order: (ex.spots.length + i + 1) * 10 }))); if (error) throw error }
       }
       if (Object.keys(ev).length) { const { error } = await supabase.from('events').update(ev).eq('id', e.id); if (error) throw error }
       setDone('들어갔어요. 이미 있던 핀은 위치와 스탬프 QR 을 그대로 두고 내용만 바꿨어요. 지도·일정·안내 탭에서 다듬어 주세요.')
@@ -158,7 +171,7 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
   }
 
   const Tag = ({ isNew }: { isNew: boolean }) => <span className={`ml-1 rounded px-1 text-[10px] ${isNew ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>{isNew ? '추가' : '갱신'}</span>
-  const Gone = ({ items }: { items: { name?: string; title?: string }[] }) => items.length ? <div className="mt-2 text-xs text-amber-700">운영안에 없음 (지우진 않아요): {items.map(i => i.name ?? i.title).join(', ')}</div> : null
+  const Gone = ({ items }: { items: { name?: string; title?: string }[] }) => items.length ? <div className="mt-2 text-xs text-amber-700">운영안에 없음{prune ? ' → 지워져요' : ' (그대로 둬요)'}: {items.map(i => i.name ?? i.title).join(', ')}</div> : null
 
   const Sec = ({ k, title, n, children }: { k: Section; title: string; n: number; children: React.ReactNode }) => (
     <div className={`rounded-xl border p-3 ${sel[k] ? 'border-gray-200' : 'border-dashed border-gray-200 opacity-50'}`}>
@@ -219,7 +232,8 @@ export default function AdminPlan({ e, onSaved }: { e: EventRow; onSaved: () => 
               {plan.stamp?.enabled ? <div>{plan.stamp.reward_text && <div>보상: {plan.stamp.reward_text}</div>}<div className="text-xs text-gray-500">지점: {(plan.stamp.spot_names ?? []).join(', ') || '(지도 핀 중에서 골라야 해요)'}</div></div> : <div className="text-gray-400">운영안에 없음</div>}
             </Sec>
           </div>
-          <p className="mt-3 text-xs text-gray-500">같은 이름은 갱신, 새 이름은 추가, 운영안에서 빠진 건 그대로 둬요. 핀 위치·스탬프 QR·대기 부스 연결은 안 바뀌니 초안으로 QR 을 먼저 뽑고 확정안으로 다시 돌려도 돼요.</p>
+          <label className="mt-3 flex items-start gap-2 text-sm"><input type="checkbox" checked={prune} onChange={x => setPrune(x.target.checked)} className="mt-1" /><span><b>운영안에 없는 핀·일정·공지 지우기</b><span className="block text-xs text-gray-500">템플릿 샘플을 정리할 때 켜세요. 지워지는 핀에 붙은 스탬프 지점도 같이 지워져 그 QR 은 못 써요.</span></span></label>
+          <p className="mt-2 text-xs text-gray-500">같은 이름은 갱신, 새 이름은 추가, 운영안에서 빠진 건 그대로 둬요. 핀 위치·스탬프 QR·대기 부스 연결은 안 바뀌니 초안으로 QR 을 먼저 뽑고 확정안으로 다시 돌려도 돼요.</p>
         </Card>
       )}
     </div>
