@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { rpc } from '../../lib/supabase'
 import { useAsync, LS } from '../../lib/util'
@@ -25,8 +25,10 @@ export default function StampTour() {
   const [toast, setToast] = useState<{ kind: 'success' | 'info' | 'error'; text: string } | null>(null)
 
   // QR 로 들어온 경우: 적립 → 결과 안내 → 카드 화면으로 주소 정리
+  const collected = useRef<string | null>(null)  // StrictMode 이중 실행·재렌더에서 같은 코드를 두 번 보내지 않게
   useEffect(() => {
-    if (!code) return
+    if (!code || collected.current === code) return
+    collected.current = code
     ;(async () => {
       try {
         const r = await rpc<{ spot: string; new: boolean; count: number; goal: number; completed: boolean }>('stamp_collect', { p_slug: slug, p_code: code, p_card: token })
