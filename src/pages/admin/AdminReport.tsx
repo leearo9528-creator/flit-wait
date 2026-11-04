@@ -18,6 +18,7 @@ interface Report {
  */
 export default function AdminReport({ eventId }: { eventId: string }) {
   const { data: r, error, loading } = useAsync<Report>(async () => { const { data, error } = await supabase.rpc('admin_event_report', { p_event: eventId }); if (error) throw error; return data }, [eventId])
+  const extra = useAsync<any>(async () => { const { data } = await supabase.rpc('admin_event_report_extra', { p_event: eventId }); return data }, [eventId])
   if (loading) return <Spinner />
   if (error || !r) return <Alert kind="error">{error ?? '권한이 없어요.'}</Alert>
   const t = r.tickets, v = r.views, s = r.stamps
@@ -74,10 +75,29 @@ export default function AdminReport({ eventId }: { eventId: string }) {
           </Section>
         )}
 
+        {extra.data?.survey?.responses > 0 && (
+          <Section title={`만족도 설문 · 응답 ${extra.data.survey.responses}`}>
+            <ul className="space-y-1.5 text-sm">
+              {extra.data.survey.questions.map((q: any) => (
+                <li key={q.id} className="flex flex-wrap items-baseline gap-2"><span className="text-gray-700">{q.label}</span>
+                  {q.type === 'rating' && <b>평균 {q.avg}점</b>}
+                  {q.type === 'choice' && Object.entries(q.dist ?? {}).sort((a: any, b: any) => b[1] - a[1]).map(([k, v]: any) => <span key={k} className="rounded bg-gray-50 px-1.5 text-xs">{k} {v}</span>)}
+                  {q.type === 'text' && <span className="text-xs text-gray-500">주관식 {q.texts?.length ?? 0}건</span>}
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+        {extra.data?.draws?.length > 0 && (
+          <Section title="럭키드로우">
+            <ul className="text-sm">{extra.data.draws.map((d: any, i: number) => <li key={i}>{d.title} — 응모 <b>{d.entries}</b>명 · 당첨 {d.winners}명 · {d.status === 'drawn' ? '추첨 완료' : d.status}</li>)}</ul>
+          </Section>
+        )}
         <Section title="운영 콘텐츠 · 알림">
           <ul className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-4">
             <li>지도 핀 <b>{r.content.places}</b></li><li>일정 <b>{r.content.programs}</b></li><li>공지 <b>{r.content.notices}</b> (긴급 {r.content.urgent_notices})</li>
             <li>알림톡·SMS 발송 <b>{sent}</b>{failed ? <span className="text-red-600"> · 실패 {failed}</span> : null}</li>
+            {extra.data?.vendors && <li>셀프 등록 업체 <b>{extra.data.vendors.approved}</b> (대기 {extra.data.vendors.pending})</li>}
           </ul>
         </Section>
 

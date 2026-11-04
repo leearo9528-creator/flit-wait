@@ -10,6 +10,7 @@ import AdminMap from './AdminMap'
 import AdminSchedule from './AdminSchedule'
 import AdminStamp from './AdminStamp'
 import AdminReport from './AdminReport'
+import AdminEngage from './AdminEngage'
 
 interface Stats { booth_id: string; waiting: number; called: number; done: number; no_show: number; reserved: number }
 
@@ -43,7 +44,7 @@ export default function AdminEvent() {
   }, [eventId])
   useEffect(() => { const i = setInterval(stats.reload, 10000); return () => clearInterval(i) }, [stats.reload])
 
-  const [tab, setTab] = useState<'booths' | 'map' | 'schedule' | 'stamp' | 'stats' | 'report' | 'settings' | 'codes' | 'notify'>('booths')
+  const [tab, setTab] = useState<'booths' | 'map' | 'schedule' | 'stamp' | 'engage' | 'stats' | 'report' | 'settings' | 'codes' | 'notify'>('booths')
   if (ev.loading || booths.loading) return <Spinner />
   if (ev.error || !ev.data) return <Page><Alert kind="error">{ev.error}</Alert></Page>
   const e = ev.data
@@ -55,8 +56,8 @@ export default function AdminEvent() {
         <a className="rounded-lg bg-gray-100 px-2 py-1 text-xs" href={`${PUBLIC_BASE_URL}/e/${e.slug}`} target="_blank" rel="noreferrer">손님 링크(통합 QR) /e/{e.slug}</a>
         <a className="rounded-lg bg-gray-100 px-2 py-1 text-xs" href={`${PUBLIC_BASE_URL}/board/${e.slug}`} target="_blank" rel="noreferrer">현황판 /board/{e.slug}</a>
         <div className="ml-auto flex gap-1 rounded-xl bg-gray-100 p-1 text-sm">
-          {(['booths', 'map', 'schedule', 'stamp', 'stats', 'report', 'settings', 'codes', 'notify'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)} className={`rounded-lg px-3 py-1.5 font-semibold ${tab === t ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{{ booths: '부스', map: '지도', schedule: '일정·안내', stamp: '스탬프', stats: '통계', report: '리포트', settings: '행사 설정', codes: '접속 코드', notify: '발송 로그' }[t]}</button>
+          {(['booths', 'map', 'schedule', 'stamp', 'engage', 'stats', 'report', 'settings', 'codes', 'notify'] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)} className={`rounded-lg px-3 py-1.5 font-semibold ${tab === t ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{{ booths: '부스', map: '지도', schedule: '일정·안내', stamp: '스탬프', engage: '참여·셀러', stats: '통계', report: '리포트', settings: '행사 설정', codes: '접속 코드', notify: '발송 로그' }[t]}</button>
           ))}
         </div>
       </div>
@@ -95,6 +96,7 @@ export default function AdminEvent() {
       {tab === 'map' && <AdminMap e={e} booths={booths.data ?? []} onSaved={ev.reload} />}
       {tab === 'schedule' && <AdminSchedule e={e} onSaved={ev.reload} />}
       {tab === 'stamp' && <AdminStamp e={e} onSaved={ev.reload} />}
+      {tab === 'engage' && <AdminEngage e={e} onSaved={ev.reload} />}
       {tab === 'report' && <AdminReport eventId={eventId} />}
       {tab === 'stats' && <AdminStats eventId={eventId} eventName={e.name} />}
       {tab === 'settings' && <EventSettings e={e} onSaved={ev.reload} />}
@@ -136,12 +138,12 @@ function NewBooth({ eventId, next, onDone }: { eventId: string; next: number; on
 }
 
 function EventSettings({ e, onSaved }: { e: EventRow; onSaved: () => void }) {
-  const [f, setF] = useState({ name: e.name, status: e.status, notice: e.notice ?? '', privacy_text: e.privacy_text, data_retention_days: e.data_retention_days, image_url: e.image_url ?? null as string | null })
+  const [f, setF] = useState({ name: e.name, status: e.status, notice: e.notice ?? '', privacy_text: e.privacy_text, data_retention_days: e.data_retention_days, image_url: e.image_url ?? null as string | null, accent_color: e.accent_color ?? '' })
   const [msg, setMsg] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   async function save() {
     setBusy(true); setMsg(null)
-    const { error } = await supabase.from('events').update({ ...f, notice: f.notice || null }).eq('id', e.id)
+    const { error } = await supabase.from('events').update({ ...f, notice: f.notice || null, accent_color: /^#[0-9a-fA-F]{6}$/.test(f.accent_color) ? f.accent_color : null }).eq('id', e.id)
     setMsg(error ? error.message : '저장했습니다.'); setBusy(false); onSaved()
   }
   async function purge() {
@@ -161,6 +163,9 @@ function EventSettings({ e, onSaved }: { e: EventRow; onSaved: () => void }) {
         </Field>
         <div className="md:col-span-2"><Field label="공지 문구 (손님 화면 상단, 비우면 숨김)"><Input value={f.notice} onChange={x => setF({ ...f, notice: x.target.value })} placeholder="예: 우천으로 15시 이후 체험 중단" /></Field></div>
         <div className="md:col-span-2"><Field label="개인정보 동의 문구"><textarea value={f.privacy_text} onChange={x => setF({ ...f, privacy_text: x.target.value })} rows={3} className="w-full rounded-xl border border-gray-300 p-3 text-sm" /></Field></div>
+        <Field label="테마 색 (행사 홈·강조 버튼)" hint="비우면 기본 주황. 겨울 페어는 #1f3fd0(코발트)·#b91c1c(레드) 추천">
+          <div className="flex items-center gap-2"><input type="color" value={/^#[0-9a-fA-F]{6}$/.test(f.accent_color) ? f.accent_color : '#f97316'} onChange={x => setF({ ...f, accent_color: x.target.value })} className="h-12 w-14 cursor-pointer rounded-lg border border-gray-300 bg-white p-1" /><Input value={f.accent_color} onChange={x => setF({ ...f, accent_color: x.target.value })} placeholder="#f97316" /></div>
+        </Field>
         <Field label="보존기간 (행사 종료 후 N일 뒤 자동 파기)"><Input type="number" value={f.data_retention_days} onChange={x => setF({ ...f, data_retention_days: +x.target.value })} /></Field>
       </div>
       {msg && <div className="mt-4"><Alert kind={msg.includes('했습니다') ? 'success' : 'error'}>{msg}</Alert></div>}

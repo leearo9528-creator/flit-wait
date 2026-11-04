@@ -69,6 +69,10 @@ export interface EventRow {
   stamp_enabled?: boolean
   stamp_goal?: number | null
   stamp_reward_text?: string | null
+  accent_color?: string | null
+  template?: string | null
+  vendor_token?: string | null
+  vendor_open?: boolean
 }
 
 export interface SlotPublic {
@@ -191,7 +195,7 @@ export interface NoticeRow {
   id: string; event_id: string; title: string; body: string | null; urgent: boolean; pinned: boolean; publish_at: string; expires_at: string | null
 }
 export interface EventSchedule {
-  event: Pick<EventRow, 'id' | 'name' | 'slug' | 'status' | 'notice' | 'starts_at' | 'ends_at' | 'info_text' | 'contact_text' | 'stamp_enabled' | 'image_url' | 'map_image_url'> & { booth_count: number }
+  event: Pick<EventRow, 'id' | 'name' | 'slug' | 'status' | 'notice' | 'starts_at' | 'ends_at' | 'info_text' | 'contact_text' | 'stamp_enabled' | 'image_url' | 'map_image_url' | 'accent_color'> & { booth_count: number; survey_enabled?: boolean; draw_open?: boolean }
   programs: Array<Omit<ProgramRow, 'event_id' | 'place_id'> & { place: { id: string; name: string } | null }>
   notices: Array<Pick<NoticeRow, 'id' | 'title' | 'body' | 'urgent' | 'pinned' | 'publish_at'>>
 }
@@ -201,3 +205,10 @@ export interface StampStatus {
   spots: Array<{ id: string; name: string; got: boolean }>
   count: number; reward_code: string | null; completed_at: string | null; redeemed_at: string | null
 }
+
+// ───────── 럭키드로우 · 설문 · 셀러 등록 · 테마 (0039)
+export interface DrawRow { id: string; event_id: string; title: string; prize: string | null; description: string | null; draw_at: string | null; winners_count: number; require_stamp: boolean; status: 'draft' | 'open' | 'closed' | 'drawn' }
+export interface DrawPublic extends Omit<DrawRow, 'event_id'> { entries: number; mine: { name: string; won: boolean } | null; winners: { name: string; phone_tail: string }[] }
+export type SurveyQuestion = { id: string; type: 'rating' | 'choice' | 'text'; label: string; options?: string[] }
+export interface SurveyPublic { enabled: boolean; title: string | null; questions: SurveyQuestion[]; thanks: string | null; done: boolean }
+export interface VendorSubmissionRow { id: string; event_id: string; kind: 'market' | 'food' | 'booth' | 'other'; name: string; description: string | null; menu: MenuItem[]; image_url: string | null; contact: string | null; status: 'pending' | 'approved' | 'rejected'; place_id: string | null; created_at: string }

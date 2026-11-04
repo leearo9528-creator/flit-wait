@@ -43,6 +43,7 @@ export default function EventHub() {
   const urgent = notices.filter(n => n.urgent)
   const latest = notices.find(n => !n.urgent)
   const closed = event.status !== 'open'
+  const accent = event.accent_color || '#f97316'
 
   return (
     <div className="mx-auto min-h-dvh max-w-md bg-white pb-24">
@@ -72,7 +73,7 @@ export default function EventHub() {
           <Link to={`/e/${slug}/schedule`} className="block rounded-2xl bg-gray-50 p-4 ring-1 ring-gray-200">
             {live.length > 0 ? (
               <>
-                <div className="flex items-center gap-2 text-xs"><span className="rounded-full bg-orange-500 px-2 py-0.5 font-bold text-white">지금 진행 중</span></div>
+                <div className="flex items-center gap-2 text-xs"><span className="rounded-full px-2 py-0.5 font-bold text-white" style={{ background: accent }}>지금 진행 중</span></div>
                 {live.slice(0, 2).map(p => (
                   <div key={p.id} className="mt-2">
                     <div className="text-[17px] font-bold text-gray-900">{p.title}</div>
@@ -97,9 +98,15 @@ export default function EventHub() {
           <Menu to={`/e/${slug}/map`} icon="🗺️" title="행사장 지도" sub={event.map_image_url ? '부스·먹거리·화장실' : '준비 중'} />
           <Menu to={`/e/${slug}/schedule`} icon="📅" title="일정·안내" sub={data.programs.length ? `일정 ${data.programs.length}개` : '공지·안내'} />
           {event.stamp_enabled
-            ? <Menu to={`/e/${slug}/stamp`} icon="🔖" title="스탬프 투어" sub={stamp.data ? `${stamp.data.count} / ${stamp.data.goal} 모음` : '부스 돌고 경품'} accent />
+            ? <Menu to={`/e/${slug}/stamp`} icon="🔖" title="스탬프 투어" sub={stamp.data ? `${stamp.data.count} / ${stamp.data.goal} 모음` : '부스 돌고 경품'} accent={accent} />
             : <Menu to={`/e/${slug}/my`} icon="🎫" title="내 대기·예약" sub="현황 확인" />}
         </div>
+        {(event.draw_open || event.survey_enabled) && (
+          <div className="grid grid-cols-2 gap-3">
+            {event.draw_open && <Menu to={`/e/${slug}/draw`} icon="🎁" title="럭키드로우" sub="응모하고 경품 받기" accent={event.stamp_enabled ? undefined : accent} />}
+            {event.survey_enabled && <Menu to={`/e/${slug}/survey`} icon="💬" title="한마디 남기기" sub="30초 만족도 설문" />}
+          </div>
+        )}
 
         {latest && (
           <Link to={`/e/${slug}/schedule`} className="block rounded-xl px-1 py-1 text-sm text-gray-600">
@@ -113,9 +120,9 @@ export default function EventHub() {
   )
 }
 
-function Menu({ to, icon, title, sub, accent }: { to: string; icon: string; title: string; sub: string; accent?: boolean }) {
+function Menu({ to, icon, title, sub, accent }: { to: string; icon: string; title: string; sub: string; accent?: string }) {
   return (
-    <Link to={to} className={`flex flex-col rounded-2xl p-4 ring-1 active:scale-[0.98] ${accent ? 'bg-orange-500 text-white ring-orange-500' : 'bg-white text-gray-900 ring-gray-200'}`}>
+    <Link to={to} className={`flex flex-col rounded-2xl p-4 ring-1 active:scale-[0.98] ${accent ? 'text-white' : 'bg-white text-gray-900 ring-gray-200'}`} style={accent ? { background: accent, boxShadow: `0 0 0 1px ${accent}` } : undefined}>
       <span className="text-2xl leading-none">{icon}</span>
       <span className="mt-3 text-[17px] font-bold">{title}</span>
       <span className={`mt-0.5 text-xs ${accent ? 'text-white/80' : 'text-gray-500'}`}>{sub}</span>

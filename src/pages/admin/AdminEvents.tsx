@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useAsync, fmtDate } from '../../lib/util'
 import { EventRow } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Alert, Spinner, Badge, Empty } from '../../components/ui'
+import { TEMPLATES, applyTemplate, type TemplateId } from '../../lib/templates'
 
 export default function AdminEvents() {
   // events 는 손님 화면 때문에 공개 읽기라, 담당자 코드로 들어와도 전체 행사가 보였다 → 내 관리 범위로 필터
@@ -52,18 +53,31 @@ export default function AdminEvents() {
 
 function NewEvent({ onDone }: { onDone: () => void }) {
   const [f, setF] = useState({ name: '', slug: '', starts_at: '', ends_at: '' })
+  const [tpl, setTpl] = useState<TemplateId>('winter-fair')
   const [err, setErr] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setErr(null)
     // 셀프 개설 RPC — 만든 사람이 자동으로 그 행사의 담당자가 된다 (owner 불필요)
-    const { error } = await supabase.rpc('create_my_event', { p_name: f.name, p_slug: f.slug, p_starts_at: new Date(f.starts_at).toISOString(), p_ends_at: new Date(f.ends_at).toISOString() })
+    const { data: id, error } = await supabase.rpc('create_my_event', { p_name: f.name, p_slug: f.slug, p_starts_at: new Date(f.starts_at).toISOString(), p_ends_at: new Date(f.ends_at).toISOString() })
     if (error) { setErr(error.message.replace(/^[A-Z0-9]{5}:\s*/, '')); setBusy(false); return }
+    try { await applyTemplate(tpl, id as string, new Date(f.starts_at).toISOString()) } catch (e: any) { setErr(`행사는 만들어졌지만 템플릿 일부를 못 넣었어요: ${e.message}`) }
     setBusy(false); onDone()
   }
   return (
     <Card>
       <form onSubmit={submit} className="grid gap-3 md:grid-cols-2">
+        <div className="md:col-span-2">
+          <div className="mb-1.5 text-sm font-medium text-gray-700">템플릿</div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {TEMPLATES.map(t => (
+              <button key={t.id} type="button" onClick={() => setTpl(t.id)} className={`rounded-xl p-3 text-left ring-1 ${tpl === t.id ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white ring-gray-300'}`}>
+                <div className="flex items-center gap-2 font-semibold">{t.accent && <span className="inline-block h-3 w-3 rounded-full" style={{ background: t.accent }} />}{t.name}</div>
+                <div className={`mt-0.5 text-xs ${tpl === t.id ? 'text-white/70' : 'text-gray-500'}`}>{t.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
         <Field label="행사명"><Input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} required /></Field>
         <Field label="주소 (영문·숫자·하이픈)" hint="손님 링크가 /e/주소 가 돼요"><Input value={f.slug} onChange={e => setF({ ...f, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })} required placeholder="seongnam-2026" /></Field>
         <Field label="시작"><Input type="datetime-local" value={f.starts_at} onChange={e => setF({ ...f, starts_at: e.target.value })} required /></Field>
