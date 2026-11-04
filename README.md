@@ -5,11 +5,13 @@
 
 **문서**: 전체 안내 `docs/시스템_매뉴얼.md` · 서버 운영 `OPERATIONS.md` · 현장 장애 `docs/장애대응_런북.md` · 스태프 `docs/staff-manual-seongnam-2026.html`
 
-- 프론트: React + Vite + Tailwind → Vercel (`wait.flitunion.com`)
+- 프론트: React + Vite + Tailwind + **PWA**(vite-plugin-pwa: 앱 셸 프리캐시, /api/public 네트워크 우선·오프라인 폴백, 이미지 캐시) → Vercel (`wait.flitunion.com`)
 - 백엔드: Supabase 프로젝트 `flit-wait` (`mqrafomyngxsixakbnzu`, 서울) — Postgres RPC + RLS + Realtime + Edge Function + pg_cron
 - 발송: 네이버 클라우드 SENS 알림톡 + SMS failover (Edge Function `notify`)
 
 ## 라우트
+
+- `/e/:slug` 행사 홈(대문) · `/e/:slug/booths` 체험부스 목록 · `/e/:slug/map` 지도 · `/e/:slug/schedule` 일정·안내 · `/e/:slug/stamp` 스탬프
 
 | 경로 | 대상 | 설명 |
 |---|---|---|
@@ -20,7 +22,13 @@
 | `/e/:slug/stamp` · `/stamp/:code` | 손님 | **스탬프 투어** — 부스 QR(:code) 찍으면 적립, 목표 달성 시 6자리 교환 코드. 기기별 카드(localStorage) (0037, 관리자 > 스탬프 탭: 지점·QR 인쇄·교환 확인) |
 | `/t/:token` | 손님 | 내 대기/예약 상태 (알림톡 버튼 링크), 취소 |
 | `/s/:slug` | 스태프 | PIN 로그인 → `/s/:slug/board` 대기열·회차 체크인 |
-| `/admin` | 관리자 | **접속 코드** 로그인 (admin_codes · Edge Function admin-login), 행사·부스·회차·설정·PIN·QR·통계·코드 발급·발송 로그 |
+| `/admin` | 기획자 | **이메일 매직링크·카카오**(셀프 가입, `create_my_event` 로 자기 행사 개설) 또는 **접속 코드** 로그인 (admin_codes · Edge Function admin-login), 행사·부스·회차·설정·PIN·QR·통계·코드 발급·발송 로그 |
+
+## 축제 앱 (2026-11-04 확장)
+
+기획자가 직접 넣는 콘텐츠: 지도 핀(`places`)·타임테이블(`programs`)·공지(`notices`)·안내문·스탬프 투어(`stamp_*`). 마이그레이션 0036~0038.
+관리자 탭: 부스 / 지도 / 일정·안내 / 스탬프 / 통계 / **리포트**(`admin_event_report` 집계 한 장, 인쇄→PDF) / 행사 설정 / 접속 코드 / 발송 로그.
+방문 집계 `event_views`(`track_view`, 개인정보 없음). ⚠️ 카카오 로그인은 Supabase Auth > Providers > Kakao 설정(REST 키·리다이렉트) 후에 동작, 이메일 매직링크는 Site URL/Redirect 에 `/admin` 허용 필요.
 
 ## 구조
 

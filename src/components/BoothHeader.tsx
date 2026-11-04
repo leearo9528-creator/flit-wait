@@ -32,7 +32,7 @@ export default function BoothHeader({ booth, event, live, closed }: {
           </div>
         )}
         {event.slug && (
-          <Link to={`/e/${event.slug}`} aria-label="목록으로" className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-2xl text-white backdrop-blur">‹</Link>
+          <Link to={`/e/${event.slug}/booths`} aria-label="목록으로" className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/35 text-2xl text-white backdrop-blur">‹</Link>
         )}
       </div>
       <div className="px-4 pt-5">

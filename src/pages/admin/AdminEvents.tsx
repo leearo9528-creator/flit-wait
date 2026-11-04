@@ -24,8 +24,8 @@ export default function AdminEvents() {
   return (
     <Page title="행사" wide>
       {error && <Alert kind="error">{error}</Alert>}
-      {error?.includes('permission') || (data && data.length === 0 && !open) ? (
-        <Alert kind="info">행사가 없거나 관리자 권한이 없습니다. 처음이라면 Supabase SQL에서 <code>admins</code> 테이블에 내 user_id 를 owner 로 넣어주세요.</Alert>
+      {data && data.length === 0 && !open ? (
+        <Alert kind="info">아직 행사가 없어요. '새 행사'를 눌러 첫 행사를 만들어 보세요. 만들면 QR 링크가 바로 나와요.</Alert>
       ) : null}
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {data?.map(e => (
@@ -43,9 +43,9 @@ export default function AdminEvents() {
         ))}
       </div>
       {data?.length === 0 && <Empty>등록된 행사가 없습니다.</Empty>}
-      {scope?.owner && <div className="mt-6">
+      <div className="mt-6">
         {!open ? <Button variant="secondary" onClick={() => setOpen(true)}>+ 새 행사</Button> : <NewEvent onDone={() => { setOpen(false); reload() }} />}
-      </div>}
+      </div>
     </Page>
   )
 }
@@ -56,18 +56,16 @@ function NewEvent({ onDone }: { onDone: () => void }) {
   const [busy, setBusy] = useState(false)
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setErr(null)
-    const { data: u } = await supabase.auth.getUser()
-    const { data, error } = await supabase.from('events').insert({ ...f, starts_at: new Date(f.starts_at).toISOString(), ends_at: new Date(f.ends_at).toISOString(), created_by: u.user?.id }).select('id').single()
-    if (error) { setErr(error.message); setBusy(false); return }
-    // 생성자를 이 행사의 manager 로 (owner 가 아니면 RLS 로 insert 실패할 수 있음 → 무시)
-    await supabase.from('admins').insert({ user_id: u.user!.id, event_id: data.id, role: 'manager' })
+    // 셀프 개설 RPC — 만든 사람이 자동으로 그 행사의 담당자가 된다 (owner 불필요)
+    const { error } = await supabase.rpc('create_my_event', { p_name: f.name, p_slug: f.slug, p_starts_at: new Date(f.starts_at).toISOString(), p_ends_at: new Date(f.ends_at).toISOString() })
+    if (error) { setErr(error.message.replace(/^[A-Z0-9]{5}:\s*/, '')); setBusy(false); return }
     setBusy(false); onDone()
   }
   return (
     <Card>
       <form onSubmit={submit} className="grid gap-3 md:grid-cols-2">
         <Field label="행사명"><Input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} required /></Field>
-        <Field label="slug (URL)"><Input value={f.slug} onChange={e => setF({ ...f, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })} required placeholder="seongnam-2026" /></Field>
+        <Field label="주소 (영문·숫자·하이픈)" hint="손님 링크가 /e/주소 가 돼요"><Input value={f.slug} onChange={e => setF({ ...f, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })} required placeholder="seongnam-2026" /></Field>
         <Field label="시작"><Input type="datetime-local" value={f.starts_at} onChange={e => setF({ ...f, starts_at: e.target.value })} required /></Field>
         <Field label="종료"><Input type="datetime-local" value={f.ends_at} onChange={e => setF({ ...f, ends_at: e.target.value })} required /></Field>
         {err && <div className="md:col-span-2"><Alert kind="error">{err}</Alert></div>}

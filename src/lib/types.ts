@@ -191,7 +191,7 @@ export interface NoticeRow {
   id: string; event_id: string; title: string; body: string | null; urgent: boolean; pinned: boolean; publish_at: string; expires_at: string | null
 }
 export interface EventSchedule {
-  event: Pick<EventRow, 'id' | 'name' | 'slug' | 'status' | 'notice' | 'starts_at' | 'ends_at' | 'info_text' | 'contact_text' | 'stamp_enabled'>
+  event: Pick<EventRow, 'id' | 'name' | 'slug' | 'status' | 'notice' | 'starts_at' | 'ends_at' | 'info_text' | 'contact_text' | 'stamp_enabled' | 'image_url' | 'map_image_url'> & { booth_count: number }
   programs: Array<Omit<ProgramRow, 'event_id' | 'place_id'> & { place: { id: string; name: string } | null }>
   notices: Array<Pick<NoticeRow, 'id' | 'title' | 'body' | 'urgent' | 'pinned' | 'publish_at'>>
 }

@@ -96,7 +96,8 @@ language sql stable security definer set search_path = public as $$
   select jsonb_build_object(
     'event', jsonb_build_object('id', e.id, 'name', e.name, 'slug', e.slug, 'status', e.status, 'notice', e.notice,
                                 'starts_at', e.starts_at, 'ends_at', e.ends_at, 'info_text', e.info_text, 'contact_text', e.contact_text,
-                                'stamp_enabled', e.stamp_enabled),
+                                'stamp_enabled', e.stamp_enabled, 'image_url', e.image_url, 'map_image_url', e.map_image_url,
+                                'booth_count', (select count(*) from booths b where b.event_id = e.id)),
     'programs', (select coalesce(jsonb_agg(jsonb_build_object(
         'id', p.id, 'title', p.title, 'description', p.description, 'starts_at', p.starts_at, 'ends_at', p.ends_at, 'kind', p.kind,
         'place', case when pl.id is null then null else jsonb_build_object('id', pl.id, 'name', pl.name) end

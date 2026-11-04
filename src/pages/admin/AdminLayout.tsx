@@ -19,8 +19,8 @@ export default function AdminLayout() {
   return (
     <div className="min-h-dvh">
       <nav className="sticky top-0 z-10 flex h-12 items-center gap-4 border-b bg-white/90 px-4 text-sm backdrop-blur">
-        <Link to="/admin" className="font-bold">FLIT WAIT · 관리자</Link>
-        <span className="ml-auto text-gray-500">{(session.user.user_metadata as any)?.label ?? '관리자'}</span>
+        <Link to="/admin" className="font-bold">FLIT 축제 앱 · 행사 관리</Link>
+        <span className="ml-auto text-gray-500">{(session.user.user_metadata as any)?.label ?? session.user.email ?? '관리자'}</span>
         <button onClick={() => supabase.auth.signOut()} className="text-gray-600 underline">로그아웃</button>
       </nav>
       <Outlet />
@@ -29,6 +29,56 @@ export default function AdminLayout() {
 }
 
 function Login() {
+  const [mode, setMode] = useState<'email' | 'code'>('email')
+  return (
+    <Page title="기획자 · 행사 관리" sub="FLIT 축제 앱">
+      <div className="mb-3 flex gap-1 rounded-xl bg-gray-100 p-1 text-sm">
+        {(['email', 'code'] as const).map(m => (
+          <button key={m} type="button" onClick={() => setMode(m)} className={`flex-1 rounded-lg py-2 font-semibold ${mode === m ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{m === 'email' ? '이메일·카카오로 시작' : '접속 코드'}</button>
+        ))}
+      </div>
+      {mode === 'email' ? <EmailLogin /> : <CodeLogin />}
+    </Page>
+  )
+}
+
+/** 셀프 가입 — 이메일 매직링크 또는 카카오. 로그인 후 '새 행사' 로 자기 행사를 만들면 그 행사의 담당자가 된다 */
+function EmailLogin() {
+  const [email, setEmail] = useState('')
+  const [sent, setSent] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const redirectTo = `${window.location.origin}/admin`
+  async function sendLink(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true); setErr(null)
+    const { error } = await supabase.auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: redirectTo } })
+    if (error) setErr(error.message); else setSent(true)
+    setBusy(false)
+  }
+  async function kakao() {
+    setErr(null)
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'kakao', options: { redirectTo } })
+    if (error) setErr(`카카오 로그인을 아직 쓸 수 없어요. 이메일로 시작해 주세요. (${error.message})`)
+  }
+  return (
+    <Card>
+      {sent ? (
+        <Alert kind="success">{email} 로 로그인 링크를 보냈어요. 메일의 링크를 누르면 바로 들어와져요. (안 보이면 스팸함 확인)</Alert>
+      ) : (
+        <form onSubmit={sendLink} className="space-y-4">
+          <Field label="이메일" hint="처음이면 자동으로 가입돼요. 결제 없이 행사를 만들고 바로 써 볼 수 있어요.">
+            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" required autoComplete="email" />
+          </Field>
+          {err && <Alert kind="error">{err}</Alert>}
+          <Button type="submit" loading={busy}>로그인 링크 받기</Button>
+          <button type="button" onClick={kakao} className="flex h-12 w-full items-center justify-center rounded-xl bg-[#FEE500] font-semibold text-[#191919] active:scale-[0.98]">카카오로 시작하기</button>
+        </form>
+      )}
+    </Card>
+  )
+}
+
+function CodeLogin() {
   const [code, setCode] = useState('')
   const [err, setErr] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -46,16 +96,14 @@ function Login() {
     } catch (e: any) { setErr(e.message) } finally { setBusy(false) }
   }
   return (
-    <Page title="관리자" sub="FLIT WAIT">
-      <Card>
-        <form onSubmit={submit} className="space-y-4">
-          <Field label="접속 코드" hint="플릿에서 발급한 코드를 입력하세요. 예: FLIT-XXXX-XXXX">
-            <Input value={code} onChange={e => setCode(e.target.value.toUpperCase())} placeholder="FLIT-" autoComplete="off" autoCapitalize="characters" required className="font-mono tracking-wider" />
-          </Field>
-          {err && <Alert kind="error">{err}</Alert>}
-          <Button type="submit" loading={busy}>입장</Button>
-        </form>
-      </Card>
-    </Page>
+    <Card>
+      <form onSubmit={submit} className="space-y-4">
+        <Field label="접속 코드" hint="플릿이 대행하는 행사는 발급받은 코드로 들어와요. 예: FLIT-XXXX-XXXX">
+          <Input value={code} onChange={e => setCode(e.target.value.toUpperCase())} placeholder="FLIT-" autoComplete="off" autoCapitalize="characters" required className="font-mono tracking-wider" />
+        </Field>
+        {err && <Alert kind="error">{err}</Alert>}
+        <Button type="submit" loading={busy}>입장</Button>
+      </form>
+    </Card>
   )
 }
