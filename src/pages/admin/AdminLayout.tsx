@@ -3,6 +3,7 @@ import { Outlet, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import type { Session } from '@supabase/supabase-js'
 import { Page, Card, Button, Field, Input, Alert, Spinner } from '../../components/ui'
+import DemoBanner from '../../components/DemoBanner'
 
 export default function AdminLayout() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
@@ -18,6 +19,7 @@ export default function AdminLayout() {
   if (!session) return <Login />
   return (
     <div className="min-h-dvh">
+      <DemoBanner />
       <nav className="sticky top-0 z-10 flex h-12 items-center gap-4 border-b bg-white/90 px-4 text-sm backdrop-blur">
         <Link to="/admin" className="font-bold">FLIT 축제 앱 · 행사 관리</Link>
         <span className="ml-auto text-gray-500">{(session.user.user_metadata as any)?.label ?? session.user.email ?? '관리자'}</span>

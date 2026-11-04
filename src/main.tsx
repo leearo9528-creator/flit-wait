@@ -22,12 +22,14 @@ import StaffLogin from './pages/staff/StaffLogin'
 import StaffBoardPage from './pages/staff/StaffBoard'
 // 관리자는 손님 번들을 키우지 않도록 지연 로딩 유지. 레이아웃(로그인 화면)은 즉시, 하위 화면은 레이아웃이 뜨면 미리 받아둔다 (AdminLayout 참고)
 import AdminLayout from './pages/admin/AdminLayout'
+const Demo = lazy(() => import('./pages/Demo'))
 const AdminEvents = lazy(() => import('./pages/admin/AdminEvents'))
 const AdminEvent = lazy(() => import('./pages/admin/AdminEvent'))
 const AdminBooth = lazy(() => import('./pages/admin/AdminBooth'))
 
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
+  { path: '/demo', element: <Demo /> },
   { path: '/e/:slug', element: <EventHub /> },
   { path: '/e/:slug/booths', element: <EventHome /> },
   { path: '/e/:slug/map', element: <EventMap /> },

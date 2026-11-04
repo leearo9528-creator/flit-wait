@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
+import { isDemo, makeDemoFetch } from './demo'
 
+// 데모 모드(/demo)면 네트워크 대신 브라우저 안 가짜 DB 로 — 프로덕션에는 요청이 한 건도 안 나간다
+export const DEMO = isDemo()
 export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY,
+  DEMO ? { global: { fetch: makeDemoFetch() } } : undefined,
 )
 
 export const PUBLIC_BASE_URL: string =
@@ -22,7 +26,7 @@ export function cleanError(msg: string) {
 /** 모두에게 같은 공개 읽기 (event_summary / booth_summary / event_board) → 엣지 캐시 경유.
  *  실패하면 직접 RPC 로 폴백. */
 export async function cachedRpc<T = any>(fn: 'event_summary' | 'booth_summary' | 'event_board' | 'event_guide' | 'event_schedule', slug: string): Promise<T> {
-  if (import.meta.env.DEV) return rpc<T>(fn, { p_slug: slug })
+  if (import.meta.env.DEV || DEMO) return rpc<T>(fn, { p_slug: slug })
   try {
     const r = await fetch(`/api/public?fn=${fn}&slug=${encodeURIComponent(slug)}`, { cache: 'no-store' })
     if (!r.ok) throw new Error(String(r.status))

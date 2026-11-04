@@ -4,6 +4,7 @@ import { cachedRpc, rpc } from '../../lib/supabase'
 import { useAsync, fmtDate, fmtTime, LS } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
+import DemoBanner from '../../components/DemoBanner'
 import { PROGRAM_KIND_LABEL, type EventSchedule, type StampStatus } from '../../lib/types'
 
 /**
@@ -47,6 +48,7 @@ export default function EventHub() {
 
   return (
     <div className="mx-auto min-h-dvh max-w-md bg-white pb-24">
+      <DemoBanner />
       {/* 배너 */}
       <div className="relative">
         {event.image_url

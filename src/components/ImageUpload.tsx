@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, DEMO } from '../lib/supabase'
 import { Button } from './ui'
 
 /** 이미지 → 1600px WebP 축소 → Supabase Storage(images) 업로드 → public URL */
@@ -12,6 +12,7 @@ export default function ImageUpload({ value, folder, onChange, aspect = 'aspect-
     setBusy(true); setErr(null)
     try {
       const blob = await shrink(file, 1600)
+      if (DEMO) { onChange(await new Promise<string>(r => { const fr = new FileReader(); fr.onload = () => r(String(fr.result)); fr.readAsDataURL(blob) })); return }  // 데모: 스토리지 없이 data URL
       const path = `${folder}/${Date.now()}.webp`
       const { error } = await supabase.storage.from('images').upload(path, blob, { contentType: 'image/webp', upsert: true })
       if (error) throw error
