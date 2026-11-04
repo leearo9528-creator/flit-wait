@@ -60,6 +60,10 @@ export interface EventRow {
   data_retention_days: number
   notice: string | null
   image_url?: string | null
+  map_image_url?: string | null
+  map_note?: string | null
+  lat?: number | null
+  lng?: number | null
 }
 
 export interface SlotPublic {
@@ -134,4 +138,37 @@ export interface StaffSession {
   staff_token: string
   booth: Booth
   slug: string
+}
+
+// ───────── 행사장 지도 (0036_map_guide)
+export type PlaceKind = 'booth' | 'food' | 'market' | 'stage' | 'facility' | 'info' | 'other'
+export const PLACE_KIND_LABEL: Record<PlaceKind, string> = {
+  booth: '체험부스', food: '먹거리', market: '마켓', stage: '무대·공연', facility: '편의시설', info: '안내소', other: '기타',
+}
+
+export interface PlaceRow {
+  id: string
+  event_id: string
+  booth_id: string | null
+  kind: PlaceKind
+  name: string
+  description: string | null
+  hours: string | null
+  image_url: string | null
+  x: number
+  y: number
+  lat: number | null
+  lng: number | null
+  sort_order: number
+}
+
+export interface GuidePlace extends Omit<PlaceRow, 'event_id'> {
+  booth: { id: string; slug: string; mode: BoothMode; is_paused: boolean; location: string | null; waiting_teams: number; today_left: number } | null
+}
+
+export interface EventGuide {
+  event: Pick<EventRow, 'id' | 'name' | 'slug' | 'status' | 'notice' | 'starts_at' | 'ends_at' | 'image_url'> & {
+    map_image_url: string | null; map_note: string | null; lat: number | null; lng: number | null
+  }
+  places: GuidePlace[]
 }

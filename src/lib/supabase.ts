@@ -21,7 +21,7 @@ export function cleanError(msg: string) {
 
 /** 모두에게 같은 공개 읽기 (event_summary / booth_summary / event_board) → 엣지 캐시 경유.
  *  실패하면 직접 RPC 로 폴백. */
-export async function cachedRpc<T = any>(fn: 'event_summary' | 'booth_summary' | 'event_board', slug: string): Promise<T> {
+export async function cachedRpc<T = any>(fn: 'event_summary' | 'booth_summary' | 'event_board' | 'event_guide', slug: string): Promise<T> {
   if (import.meta.env.DEV) return rpc<T>(fn, { p_slug: slug })
   try {
     const r = await fetch(`/api/public?fn=${fn}&slug=${encodeURIComponent(slug)}`, { cache: 'no-store' })

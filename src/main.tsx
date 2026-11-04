@@ -8,6 +8,7 @@ import MyTicket from './pages/customer/MyTicket'
 import Home from './pages/Home'
 import EventHome from './pages/customer/EventHome'
 import MyTickets from './pages/customer/MyTickets'
+import EventMap from './pages/customer/EventMap'
 import Board from './pages/customer/Board'
 import { Spinner } from './components/ui'
 // 스태프·현황판은 그 주소로 바로 들어오므로 지연 로딩이 왕복만 늘린다 → 메인 번들에 포함 (합쳐서 ~16KB)
@@ -22,6 +23,7 @@ const AdminBooth = lazy(() => import('./pages/admin/AdminBooth'))
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/e/:slug', element: <EventHome /> },
+  { path: '/e/:slug/map', element: <EventMap /> },
   { path: '/e/:slug/my', element: <MyTickets /> },
   { path: '/board/:slug', element: <Board /> },
   { path: '/q/:slug', element: <QueueJoin /> },
