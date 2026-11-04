@@ -8,10 +8,11 @@ import { TEMPLATES, applyTemplate, type TemplateId } from '../../lib/templates'
 
 export default function AdminEvents() {
   // events 는 손님 화면 때문에 공개 읽기라, 담당자 코드로 들어와도 전체 행사가 보였다 → 내 관리 범위로 필터
-  const { data: scope } = useAsync<{ owner: boolean; event_ids: string[] }>(async () => {
+  const { data: scope, reload: reloadScope } = useAsync<{ owner: boolean; event_ids: string[] }>(async () => {
     const { data, error } = await supabase.rpc('my_admin_scope'); if (error) throw error; return data
   }, [])
-  const { data, error, loading, reload } = useAsync<EventRow[]>(async () => {
+  // 행사를 새로 만들면 내 관리 범위(scope)부터 다시 받아야 목록에 뜬다 — 범위가 바뀌면 아래 목록 조회가 자동으로 따라간다
+  const { data, error, loading } = useAsync<EventRow[]>(async () => {
     if (!scope) return []
     let q = supabase.from('events').select('*').order('starts_at', { ascending: false })
     if (!scope.owner) q = q.in('id', scope.event_ids.length ? scope.event_ids : ['00000000-0000-0000-0000-000000000000'])
@@ -43,9 +44,8 @@ export default function AdminEvents() {
           </Link>
         ))}
       </div>
-      {data?.length === 0 && <Empty>등록된 행사가 없습니다.</Empty>}
       <div className="mt-6">
-        {!open ? <Button variant="secondary" onClick={() => setOpen(true)}>+ 새 행사</Button> : <NewEvent onDone={() => { setOpen(false); reload() }} />}
+        {!open ? <Button variant="secondary" onClick={() => setOpen(true)}>+ 새 행사</Button> : <NewEvent onDone={() => { setOpen(false); reloadScope() }} />}
       </div>
     </Page>
   )

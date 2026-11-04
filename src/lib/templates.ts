@@ -19,11 +19,12 @@ export async function applyTemplate(id: TemplateId, eventId: string, startsAt: s
   const t0 = new Date(startsAt).getTime()
   const at = (h: number) => new Date(t0 + h * H).toISOString()
   const ev: Record<string, unknown> = { template: id, stamp_enabled: true, stamp_reward_text: '안내소에서 작은 선물을 드려요' }
+  // 목표 개수는 비워 둔다(= 지점 전부). 숫자를 박으면 지점 수와 어긋나 헷갈린다
   const places: any[] = [], programs: any[] = [], notices: any[] = [], draws: any[] = []
   let survey: any = null, vendorOpen = false, infoText = '', contactText = ''
 
   if (id === 'winter-fair') {
-    ev.accent_color = '#b91c1c'; ev.stamp_goal = 5; vendorOpen = true
+    ev.accent_color = '#b91c1c'; ev.stamp_goal = null; vendorOpen = true
     places.push(
       { kind: 'info', name: '안내소 · 경품 교환', description: '분실물 · 스탬프 경품 · 럭키드로우 당첨 확인', x: 50, y: 88, sort_order: 10 },
       { kind: 'stage', name: '포토존 · 트리', description: '사진 찍고 인스타에 올려 주세요', x: 50, y: 50, sort_order: 20 },

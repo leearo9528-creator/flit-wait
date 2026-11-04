@@ -137,7 +137,7 @@ function SurveyEditor({ e }: { e: EventRow }) {
   const q = useAsync<{ enabled: boolean; title: string; questions: SurveyQuestion[]; thanks: string | null } | null>(async () => { const { data, error } = await supabase.from('surveys').select('*').eq('event_id', e.id).maybeSingle(); if (error) throw error; return data }, [e.id])
   const sum = useAsync<any>(async () => { const { data, error } = await supabase.rpc('admin_survey_summary', { p_event: e.id }); if (error) throw error; return data }, [e.id])
   const [f, setF] = useState<{ enabled: boolean; title: string; questions: SurveyQuestion[]; thanks: string } | null>(null)
-  useEffect(() => { if (q.data !== undefined && !f) setF(q.data ? { enabled: q.data.enabled, title: q.data.title, questions: q.data.questions, thanks: q.data.thanks ?? '' } : { enabled: false, title: '오늘 행사, 어떠셨어요?', questions: DEFAULT_Q, thanks: '' }) }, [q.data]) // eslint-disable-line
+  useEffect(() => { if (!q.loading && !f) setF(q.data ? { enabled: q.data.enabled, title: q.data.title, questions: q.data.questions, thanks: q.data.thanks ?? '' } : { enabled: false, title: '오늘 행사, 어떠셨어요?', questions: DEFAULT_Q, thanks: '' }) }, [q.loading, q.data]) // eslint-disable-line
   const [msg, setMsg] = useState<string | null>(null)
   if (!f) return <Card><Spinner /></Card>
   async function save() {

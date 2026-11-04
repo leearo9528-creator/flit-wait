@@ -51,13 +51,13 @@ export default function AdminEvent() {
 
   return (
     <Page title={e.name} sub={`/${e.slug} · ${fmtDateTime(e.starts_at)} ~ ${fmtDateTime(e.ends_at)}`} wide>
-      <div className="mb-4 flex items-center gap-2">
-        <Badge tone={e.status === 'open' ? 'green' : e.status === 'draft' ? 'gray' : 'red'}>{e.status}</Badge>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <Badge tone={e.status === 'open' ? 'green' : e.status === 'draft' ? 'gray' : 'red'}>{e.status === 'open' ? '운영 중' : e.status === 'draft' ? '준비 중 (손님에게 안 보임)' : '종료'}</Badge>
         <a className="rounded-lg bg-gray-100 px-2 py-1 text-xs" href={`${PUBLIC_BASE_URL}/e/${e.slug}`} target="_blank" rel="noreferrer">손님 링크(통합 QR) /e/{e.slug}</a>
         <a className="rounded-lg bg-gray-100 px-2 py-1 text-xs" href={`${PUBLIC_BASE_URL}/board/${e.slug}`} target="_blank" rel="noreferrer">현황판 /board/{e.slug}</a>
-        <div className="ml-auto flex gap-1 rounded-xl bg-gray-100 p-1 text-sm">
+        <div className="flex w-full flex-wrap gap-1 rounded-xl bg-gray-100 p-1 text-sm md:ml-auto md:w-auto">
           {(['booths', 'map', 'schedule', 'stamp', 'engage', 'stats', 'report', 'settings', 'codes', 'notify'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)} className={`rounded-lg px-3 py-1.5 font-semibold ${tab === t ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{{ booths: '부스', map: '지도', schedule: '일정·안내', stamp: '스탬프', engage: '참여·셀러', stats: '통계', report: '리포트', settings: '행사 설정', codes: '접속 코드', notify: '발송 로그' }[t]}</button>
+            <button key={t} onClick={() => setTab(t)} className={`whitespace-nowrap rounded-lg px-3 py-1.5 font-semibold ${tab === t ? 'bg-white shadow-sm' : 'text-gray-600'}`}>{{ booths: '부스', map: '지도', schedule: '일정·안내', stamp: '스탬프', engage: '참여·셀러', stats: '통계', report: '리포트', settings: '행사 설정', codes: '접속 코드', notify: '발송 로그' }[t]}</button>
           ))}
         </div>
       </div>

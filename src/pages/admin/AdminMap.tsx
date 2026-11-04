@@ -150,7 +150,7 @@ function PlaceEditor({ p, booths, selected, onSelect, onSave, onRemove }: { p: P
       <div className="flex items-center gap-3 px-1">
         <button type="button" onClick={onSelect} className={`h-8 shrink-0 rounded-lg px-3 text-xs font-semibold ring-1 ${selected ? 'bg-orange-500 text-white ring-orange-500' : 'bg-white text-gray-700 ring-gray-300'}`}>{selected ? '지도 눌러 배치' : '선택'}</button>
         <div className="min-w-0 flex-1">
-          <div className="text-xs text-gray-500">{PLACE_KIND_LABEL[p.kind]}{booth ? ` · 부스 연결: ${booth.name}` : ''} · ({p.x}, {p.y})</div>
+          <div className="text-xs text-gray-500">{PLACE_KIND_LABEL[p.kind]}{booth ? ` · 부스 연결: ${booth.name}` : ''}{Number(p.x) === 50 && Number(p.y) === 50 ? ' · 아직 지도에 안 놓음' : ''}</div>
           <div className="truncate font-semibold">{p.name}</div>
         </div>
         <Button variant="ghost" size="sm" className="!w-auto" onClick={() => setEdit(o => !o)}>{edit ? '접기' : '편집'}</Button>
