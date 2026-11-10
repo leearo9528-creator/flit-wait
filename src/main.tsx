@@ -8,6 +8,7 @@ import MyTicket from './pages/customer/MyTicket'
 import Home from './pages/Home'
 import EventHome from './pages/customer/EventHome'
 import ParkHome from './pages/customer/ParkHome'
+import PlaceDetail from './pages/customer/PlaceDetail'
 import MyTickets from './pages/customer/MyTickets'
 import EventMap from './pages/customer/EventMap'
 import EventSchedule from './pages/customer/EventSchedule'
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/demo', element: <Demo /> },
   { path: '/e/:slug', element: <ParkHome /> },
+  { path: '/e/:slug/p/:placeId', element: <PlaceDetail /> },
   { path: '/e/:slug/booths', element: <EventHome /> },
   { path: '/e/:slug/map', element: <EventMap /> },
   { path: '/e/:slug/schedule', element: <EventSchedule /> },
