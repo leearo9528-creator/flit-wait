@@ -107,6 +107,22 @@ export default function EventSchedule() {
           )}
         </section>
 
+        {/* 오시는 길 — 옛 지도 화면에 있던 것 */}
+        {(event.directions_text || event.lat != null) && (
+          <section id="way" className="mt-6 scroll-mt-20">
+            <h2 className="mb-2 text-sm font-semibold text-gray-500">오시는 길</h2>
+            <div className="rounded-xl bg-gray-50 px-4 py-3 ring-1 ring-gray-200">
+              {event.directions_text && <p className="whitespace-pre-line text-sm leading-relaxed text-gray-800">{event.directions_text}</p>}
+              {event.lat != null && event.lng != null && (
+                <div className="mt-3 flex gap-2">
+                  <a href={`https://map.kakao.com/link/to/${encodeURIComponent(event.name)},${event.lat},${event.lng}`} target="_blank" rel="noreferrer" className="flex h-11 flex-1 items-center justify-center rounded-xl bg-gray-900 text-[15px] font-semibold text-white active:bg-gray-800">카카오맵 길찾기</a>
+                  <a href={`https://map.naver.com/v5/directions/-/${event.lng},${event.lat},${encodeURIComponent(event.name)}/-/transit`} target="_blank" rel="noreferrer" className="flex h-11 flex-1 items-center justify-center rounded-xl bg-white text-[15px] font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">네이버지도</a>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {/* 행사 안내 */}
         {(event.info_text || event.contact_text) && (
           <section className="mb-6">

@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate, useParams } from 'react-router-dom'
 import './index.css'
 import { isDemo } from './lib/demo'
 import QueueJoin from './pages/customer/QueueJoin'
@@ -11,7 +11,6 @@ import EventHome from './pages/customer/EventHome'
 import ParkHome from './pages/customer/ParkHome'
 import PlaceDetail from './pages/customer/PlaceDetail'
 import MyTickets from './pages/customer/MyTickets'
-import EventMap from './pages/customer/EventMap'
 import EventSchedule from './pages/customer/EventSchedule'
 import StampTour from './pages/customer/StampTour'
 import LuckyDraw from './pages/customer/LuckyDraw'
@@ -29,13 +28,16 @@ const AdminEvents = lazy(() => import('./pages/admin/AdminEvents'))
 const AdminEvent = lazy(() => import('./pages/admin/AdminEvent'))
 const AdminBooth = lazy(() => import('./pages/admin/AdminBooth'))
 
+function ToHome() { const { slug } = useParams(); return <Navigate to={`/e/${slug}`} replace /> }
+
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/demo', element: <Demo /> },
   { path: '/e/:slug', element: <ParkHome /> },
   { path: '/e/:slug/p/:placeId', element: <PlaceDetail /> },
   { path: '/e/:slug/booths', element: <EventHome /> },
-  { path: '/e/:slug/map', element: <EventMap /> },
+  { path: '/e/:slug/b/:boothSlug', element: <PlaceDetail /> },
+  { path: '/e/:slug/map', element: <ToHome /> },   // 옛 지도 화면 — 지도 홈으로 합쳤다
   { path: '/e/:slug/schedule', element: <EventSchedule /> },
   { path: '/e/:slug/stamp', element: <StampTour /> },
   { path: '/e/:slug/stamp/:code', element: <StampTour /> },

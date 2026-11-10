@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { rpc } from '../../lib/supabase'
+import { rpc, DEMO } from '../../lib/supabase'
 import { LS } from '../../lib/util'
 import { StaffSession } from '../../lib/types'
 import { Page, Card, Button, Alert } from '../../components/ui'
@@ -35,7 +35,7 @@ export default function StaffLogin() {
     <Page title="스태프 로그인" sub={`부스 · ${slug}`}>
       <Card>
         <form onSubmit={submit}>
-          <div className="mb-4 text-center text-sm text-gray-500">부스 PIN 4자리를 입력하세요</div>
+          <div className="mb-4 text-center text-sm text-gray-500">{DEMO ? '데모예요. 아무 숫자 4자리를 누르세요' : '부스 PIN 4자리를 입력하세요'}</div>
           <div className="mb-5 flex justify-center gap-3">
             {[0, 1, 2, 3].map(i => (
               <div key={i} className={`h-4 w-4 rounded-full ${i < pin.length ? 'bg-gray-900' : 'bg-gray-300'}`} />

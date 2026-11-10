@@ -153,7 +153,7 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
                       <div className="mt-3 grid grid-cols-4 gap-2">
                         <Button size="lg" className="col-span-2" onClick={() => act(t.id, 'checkin')} loading={busyId === t.id}>입장</Button>
                         <Button size="lg" variant="danger" onClick={() => act(t.id, 'noshow')} loading={busyId === t.id}>노쇼</Button>
-                        <Button size="lg" variant="secondary" onClick={() => act(t.id, 'recall')} loading={busyId === t.id} disabled={!t.phone_tail}>재호출</Button>
+                        <Button size="lg" variant="secondary" className="whitespace-nowrap !px-2 !text-base" onClick={() => act(t.id, 'recall')} loading={busyId === t.id} disabled={!t.phone_tail}>재호출</Button>
                       </div>
                     </Card>
                   )

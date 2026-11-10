@@ -20,6 +20,7 @@ export default function QueueJoin() {
   const [phone, setPhone] = useState(() => me.get().phone)
   const [party, setParty] = useState(() => me.get().party)
   const [consent, setConsent] = useState(false)
+  const [again, setAgain] = useState(false)
   // 로그인한 손님이면 계정에 저장된 이름·번호를 한 번 채운다
   const cust = useCustomer()
   const filled = useRef(false)
@@ -34,6 +35,7 @@ export default function QueueJoin() {
   const [err, setErr] = useState<string | null>(null)
 
   const existing = LS.get<{ token: string; slug: string; at: number }>(`ticket:${slug}`)
+  const hasExisting = !!existing && Date.now() - existing.at < 6 * 3600_000
 
   if (loading) return <Spinner />
   if (!data) return <Page><Alert kind="error">{error ?? '부스를 찾을 수 없습니다.'}</Alert></Page>  // 폴링 실패 시 마지막 정상 화면 유지
@@ -87,16 +89,17 @@ export default function QueueJoin() {
         </Alert></div>
       )}
 
-      {existing && Date.now() - existing.at < 6 * 3600_000 && (
+      {hasExisting && (
         <div className="mb-4">
           <Alert kind="info">
             이미 접수한 대기표가 있어요. <Link to={`/t/${existing.token}`} className="font-semibold underline">내 대기 현황 보기</Link>
           </Alert>
+          {!again && <button type="button" onClick={() => setAgain(true)} className="mt-3 text-sm text-gray-500 underline">다른 사람 이름으로 한 번 더 접수</button>}
         </div>
       )}
 
       {/* 접수 시간대 밖(오픈 전·마감 후)에는 폼을 그대로 두고 반투명 회색 박스로 덮는다 */}
-      {!booth.is_paused && <div className="relative"><Card>
+      {!booth.is_paused && !(hasExisting && !again) && <div className="relative"><Card>
         <form onSubmit={submit} className="space-y-4">
           <KakaoStart cust={cust} note="다음부터 이름·번호를 안 적어도 돼요" />
           <Field label="이름 (대표자)">

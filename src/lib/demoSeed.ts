@@ -7,6 +7,8 @@ import { supabase } from './supabase'
  */
 export async function seedDemoEvent(eventId: string) {
   const day = new Date(); day.setHours(0, 0, 0, 0)
+  // 저녁에 데모를 열어도 '운영 시간'과 회차·일정이 어긋나지 않게 마감 시각을 지금 기준으로 늘린다
+  const closeH = Math.min(24, Math.max(20, new Date().getHours() + 6))
   // 일정은 '지금' 기준으로 깔되 10분 단위로 맞춘다 (12:27 같은 시각이 안 나오게)
   const at = (h: number) => new Date(Math.round((Date.now() + h * 3600_000) / 600_000) * 600_000).toISOString()
 
@@ -14,14 +16,14 @@ export async function seedDemoEvent(eventId: string) {
     status: 'open', starts_at: day.toISOString(), ends_at: new Date(day.getTime() + 2 * 86400_000).toISOString(),
     map_image_url: '/demo-map.svg', accent_color: '#111827', template: 'demo',
     stamp_enabled: true, stamp_goal: null, stamp_reward_text: '안내소에서 핫팩과 기념 배지를 드려요',
-    info_text: '운영 10:00~20:00\n눈썰매: 회차 예약제 (회차당 50분)\n체험: 원격 대기 — 차례가 되면 알림톡으로 불러 드려요',
+    info_text: `운영 10:00~${closeH}:00\n눈썰매: 회차 예약제 (회차당 50분)\n체험: 원격 대기 — 차례가 되면 알림톡으로 불러 드려요`,
     contact_text: '운영본부 010-2244-3585', directions_text: '주차: 행사장 주차장 (만차 시 공영주차장)\n셔틀: 역 ↔ 행사장 20분 간격',
   }).eq('id', eventId)
 
   const s = (service_min: number) => ({ max_party_size: 4, allow_duplicate_phone: false, queue_close_before_min: 0, notify_ahead_teams: 3, call_valid_min: 10, reserve_open_at: null, reserve_close_before_min: 0, reminders: [], noshow_after_start_min: 10, transfer_noshow_to_queue: false, cancel_until_before_min: 0, sms_fallback: false, service_min })
   const booths = [
     { slug: 'demo-slope', name: '대형 슬로프', mode: 'slot', group_name: '눈썰매', category: '90m · 초등학생 이상', description: '회차당 50분, 회차마다 정원 60명', location: '슬로프 A', demo_wait: 0, settings: s(50), x: 34, y: 17 },
-    { slug: 'demo-kids', name: '유아 슬로프', mode: 'slot', group_name: '눈썰매', category: '40m · 3~7세', description: '보호자 동반, 회차마다 정원 30명', location: '슬로프 B', demo_wait: 0, settings: s(50), x: 74, y: 19 },
+    { slug: 'demo-kids', name: '유아 슬로프', mode: 'slot', group_name: '눈썰매', category: '40m · 3~7세', description: '보호자 동반 · 보호자도 인원에 넣어 주세요', location: '슬로프 B', demo_wait: 0, settings: s(50), x: 74, y: 19 },
     { slug: 'demo-fish', name: '빙어잡이', mode: 'queue', group_name: '체험', category: '얼음 광장', description: '잡은 빙어는 바로 튀겨 드려요', location: '얼음 광장', demo_wait: 9, settings: s(4), x: 64, y: 47 },
     { slug: 'demo-sled', name: '얼음썰매', mode: 'queue', group_name: '체험', category: '얼음 광장', description: '전통 얼음썰매 20분 이용', location: '얼음 광장', demo_wait: 3, settings: s(5), x: 64, y: 55 },
     { slug: 'demo-candle', name: '석고방향제', mode: 'queue', group_name: '체험', category: '체험 존', description: '15분이면 완성, 포장해서 가져가요', location: '체험 존 1번', demo_wait: 6, settings: s(5), x: 33, y: 47.5 },
@@ -33,18 +35,18 @@ export async function seedDemoEvent(eventId: string) {
 
   const places = [
     ...booths.map((b, i) => ({ kind: 'booth', name: b.name, description: b.description, x: b.x, y: b.y, sort_order: (i + 1) * 10, booth_id: boothId(b.slug) })),
-    { kind: 'food', name: '어묵 · 떡볶이', description: '푸드 존', hours: '10:00~20:00', x: 60, y: 68, sort_order: 110, crowd: 'high', menu: [{ name: '어묵 (3개)', price: '3,000원' }, { name: '떡볶이', price: '5,000원' }, { name: '순대', price: '5,000원' }] },
-    { kind: 'food', name: '닭꼬치 · 소떡소떡', description: '푸드 존', hours: '10:00~20:00', x: 73, y: 72.5, sort_order: 120, crowd: 'mid', menu: [{ name: '닭꼬치', price: '4,000원' }, { name: '소떡소떡', price: '4,000원' }] },
-    { kind: 'food', name: '핫초코 · 뱅쇼', description: '푸드 존', hours: '10:00~20:00', x: 60, y: 77.5, sort_order: 130, crowd: 'low', menu: [{ name: '핫초코', price: '4,000원' }, { name: '뱅쇼', price: '6,000원' }, { name: '군고구마', price: '3,000원' }] },
+    { kind: 'food', name: '어묵 · 떡볶이', description: '푸드 존', hours: `10:00~${closeH}:00`, x: 60, y: 68, sort_order: 110, crowd: 'high', menu: [{ name: '어묵 (3개)', price: '3,000원' }, { name: '떡볶이', price: '5,000원' }, { name: '순대', price: '5,000원' }] },
+    { kind: 'food', name: '닭꼬치 · 소떡소떡', description: '푸드 존', hours: `10:00~${closeH}:00`, x: 73, y: 72.5, sort_order: 120, crowd: 'mid', menu: [{ name: '닭꼬치', price: '4,000원' }, { name: '소떡소떡', price: '4,000원' }] },
+    { kind: 'food', name: '핫초코 · 뱅쇼', description: '푸드 존', hours: `10:00~${closeH}:00`, x: 60, y: 77.5, sort_order: 130, crowd: 'low', menu: [{ name: '핫초코', price: '4,000원' }, { name: '뱅쇼', price: '6,000원' }, { name: '군고구마', price: '3,000원' }] },
     { kind: 'market', name: '핸드메이드 마켓', description: '소품 · 캔들 · 뜨개 — 셀러 12팀', x: 31, y: 69.5, sort_order: 210 },
     { kind: 'market', name: '겨울 간식 마켓', description: '수제 쿠키 · 잼 · 차', x: 33, y: 77, sort_order: 220 },
     { kind: 'stage', name: '메인 무대', description: '공연 · 럭키드로우 추첨', x: 90, y: 44, sort_order: 310 },
     { kind: 'info', name: '안내소 · 경품 교환', description: '분실물 · 스탬프 경품 · 미아 보호', x: 50, y: 86, sort_order: 410 },
-    { kind: 'medical', name: '의무실', x: 64, y: 90, sort_order: 420 },
-    { kind: 'facility', name: '화장실 · 수유실', x: 12, y: 56, sort_order: 430 },
+    { kind: 'medical', name: '의무실', description: '간호 인력 상주 · 구급함 · 핫팩', x: 64, y: 90, sort_order: 420 },
+    { kind: 'facility', name: '화장실 · 수유실', description: '수유실 · 기저귀 교환대 · 유아 변기 있어요', x: 12, y: 56, sort_order: 430 },
     { kind: 'parking', name: '주차장', description: '무료 · 300면', x: 19, y: 91.5, sort_order: 510, crowd: 'mid' },
   ]
-  const { data: ps } = await supabase.from('places').insert(places.map(p => ({ menu: [], hours: null, crowd: null, booth_id: null, description: null, image_url: null, lat: null, lng: null, ...p, event_id: eventId }))).select()
+  const { data: ps } = await supabase.from('places').insert(places.map(p => ({ menu: [], hours: null, crowd: null, booth_id: null, image_url: null, lat: null, lng: null, ...p, event_id: eventId }))).select()
   const placeId = (name: string) => (ps as any[])?.find(p => p.name === name)?.id ?? null
 
   await supabase.from('programs').insert([

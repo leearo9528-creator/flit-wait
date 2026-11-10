@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { rpc } from '../../lib/supabase'
+import { rpc, DEMO } from '../../lib/supabase'
 import { useAsync, LS } from '../../lib/util'
 import { Alert, Spinner, Button } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
@@ -42,6 +42,8 @@ export default function StampTour() {
   if (loading && !data) return <Spinner />
   if (error && !data) return <div className="p-6"><Alert kind="error">{error}</Alert></div>
   const s = data!
+  // 데모에서는 QR 을 찍을 수 없으니, 아직 안 찍은 지점의 QR 주소를 대신 연다
+  const demoStamp = () => { try { const db = JSON.parse(localStorage.getItem('flit:demo:db') ?? '{}'); const next = s.spots.find(x => !x.got); const c = (db.stamp_spots ?? []).find((x: any) => x.id === next?.id || x.name === next?.name)?.code; if (c) nav(`/e/${slug}/stamp/${c}`) } catch { /* 데모 저장소 없음 */ } }
   const done = s.count >= s.goal && s.goal > 0
 
   return (
@@ -52,6 +54,7 @@ export default function StampTour() {
       <div className="px-4">
         {toast && <div className="mb-3"><Alert kind={toast.kind}>{toast.text}</Alert></div>}
         {!s.enabled && <Alert kind="info">지금은 스탬프 투어가 진행 중이 아니에요.</Alert>}
+        {DEMO && s.enabled && !done && <button type="button" onClick={demoStamp} className="mb-3 flex h-12 w-full items-center justify-center rounded-xl bg-blue-50 text-[15px] font-bold text-blue-800 ring-1 ring-blue-200 active:bg-blue-100">데모 · QR 찍은 것처럼 스탬프 받기</button>}
 
         {s.enabled && (
           <>

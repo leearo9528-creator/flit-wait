@@ -5,14 +5,15 @@ import { LS, fmtDateTime, fmtPhone, STATUS_LABEL } from '../../lib/util'
 import { Card, Button, Field, Input, Alert, Badge } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import KakaoStart from '../../components/KakaoStart'
+import { useMyTickets } from '../../lib/myTickets'
 import { useCustomer, LOGIN_ENABLED, type Customer } from '../../lib/customer'
 
-interface Row { token: string; booth: string; status: string; ticket_no: number | null; slot_at: string | null; created_at: string }
+interface Row { token: string; booth: string; status: string; ticket_no: number | null; slot_at: string | null; created_at: string; ahead?: number | null; est_wait_min?: number | null }
 
 /** 내 접수·예약 — 이 기기에서 접수한 것 + 이름/전화로 찾기 */
 export default function MyTickets() {
   const { slug = '' } = useParams()
-  const [mine, setMine] = useState<Row[]>([])
+  const mine: Row[] = useMyTickets(slug, DEMO ? 6000 : 20000)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [found, setFound] = useState<Row[] | null>(null)
@@ -26,13 +27,6 @@ export default function MyTickets() {
     rpc<Row[]>('my_tickets', { p_event_slug: slug }).then(setAcct).catch(() => setAcct([]))
   }, [cust.loggedIn, slug])
 
-  useEffect(() => {
-    // localStorage 에 저장된 토큰들 → 상태 조회
-    const tokens: string[] = []
-    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i)!; if (k.startsWith('ticket:') || k.startsWith('resv:')) { const v = LS.get<{ token: string }>(k); if (v?.token) tokens.push(v.token) } } } catch {}
-    Promise.all(tokens.map(tk => rpc('get_ticket', { p_token: tk }).then((t: any) => t ? { token: tk, booth: t.booth.name, status: t.status, ticket_no: t.ticket_no, slot_at: t.slot?.starts_at ?? null, created_at: t.created_at } : null).catch(() => null)))
-      .then(rs => setMine(rs.filter(Boolean) as Row[]))
-  }, [])
 
   async function search(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setErr(null)
@@ -49,7 +43,7 @@ export default function MyTickets() {
             <div className="font-bold">{r.booth}</div>
             <Badge tone={tone(r.status)}>{r.slot_at && r.status === 'waiting' ? '예약 완료' : STATUS_LABEL[r.status] ?? r.status}</Badge>
           </div>
-          <div className="mt-1 text-sm text-gray-500">{r.slot_at ? `예약 ${fmtDateTime(r.slot_at)}` : `대기번호 ${r.ticket_no}번 · ${fmtDateTime(r.created_at)} 접수`}</div>
+          <div className="mt-1 text-sm text-gray-500">{r.slot_at ? `예약 ${fmtDateTime(r.slot_at)}` : r.status === 'called' ? `대기번호 ${r.ticket_no}번 · 지금 입장하세요` : r.status === 'waiting' && r.ahead != null ? `대기번호 ${r.ticket_no}번 · ${r.ahead > 0 ? `앞 ${r.ahead}팀 · 약 ${r.est_wait_min ?? 0}분` : '곧 차례예요'}` : `대기번호 ${r.ticket_no}번 · ${fmtDateTime(r.created_at)} 접수`}</div>
         </Link>
       ))}
     </div>

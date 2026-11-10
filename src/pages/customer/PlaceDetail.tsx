@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { cachedRpc, DEMO } from '../../lib/supabase'
-import { useAsync } from '../../lib/util'
+import { cachedRpc, DEMO, rpc } from '../../lib/supabase'
+import { useAsync, fmtTime } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import { PLACE_KIND_LABEL, type EventGuide } from '../../lib/types'
@@ -12,7 +12,7 @@ import { liveOf, TONE_PIN, TONE_TEXT } from '../../lib/live'
  * 위: 배치도에서 그 자리를 확대한 그림 / 가운데: 이름·지금 대기·설명·메뉴 / 아래: 줄서기·회차 예약 버튼(체험만)
  */
 export default function PlaceDetail() {
-  const { slug = '', placeId = '' } = useParams()
+  const { slug = '', placeId = '', boothSlug = '' } = useParams()
   const nav = useNavigate()
   const { data, error, loading, reload } = useAsync<EventGuide>(() => cachedRpc('event_guide', slug), [slug])
   useEffect(() => {
@@ -20,12 +20,14 @@ export default function PlaceDetail() {
     return () => clearInterval(iv)
   }, [slug]) // eslint-disable-line
 
+  const sched = useAsync<{ programs: { id: string; title: string; starts_at: string; ends_at: string | null; place: { id: string } | null }[] } | null>(() => rpc('event_schedule', { p_slug: slug }), [slug])
   if (loading && !data) return <Spinner />
-  const p = data?.places.find(x => x.id === placeId)
+  const p = data?.places.find(x => boothSlug ? x.booth?.slug === boothSlug : x.id === placeId)
   if (!data?.event || !p) return <div className="p-6"><Alert kind="error">{error ?? '장소를 찾을 수 없습니다.'}</Alert><Link to={`/e/${slug}`} className="mt-4 block text-center text-sm font-semibold underline">지도로 돌아가기</Link></div>
   const { event } = data
   const b = p.booth
   const live = liveOf(p)
+  const here = (sched.data?.programs ?? []).filter(g => g.place?.id === p.id && new Date(g.ends_at ?? g.starts_at).getTime() > Date.now()).slice(0, 5)
   const to = b && !b.is_paused ? (b.mode === 'queue' ? `/q/${b.slug}` : `/r/${b.slug}`) : null
   const sub = b
     ? (b.mode === 'queue' ? (b.waiting_teams > 0 ? `지금 ${b.waiting_teams}팀이 기다리고 있어요` : '기다리는 팀이 없어요') : b.today_left > 0 ? `오늘 남은 자리 ${b.today_left}석` : '오늘 회차가 모두 찼어요')
@@ -61,6 +63,20 @@ export default function PlaceDetail() {
               {sub && <div className="mt-0.5 text-sm text-gray-600">{sub}</div>}
             </div>
             <div className={`text-3xl font-bold tabular-nums ${TONE_TEXT[live.tone]}`}>{live.text}</div>
+          </div>
+        )}
+
+        {here.length > 0 && (
+          <div className="mt-6">
+            <h2 className="text-sm font-semibold text-gray-500">여기서 열리는 일정</h2>
+            <ul className="mt-2 divide-y divide-gray-100">
+              {here.map(g => { const on = new Date(g.starts_at).getTime() <= Date.now(); return (
+                <li key={g.id} className="flex items-center gap-3 py-3">
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold tabular-nums ${on ? 'bg-blue-700 text-white' : 'bg-gray-100 text-gray-700'}`}>{on ? '지금' : fmtTime(g.starts_at)}</span>
+                  <span className="min-w-0 flex-1 truncate text-[16px] font-semibold text-gray-900">{g.title}</span>
+                  {g.ends_at && <span className="shrink-0 text-xs tabular-nums text-gray-500">~{fmtTime(g.ends_at)}</span>}
+                </li>) })}
+            </ul>
           </div>
         )}
 

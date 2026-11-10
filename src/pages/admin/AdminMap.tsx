@@ -79,7 +79,7 @@ export default function AdminMap({ e, booths, onSaved }: { e: EventRow; booths: 
     <div className="space-y-4">
       <Card>
         <div className="grid gap-4 md:grid-cols-[1fr_280px]">
-          <Field label="행사장 배치도 (손님 '행사장 지도' 탭)" hint={map.map_image_url ? (sel ? '지도를 누르면 선택한 핀이 그 자리로 이동해요.' : '아래 목록에서 핀을 고른 뒤 지도를 누르세요.') : '배치도 이미지를 올리면 핀을 찍을 수 있어요.'}>
+          <Field label="행사장 배치도 (손님 홈 화면의 지도)" hint={map.map_image_url ? (sel ? '지도를 누르면 선택한 핀이 그 자리로 이동해요.' : '아래 목록에서 핀을 고른 뒤 지도를 누르세요.') : '배치도 이미지를 올리면 핀을 찍을 수 있어요.'}>
             {map.map_image_url ? (
               <div className="relative cursor-crosshair select-none overflow-hidden rounded-xl ring-1 ring-gray-200" onClick={placeAt}>
                 <img src={map.map_image_url} alt="" className="block w-full" draggable={false} />

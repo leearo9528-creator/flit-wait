@@ -6,6 +6,7 @@ import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import DemoBanner from '../../components/DemoBanner'
 import { PLACE_KIND_LABEL, type EventGuide, type EventSchedule, type GuidePlace, type PlaceKind } from '../../lib/types'
+import { useMyTickets, isActive } from '../../lib/myTickets'
 import { liveOf, TONE_PIN, TONE_TEXT, type Live } from '../../lib/live'
 
 /**
@@ -20,6 +21,7 @@ const groupOf = (k: PlaceKind): Group => (k === 'booth' || k === 'food' || k ===
 
 export default function ParkHome() {
   const { slug = '' } = useParams()
+  const mine = useMyTickets(slug, DEMO ? 6000 : 20000)
   const { data, error, loading, reload } = useAsync<EventGuide>(() => cachedRpc('event_guide', slug), [slug])
   const sched = useAsync<EventSchedule>(() => cachedRpc('event_schedule', slug), [slug])
   useEffect(() => {
@@ -58,6 +60,7 @@ export default function ParkHome() {
   const urgent = (sched.data?.notices ?? []).find(n => n.urgent)
   const ev2 = sched.data?.event
   const hasMap = !!event.map_image_url
+  const active = mine.filter(isActive)
   const mode = hasMap ? view : 'list'
 
   return (
@@ -85,6 +88,15 @@ export default function ParkHome() {
       </header>
 
       <div className="space-y-2 px-4">
+        {/* 내 대기·예약 — 줄 서 있는 동안 지도에서도 차례가 보인다 */}
+        {active.slice(0, 3).map(r => (
+          <Link key={r.token} to={`/t/${r.token}`} className={`flex items-center gap-2 rounded-xl px-3 py-3 ${r.status === 'called' ? 'bg-red-600 text-white' : 'bg-blue-700 text-white'}`}>
+            <span className="min-w-0 flex-1 truncate text-[15px] font-bold">{r.booth}</span>
+            <span className="shrink-0 text-[15px] font-bold tabular-nums">{r.status === 'called' ? '지금 입장하세요' : r.slot_at ? `${fmtTime(r.slot_at)} 회차` : r.ahead ? `앞 ${r.ahead}팀 · 약 ${r.est_wait_min ?? 0}분` : '곧 차례예요'}</span>
+            <span className="shrink-0 text-sm opacity-80">›</span>
+          </Link>
+        ))}
+        {active.length > 3 && <Link to={`/e/${slug}/my`} className="block text-center text-sm font-semibold text-gray-600 underline">내 대기 {active.length}건 모두 보기</Link>}
         {event.status !== 'open' && <Alert kind="info">지금은 운영 시간이 아니에요.</Alert>}
         {event.notice && <Alert kind="warn">{event.notice}</Alert>}
         {urgent && (
@@ -133,7 +145,7 @@ export default function ParkHome() {
           {ev2.stamp_enabled && <More to={`/e/${slug}/stamp`} title="스탬프 투어" sub="부스를 돌고 경품 받기" />}
           {ev2.draw_open && <More to={`/e/${slug}/draw`} title="럭키드로우" sub="응모하고 경품 받기" />}
           {ev2.survey_enabled && <More to={`/e/${slug}/survey`} title="한마디 남기기" sub="30초 만족도 설문" />}
-          {ev2.directions_text && <More to={`/e/${slug}/map`} title="오시는 길 · 주차" sub={ev2.directions_text.split('\n')[0]} />}
+          {ev2.directions_text && <More to={`/e/${slug}/schedule#way`} title="오시는 길 · 주차" sub={ev2.directions_text.split('\n')[0]} />}
         </div>
       )}
       <p className="pt-6 text-center text-xs text-gray-400">운영 플릿 (FLIT)</p>

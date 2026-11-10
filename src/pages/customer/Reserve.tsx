@@ -7,11 +7,13 @@ import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner, Badge } from
 import BoothHeader from '../../components/BoothHeader'
 import CustomerNav from '../../components/CustomerNav'
 import KakaoStart from '../../components/KakaoStart'
+import { useMyTickets, isActive } from '../../lib/myTickets'
 import { useCustomer } from '../../lib/customer'
 import { openAtFor, kstYmd } from '../../components/BoothCard'
 
 export default function Reserve() {
   const { slug = '' } = useParams()
+  const mineAll = useMyTickets('')   // 같은 시간에 잡아 둔 다른 예약을 알려 주려고
   const nav = useNavigate()
   const { data, error, loading, reload } = useAsync<BoothSummary>(() => cachedRpc('booth_summary', slug), [slug])
   useBoothLive(data?.booth.id, reload, 20000, false)
@@ -63,6 +65,7 @@ export default function Reserve() {
   const showDaily = !!dailyHm && !!lastDayOpen && lastDayOpen.getTime() > Date.now()
   const closeBefore = (booth.settings.reserve_close_before_min ?? 60) * 60000
   const selected = data.slots.find(s => s.id === slotId) ?? null
+  const clash = selected ? mineAll.find(r => isActive(r) && r.slot_at === selected.starts_at && r.booth_slug !== slug) : null
   const existing = LS.get<{ token: string; at: number }>(`resv:${slug}`)
   const closed = event.status !== 'open'
   // 예약 전용 부스는 스태프 '마감'·'일시중단'이 예약에도 적용된다 (hybrid 는 현장 대기만 멈춤)
@@ -149,8 +152,9 @@ export default function Reserve() {
             <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 h-5 w-5 rounded" required />
             <span className="text-gray-700"><span className="font-semibold">개인정보 수집·이용 동의 (필수)</span><br /><span className="text-xs text-gray-500">{event.privacy_text}</span></span>
           </label>
-          <p className="text-xs text-gray-500">체험 시작 {booth.settings.noshow_after_start_min ?? 10}분이 지나도 도착하지 않으면 예약이 취소되고 현장 대기자에게 자리가 넘어갑니다. 취소는 시작 {fmtDur(booth.settings.cancel_until_before_min ?? 120)} 전까지 가능합니다.</p>
+          <p className="text-xs text-gray-500">체험 시작 {booth.settings.noshow_after_start_min ?? 10}분이 지나도 도착하지 않으면 예약이 취소되고 현장 대기자에게 자리가 넘어갑니다. {(booth.settings.cancel_until_before_min ?? 120) > 0 ? `취소는 시작 ${fmtDur(booth.settings.cancel_until_before_min ?? 120)} 전까지 가능합니다.` : '시작 전까지 취소할 수 있어요.'}</p>
           {err && <Alert kind="error">{err}</Alert>}
+          {clash && <Alert kind="warn">같은 시간에 {clash.booth} 예약이 있어요. 나눠서 이용하실 때만 예약해 주세요.</Alert>}
           <Button type="submit" size="lg" loading={busy} disabled={slotPaused || notYet || !slotId || !consent || event.status !== 'open'}>
             {slotPaused ? (slotClosedToday ? '오늘 예약 마감' : '예약 일시중단') : notYet ? '예약 오픈 전' : '예약하기'}
           </Button>

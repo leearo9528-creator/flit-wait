@@ -125,7 +125,7 @@ export default function MyTicket() {
           <div className="rounded-xl bg-gray-50 p-3"><div className="text-xs text-gray-500">인원</div><div className="font-semibold">{t.party_size}명</div></div>
           {t.phone_tail && <div className="rounded-xl bg-gray-50 p-3 col-span-2"><div className="text-xs text-gray-500">연락처</div><div className="font-semibold">010-****-{t.phone_tail}</div></div>}
         </div>
-        {t.booth.location && <div className="mt-3 text-sm text-gray-500">위치 · {t.booth.location}</div>}
+        <div className="mt-3 text-sm text-gray-500">{t.booth.location ? `위치 · ${t.booth.location} ` : ''}{(t.event as any).slug && <Link to={`/e/${(t.event as any).slug}/b/${t.booth.slug}`} className="font-semibold text-gray-700 underline">지도에서 보기</Link>}</div>
       </Card>
 
       {(t.status === 'no_show' || t.status === 'cancelled') && (
