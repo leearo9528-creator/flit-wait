@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { rpc, cachedRpc } from '../../lib/supabase'
 import { useAsync, useBoothLive, fmtPhone, fmtDateTime, fmtWait, LS, me } from '../../lib/util'
@@ -6,6 +6,8 @@ import { BoothSummary } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
 import CustomerNav from '../../components/CustomerNav'
+import KakaoStart from '../../components/KakaoStart'
+import { useCustomer } from '../../lib/customer'
 import { queueWindowState, kstYmd } from '../../components/BoothCard'
 
 export default function QueueJoin() {
@@ -18,6 +20,16 @@ export default function QueueJoin() {
   const [phone, setPhone] = useState(() => me.get().phone)
   const [party, setParty] = useState(() => me.get().party)
   const [consent, setConsent] = useState(false)
+  // 로그인한 손님이면 계정에 저장된 이름·번호를 한 번 채운다
+  const cust = useCustomer()
+  const filled = useRef(false)
+  useEffect(() => {
+    const p = cust.profile
+    if (filled.current || !cust.loggedIn) return
+    filled.current = true
+    if (p?.phone) { setName(p.name); setPhone(fmtPhone(p.phone)); setParty(p.party) }
+    else if (!name && cust.nameHint) setName(cust.nameHint.slice(0, 20))
+  }, [cust.loggedIn, cust.profile]) // eslint-disable-line
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
@@ -45,6 +57,7 @@ export default function QueueJoin() {
     try {
       const r = await rpc<{ token: string }>('join_queue', { p_slug: slug, p_name: name, p_phone: phone, p_party: party, p_consent: consent })
       me.set({ name, phone, party })
+      if (cust.loggedIn) cust.save({ name, phone, party, marketing_ok: cust.profile?.marketing_ok ?? false }).catch(() => {})
       LS.set(`ticket:${slug}`, { token: r.token, slug, at: Date.now() })
       nav(`/t/${r.token}`, { replace: true })
     } catch (e: any) { setErr(e.message) } finally { setBusy(false) }
@@ -85,6 +98,7 @@ export default function QueueJoin() {
       {/* 접수 시간대 밖(오픈 전·마감 후)에는 폼을 그대로 두고 반투명 회색 박스로 덮는다 */}
       {!booth.is_paused && <div className="relative"><Card>
         <form onSubmit={submit} className="space-y-4">
+          <KakaoStart cust={cust} note="다음부터 이름·번호를 안 적어도 돼요" />
           <Field label="이름 (대표자)">
             <Input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" required maxLength={20} autoComplete="name" />
           </Field>

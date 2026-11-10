@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { rpc } from '../../lib/supabase'
+import { rpc, DEMO } from '../../lib/supabase'
 import { LS, fmtDateTime, fmtPhone, STATUS_LABEL } from '../../lib/util'
 import { Card, Button, Field, Input, Alert, Badge } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
+import KakaoStart from '../../components/KakaoStart'
+import { useCustomer, LOGIN_ENABLED, type Customer } from '../../lib/customer'
 
 interface Row { token: string; booth: string; status: string; ticket_no: number | null; slot_at: string | null; created_at: string }
 
@@ -16,6 +18,13 @@ export default function MyTickets() {
   const [found, setFound] = useState<Row[] | null>(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const cust = useCustomer()
+  const [acct, setAcct] = useState<Row[]>([])
+  // 로그인했으면 계정에 묶인 접수 내역도 — 다른 폰에서 접수한 것까지 보인다
+  useEffect(() => {
+    if (!cust.loggedIn || DEMO) { setAcct([]); return }
+    rpc<Row[]>('my_tickets', { p_event_slug: slug }).then(setAcct).catch(() => setAcct([]))
+  }, [cust.loggedIn, slug])
 
   useEffect(() => {
     // localStorage 에 저장된 토큰들 → 상태 조회
@@ -46,10 +55,12 @@ export default function MyTickets() {
     </div>
   )
 
+  const all = [...mine, ...acct.filter(a => !mine.some(m => m.token === a.token))]
   return (
     <div className="mx-auto min-h-dvh max-w-md bg-gray-50 px-4 pb-24 pt-6">
       <h1 className="mb-4 text-2xl font-bold">내 대기·예약</h1>
-      {mine.length > 0 ? <List rows={mine} /> : <Card><p className="text-sm text-gray-500">이 기기에서 접수한 내역이 없어요. 다른 폰으로 접수했다면 아래에서 찾을 수 있어요.</p></Card>}
+      {LOGIN_ENABLED && cust.ready && <div className="mb-4">{cust.loggedIn ? <Account cust={cust} /> : <Card><KakaoStart cust={cust} note="이름·번호를 다시 안 적어도 되고, 폰을 바꿔도 내 대기가 보여요" /></Card>}</div>}
+      {all.length > 0 ? <List rows={all} /> : <Card><p className="text-sm text-gray-500">이 기기에서 접수한 내역이 없어요. 다른 폰으로 접수했다면 아래에서 찾을 수 있어요.</p></Card>}
 
       <Card className="mt-5">
         <div className="mb-3 text-sm font-semibold text-gray-700">이름·전화번호로 찾기</div>
@@ -63,5 +74,48 @@ export default function MyTickets() {
       </Card>
       <CustomerNav slug={slug} active="my" />
     </div>
+  )
+}
+
+/** 로그인한 손님의 내 정보 — 이름·번호·인원, 소식 받기(선택), 로그아웃 */
+function Account({ cust }: { cust: Customer }) {
+  const p = cust.profile
+  const [edit, setEdit] = useState(!p?.phone)
+  const [f, setF] = useState({ name: p?.name || cust.nameHint, phone: fmtPhone(p?.phone ?? ''), marketing_ok: p?.marketing_ok ?? false })
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  async function save(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true); setErr(null)
+    try { await cust.save({ name: f.name.trim(), phone: f.phone, party: p?.party ?? 1, marketing_ok: f.marketing_ok }); setEdit(false) }
+    catch (e: any) { setErr(e.message) } finally { setBusy(false) }
+  }
+  if (!edit && p) return (
+    <Card>
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[17px] font-bold text-gray-900">{p.name || '이름 없음'}</div>
+          <div className="text-sm text-gray-500">{fmtPhone(p.phone)}</div>
+        </div>
+        <button type="button" onClick={() => setEdit(true)} className="shrink-0 text-sm font-semibold text-gray-700 underline">수정</button>
+        <button type="button" onClick={() => cust.logout()} className="shrink-0 text-sm text-gray-500 underline">로그아웃</button>
+      </div>
+    </Card>
+  )
+  return (
+    <Card>
+      <form onSubmit={save} className="space-y-3">
+        <Field label="이름"><Input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} required maxLength={20} autoComplete="name" /></Field>
+        <Field label="휴대폰번호"><Input value={f.phone} onChange={e => setF({ ...f, phone: fmtPhone(e.target.value) })} placeholder="010-0000-0000" inputMode="numeric" required autoComplete="tel" /></Field>
+        <label className="flex items-start gap-2.5 text-sm text-gray-700">
+          <input type="checkbox" checked={f.marketing_ok} onChange={e => setF({ ...f, marketing_ok: e.target.checked })} className="mt-0.5 h-5 w-5 rounded" />
+          <span>다음 행사 소식 받기 (선택)</span>
+        </label>
+        {err && <Alert kind="error">{err}</Alert>}
+        <div className="flex items-center gap-3">
+          <Button type="submit" loading={busy}>저장</Button>
+          <button type="button" onClick={() => cust.logout()} className="text-sm text-gray-500 underline">로그아웃</button>
+        </div>
+      </form>
+    </Card>
   )
 }

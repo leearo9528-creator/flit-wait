@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { rpc, cachedRpc } from '../../lib/supabase'
 import { useAsync, useBoothLive, fmtPhone, fmtTime, fmtDate, fmtDateTime, fmtDur, LS, me } from '../../lib/util'
@@ -6,6 +6,8 @@ import { BoothSummary, SlotPublic } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner, Badge } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
 import CustomerNav from '../../components/CustomerNav'
+import KakaoStart from '../../components/KakaoStart'
+import { useCustomer } from '../../lib/customer'
 import { openAtFor, kstYmd } from '../../components/BoothCard'
 
 export default function Reserve() {
@@ -19,6 +21,16 @@ export default function Reserve() {
   const [phone, setPhone] = useState(() => me.get().phone)
   const [party, setParty] = useState(() => me.get().party)
   const [consent, setConsent] = useState(false)
+  // 로그인한 손님이면 계정에 저장된 이름·번호를 한 번 채운다
+  const cust = useCustomer()
+  const filled = useRef(false)
+  useEffect(() => {
+    const p = cust.profile
+    if (filled.current || !cust.loggedIn) return
+    filled.current = true
+    if (p?.phone) { setName(p.name); setPhone(fmtPhone(p.phone)); setParty(p.party) }
+    else if (!name && cust.nameHint) setName(cust.nameHint.slice(0, 20))
+  }, [cust.loggedIn, cust.profile]) // eslint-disable-line
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
@@ -67,6 +79,7 @@ export default function Reserve() {
     try {
       const r = await rpc<{ token: string }>('reserve_slot', { p_slot: slotId, p_name: name, p_phone: phone, p_party: party, p_consent: consent })
       me.set({ name, phone, party })
+      if (cust.loggedIn) cust.save({ name, phone, party, marketing_ok: cust.profile?.marketing_ok ?? false }).catch(() => {})
       LS.set(`resv:${slug}`, { token: r.token, at: Date.now() })
       nav(`/t/${r.token}`, { replace: true })
     } catch (e: any) { setErr(e.message); reload() } finally { setBusy(false) }
@@ -120,6 +133,7 @@ export default function Reserve() {
       <Card>
         <div className="mb-3 text-sm font-semibold text-gray-700">3. 예약자 정보</div>
         <form onSubmit={submit} className="space-y-4">
+          <KakaoStart cust={cust} note="다음부터 이름·번호를 안 적어도 돼요" />
           {selected && (
             <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 text-sm">
               <span>{fmtDate(selected.starts_at)} {fmtTime(selected.starts_at)} 회차</span>
