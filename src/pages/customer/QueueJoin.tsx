@@ -60,6 +60,7 @@ export default function QueueJoin() {
       const r = await rpc<{ token: string }>('join_queue', { p_slug: slug, p_name: name, p_phone: phone, p_party: party, p_consent: consent })
       me.set({ name, phone, party })
       if (cust.loggedIn) cust.save({ name, phone, party, marketing_ok: cust.profile?.marketing_ok ?? false }).catch(() => {})
+      if (existing?.token) LS.set(`ticket:${slug}:${existing.token.slice(0, 8)}`, existing)   // 앞서 받은 표도 '내 대기'에 남긴다
       LS.set(`ticket:${slug}`, { token: r.token, slug, at: Date.now() })
       nav(`/t/${r.token}`, { replace: true })
     } catch (e: any) { setErr(e.message) } finally { setBusy(false) }

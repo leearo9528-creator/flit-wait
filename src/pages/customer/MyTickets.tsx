@@ -43,7 +43,7 @@ export default function MyTickets() {
             <div className="font-bold">{r.booth}</div>
             <Badge tone={tone(r.status)}>{r.slot_at && r.status === 'waiting' ? '예약 완료' : STATUS_LABEL[r.status] ?? r.status}</Badge>
           </div>
-          <div className="mt-1 text-sm text-gray-500">{r.slot_at ? `예약 ${fmtDateTime(r.slot_at)}` : r.status === 'called' ? `대기번호 ${r.ticket_no}번 · 지금 입장하세요` : r.status === 'waiting' && r.ahead != null ? `대기번호 ${r.ticket_no}번 · ${r.ahead > 0 ? `앞 ${r.ahead}팀 · 약 ${r.est_wait_min ?? 0}분` : '곧 차례예요'}` : `대기번호 ${r.ticket_no}번 · ${fmtDateTime(r.created_at)} 접수`}</div>
+          <div className="mt-1 text-sm text-gray-500">{r.slot_at ? `예약 ${fmtDateTime(r.slot_at)}` : r.status === 'called' ? `대기번호 ${r.ticket_no}번 · 지금 입장하세요` : r.status === 'waiting' && r.ahead != null ? `대기번호 ${r.ticket_no}번 · ${r.ahead > 0 ? `앞 ${r.ahead}팀${r.est_wait_min ? ` · 약 ${r.est_wait_min}분` : ''}` : '곧 차례예요'}` : `대기번호 ${r.ticket_no}번 · ${fmtDateTime(r.created_at)} 접수`}</div>
         </Link>
       ))}
     </div>

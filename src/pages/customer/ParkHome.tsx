@@ -103,7 +103,7 @@ export default function ParkHome() {
         {active.slice(0, 3).map(r => (
           <Link key={r.token} to={`/t/${r.token}`} className={`flex items-center gap-2 rounded-xl px-3 py-3 ${r.status === 'called' ? 'bg-red-600 text-white' : 'bg-blue-700 text-white'}`}>
             <span className="min-w-0 flex-1 truncate text-[15px] font-bold">{r.booth}</span>
-            <span className="shrink-0 text-[15px] font-bold tabular-nums">{r.status === 'called' ? '지금 입장하세요' : r.slot_at ? `${fmtTime(r.slot_at)} 회차` : r.ahead ? `앞 ${r.ahead}팀 · 약 ${r.est_wait_min ?? 0}분` : '곧 차례예요'}</span>
+            <span className="shrink-0 text-[15px] font-bold tabular-nums">{r.status === 'called' ? '지금 입장하세요' : r.slot_at ? `${fmtTime(r.slot_at)} 회차` : r.ahead ? `앞 ${r.ahead}팀${r.est_wait_min ? ` · 약 ${r.est_wait_min}분` : ''}` : '곧 차례예요'}</span>
             <span className="shrink-0 text-sm opacity-80">›</span>
           </Link>
         ))}
@@ -139,7 +139,7 @@ export default function ParkHome() {
               <div className="min-w-0 flex-1">
                 <div className="text-xs text-gray-500">{PLACE_KIND_LABEL[p.kind]}{p.booth?.location ? ` · ${p.booth.location}` : p.hours ? ` · ${p.hours}` : ''}</div>
                 <div className="truncate text-[17px] font-bold text-gray-900">{p.name}</div>
-                {p.booth && p.booth.mode === 'queue' && p.booth.waiting_teams > 0 && <div className="text-xs text-gray-500">대기 {p.booth.waiting_teams}팀</div>}
+                {p.booth && p.booth.mode === 'queue' && p.booth.waiting_teams > 0 && !live?.text.endsWith('팀') && <div className="text-xs text-gray-500">대기 {p.booth.waiting_teams}팀</div>}
                 {p.booth && p.booth.mode !== 'queue' && p.booth.today_left > 0 && <div className="text-xs text-gray-500">오늘 잔여 {p.booth.today_left}석</div>}
                 {!p.booth && p.menu?.length > 0 && <div className="truncate text-xs text-gray-500">{p.menu.slice(0, 3).map(m => m.name).join(' · ')}</div>}
               </div>
