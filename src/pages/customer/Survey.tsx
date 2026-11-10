@@ -40,7 +40,7 @@ export default function Survey() {
                 {q.type === 'rating' && (
                   <div className="flex gap-1.5">{[1, 2, 3, 4, 5].map(n => (
                     <button key={n} type="button" onClick={() => setA({ ...a, [q.id]: String(n) })} aria-label={`${n}점`}
-                      className={`h-12 flex-1 rounded-xl text-2xl ring-1 ${Number(a[q.id] ?? 0) >= n ? 'bg-orange-500 text-white ring-orange-500' : 'bg-white text-gray-300 ring-gray-200'}`}>★</button>
+                      className={`h-12 flex-1 rounded-xl text-2xl ring-1 ${Number(a[q.id] ?? 0) >= n ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-300 ring-gray-200'}`}>★</button>
                   ))}</div>
                 )}
                 {q.type === 'choice' && (

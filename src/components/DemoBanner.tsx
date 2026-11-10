@@ -12,7 +12,7 @@ export default function DemoBanner() {
         <a href="/s/demo-fish" className="underline">스태프</a>
         <a href="/vo/demo-vo-1" className="underline">사장님</a>
         <a href="/admin" className="underline">관리자</a>
-        <a href="/board/demo" className="underline">현황판</a>
+        <a href="/h/demo-host" className="underline">주최</a>
         <a href="/demo?reset=1" className="underline">초기화</a>
         <button type="button" className="underline" onClick={() => { leaveDemo(); localStorage.removeItem(`${DEMO_KEY}:db`); location.href = '/' }}>끝내기</button>
       </span>

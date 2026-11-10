@@ -18,7 +18,7 @@ export default function AdminLayout() {
   if (session === undefined) return <Spinner />
   if (!session) return <Login />
   return (
-    <div className="min-h-dvh">
+    <div className="min-h-dvh bg-gray-50">
       <DemoBanner />
       <nav className="sticky top-0 z-10 flex h-12 items-center gap-4 border-b bg-white/90 px-4 text-sm backdrop-blur">
         <Link to="/admin" className="font-bold">FLIT 축제 앱 · 행사 관리</Link>

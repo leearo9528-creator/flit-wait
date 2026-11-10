@@ -37,7 +37,7 @@ export default function MyTickets() {
     catch (e: any) { setErr(e.message) } finally { setBusy(false) }
   }
 
-  const tone = (s: string) => (({ waiting: 'blue', called: 'amber', checked_in: 'green', done: 'green', no_show: 'red', cancelled: 'gray' } as any)[s] ?? 'gray')
+  const tone = (s: string) => (({ waiting: 'blue', called: 'red', checked_in: 'green', done: 'green', no_show: 'red', cancelled: 'gray' } as any)[s] ?? 'gray')
   const List = ({ rows }: { rows: Row[] }) => (
     <div className="space-y-2">
       {rows.map(r => (
@@ -54,7 +54,7 @@ export default function MyTickets() {
 
   const all = [...mine, ...acct.filter(a => !mine.some(m => m.token === a.token))]
   return (
-    <div className="mx-auto min-h-dvh max-w-md bg-gray-50 px-4 pb-24 pt-6">
+    <div className="mx-auto min-h-dvh max-w-md bg-white px-4 pb-24 pt-6">
       <h1 className="mb-4 text-2xl font-bold">내 것</h1>
       {orders.length > 0 && (
         <div className="mb-4 space-y-2">

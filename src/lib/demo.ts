@@ -6,7 +6,7 @@ export const DEMO_KEY = 'flit:demo'
 /** 데모를 켜 둔 기기에서 실제 행사 QR 을 찍으면 데모의 가짜 서버가 응답해 '행사를 찾을 수 없습니다' 가 뜬다.
  *  주소가 가리키는 행사·부스·표가 데모 저장소에 없으면 실제 주소로 보고 데모를 끈다 (데모 내용은 남겨 둔다). */
 function pathIsReal(): boolean {
-  const m = /^\/(e|board|q|r|s|t|vo|v|o)\/([^/]+)/.exec(location.pathname); if (!m) return false
+  const m = /^\/(e|board|q|r|s|t|vo|v|o|h)\/([^/]+)/.exec(location.pathname); if (!m) return false
   const db = load(), key = decodeURIComponent(m[2])
   const has = (table: string, col: string) => (db[table] ?? []).some(r => r[col] === key)
   if (m[1] === 'e' || m[1] === 'board') return key !== 'demo' && !has('events', 'slug')
@@ -14,6 +14,7 @@ function pathIsReal(): boolean {
   if (m[1] === 'v') return !has('events', 'vendor_token')
   if (m[1] === 'o') return !has('orders', 'token')
   if (m[1] === 'vo') return !key.startsWith('demo-vo-')
+  if (m[1] === 'h') return key !== 'demo-host'
   return !key.startsWith('demo-') && !has('booths', 'slug')
 }
 /** 데모가 심어 둔 가짜 로그인 토큰을 지운다 — 남아 있으면 실제 서버가 요청을 거절한다 */
@@ -156,6 +157,19 @@ export function makeDemoFetch(): typeof fetch {
   const vendorPlace = (token: string) => { const os = T('order_settings').find(o => o.token === token); const pl = os && T('places').find(p => p.id === os.place_id); if (!os || !pl) throw new Error('주문 화면 주소가 맞지 않아요. 플릿에 문의해 주세요.'); return { os, pl } }
 
   const rpc: Record<string, (a: Row) => unknown> = {
+    // 주최 화면 (0047) — 데모 링크는 /h/demo-host
+    admin_host_link: () => 'demo-host',
+    host_board: () => {
+      const e = T('events').find(x => x.slug === 'demo') ?? T('events')[0]; if (!e) throw new Error('주최 화면 주소가 맞지 않아요. 플릿에 문의해 주세요.')
+      const ts = T('tickets').filter(t => t.event_id === e.id && t.ticket_date === today()), os = T('orders').filter(o => o.event_id === e.id && o.order_date === today())
+      return { event: { name: e.name, slug: e.slug, status: e.status },
+        stats: { waiting: ts.filter(t => !t.slot_id && (t.status === 'waiting' || t.status === 'called')).length, served: ts.filter(t => t.status === 'done' || t.status === 'checked_in').length, visits: 1842 + Math.floor((Date.now() / 60000) % 60), orders: 37 + os.filter(o => o.status !== 'cancelled').length, sales: 412000 + os.filter(o => o.status === 'picked_up').reduce((a, o) => a + o.total, 0) },
+        notices: T('notices').filter(n => n.event_id === e.id && (!n.expires_at || new Date(n.expires_at).getTime() > Date.now())).sort((a, b) => String(b.publish_at).localeCompare(String(a.publish_at))).map(n => ({ id: n.id, title: n.title, body: n.body ?? null, urgent: !!n.urgent, publish_at: n.publish_at })),
+        places: T('places').filter(p => p.event_id === e.id && !p.booth_id && ['parking', 'food', 'market', 'stage', 'facility', 'shuttle'].includes(p.kind)).sort((a, b) => a.sort_order - b.sort_order).map(p => ({ id: p.id, name: p.name, kind: p.kind, crowd: p.crowd ?? null, crowd_updated_at: p.crowd_updated_at ?? null })) }
+    },
+    host_post_notice: ({ p_title, p_body, p_urgent }) => { const e = T('events').find(x => x.slug === 'demo') ?? T('events')[0]; if (String(p_title ?? '').trim().length < 2) throw new Error('공지 제목을 적어 주세요.'); T('notices').push({ id: uid(), event_id: e.id, title: String(p_title).trim(), body: p_body || null, urgent: !!p_urgent, pinned: false, publish_at: now(), expires_at: null, created_at: now() }); persist(); return { ok: true } },
+    host_end_notice: ({ p_notice }) => { const n = T('notices').find(x => x.id === p_notice); if (n) { n.expires_at = now(); persist() } return { ok: true } },
+    host_set_crowd: ({ p_place, p_crowd }) => { const pl = T('places').find(x => x.id === p_place); if (pl) { pl.crowd = p_crowd ?? null; pl.crowd_updated_at = p_crowd ? now() : null; persist() } return { ok: true } },
     place_order: ({ p_place, p_name, p_phone, p_items, p_consent, p_note }) => {
       if (!p_consent) throw new Error('개인정보 수집·이용에 동의해 주세요.')
       const pl = T('places').find(p => p.id === p_place), os = pl && osOf(pl.id)

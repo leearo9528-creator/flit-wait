@@ -73,7 +73,7 @@ export default function StampTour() {
 
             <ul className="mt-5 grid grid-cols-3 gap-3">
               {s.spots.map((sp, i) => (
-                <li key={sp.id} className={`flex aspect-square flex-col items-center justify-center rounded-2xl text-center ring-1 ${sp.got ? 'bg-orange-500 text-white ring-orange-500' : 'bg-gray-50 text-gray-400 ring-gray-200'}`}>
+                <li key={sp.id} className={`flex aspect-square flex-col items-center justify-center rounded-2xl text-center ring-1 ${sp.got ? 'bg-blue-700 text-white ring-blue-700' : 'bg-gray-50 text-gray-400 ring-gray-200'}`}>
                   <div className="text-2xl font-bold">{sp.got ? '✓' : i + 1}</div>
                   <div className={`mt-1 px-1 text-[12px] font-semibold leading-tight ${sp.got ? 'text-white' : 'text-gray-500'}`}>{sp.name}</div>
                 </li>

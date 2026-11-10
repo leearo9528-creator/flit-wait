@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { cachedRpc, DEMO, rpc } from '../../lib/supabase'
-import { useAsync, fmtTime } from '../../lib/util'
+import { useAsync, fmtTime, fmtPhone, LS, me } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import { PLACE_KIND_LABEL, type EventGuide } from '../../lib/types'
@@ -24,6 +24,10 @@ export default function PlaceDetail() {
   // 장바구니 — 이 가게 것만. 탭을 닫기 전까지 남는다
   const [bag, setBag] = useState<Cart>({})
   const [bagFor, setBagFor] = useState('')
+  // 바로 줄서기 — 이름·번호를 아는 손님은 접수 화면을 거치지 않는다
+  const [party, setParty] = useState(() => Math.min(4, me.get().party || 1))
+  const [joinBusy, setJoinBusy] = useState(false)
+  const [joinErr, setJoinErr] = useState<string | null>(null)
   const sched = useAsync<{ programs: { id: string; title: string; starts_at: string; ends_at: string | null; place: { id: string } | null }[] } | null>(() => rpc('event_schedule', { p_slug: slug }), [slug])
   if (loading && !data) return <Spinner />
   const p = data?.places.find(x => boothSlug ? x.booth?.slug === boothSlug : x.id === placeId)
@@ -39,12 +43,26 @@ export default function PlaceDetail() {
   const live = liveOf(p)
   const here = (sched.data?.programs ?? []).filter(g => g.place?.id === p.id && new Date(g.ends_at ?? g.starts_at).getTime() > Date.now() && new Date(g.starts_at).toDateString() === new Date().toDateString()).slice(0, 5)   // 오늘 남은 일정만
   const to = b && !b.is_paused ? (b.mode === 'queue' ? `/q/${b.slug}` : `/r/${b.slug}`) : null
+  const who = me.get()
+  const quick = !!to && b!.mode === 'queue' && !!who.agreed && !!who.name && who.phone.replace(/\D/g, '').length >= 10
+  const mineHere = b ? LS.get<{ token: string; at: number }>(`ticket:${b.slug}`) : null
+  const waitingHere = mineHere && Date.now() - mineHere.at < 6 * 3600_000 ? mineHere : null
+  async function joinNow() {
+    if (!b) return
+    setJoinErr(null); setJoinBusy(true)
+    try {
+      const r = await rpc<{ token: string }>('join_queue', { p_slug: b.slug, p_name: who.name, p_phone: who.phone, p_party: party, p_consent: true })
+      me.set({ party })
+      LS.set(`ticket:${b.slug}`, { token: r.token, slug: b.slug, at: Date.now() })
+      nav(`/t/${r.token}`)
+    } catch (e: any) { setJoinErr(e.message ?? '접수하지 못했어요.') } finally { setJoinBusy(false) }
+  }
   const sub = b
     ? (b.mode === 'queue' ? (b.waiting_teams > 0 ? `지금 ${b.waiting_teams}팀이 기다리고 있어요` : '기다리는 팀이 없어요') : b.today_left > 0 ? `오늘 남은 자리 ${b.today_left}석` : '오늘 회차가 모두 찼어요')
     : null
 
   return (
-    <div className={`mx-auto min-h-dvh max-w-md bg-white ${to || count > 0 ? 'pb-40' : 'pb-24'}`}>
+    <div className={`mx-auto min-h-dvh max-w-md bg-white ${to || count > 0 ? 'pb-48' : 'pb-24'}`}>
       {/* 배치도에서 이 장소 주변을 확대해 보여 준다 */}
       <div className="relative">
         {p.image_url
@@ -122,7 +140,24 @@ export default function PlaceDetail() {
 
       {to && (
         <div className="fixed inset-x-0 bottom-14 z-20 mx-auto max-w-md bg-white/95 px-4 pb-3 pt-3 backdrop-blur" style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
-          <Link to={to} className="flex h-14 items-center justify-center rounded-2xl bg-gray-900 text-[17px] font-bold text-white active:bg-gray-800">{b!.mode === 'queue' ? '줄서기' : '회차 예약하기'}</Link>
+          {joinErr && <div className="mb-2"><Alert kind="error">{joinErr}</Alert></div>}
+          {waitingHere
+            ? <Link to={`/t/${waitingHere.token}`} className="flex h-14 items-center justify-center rounded-2xl bg-blue-700 text-[17px] font-bold text-white active:bg-blue-800">내 대기 보기</Link>
+            : quick
+              ? <>
+                  <div className="mb-2 flex items-center justify-between text-sm text-gray-600">
+                    <span className="min-w-0 truncate">{who.name} · {fmtPhone(who.phone)} <Link to={to} className="font-semibold underline">바꾸기</Link></span>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex h-14 shrink-0 items-center rounded-2xl ring-1 ring-gray-300">
+                      <button type="button" onClick={() => setParty(n => Math.max(1, n - 1))} aria-label="인원 줄이기" className="flex h-14 w-12 items-center justify-center text-xl active:bg-gray-100">−</button>
+                      <span className="w-10 text-center text-[16px] font-bold tabular-nums">{party}명</span>
+                      <button type="button" onClick={() => setParty(n => Math.min(8, n + 1))} aria-label="인원 늘리기" className="flex h-14 w-12 items-center justify-center text-xl active:bg-gray-100">+</button>
+                    </div>
+                    <button type="button" onClick={joinNow} disabled={joinBusy} className="h-14 flex-1 rounded-2xl bg-gray-900 text-[17px] font-bold text-white active:bg-gray-800 disabled:opacity-60">{joinBusy ? '접수 중…' : '바로 줄서기'}</button>
+                  </div>
+                </>
+              : <Link to={to} className="flex h-14 items-center justify-center rounded-2xl bg-gray-900 text-[17px] font-bold text-white active:bg-gray-800">{b!.mode === 'queue' ? '줄서기' : '회차 예약하기'}</Link>}
         </div>
       )}
       {count > 0 && (

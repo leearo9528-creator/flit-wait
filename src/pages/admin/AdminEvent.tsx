@@ -110,7 +110,7 @@ export default function AdminEvent() {
       {tab === 'data' && <AdminDataReport eventId={eventId} />}
       {tab === 'stats' && <AdminStats eventId={eventId} eventName={e.name} />}
       {tab === 'settings' && <EventSettings e={e} onSaved={ev.reload} />}
-      {tab === 'codes' && <AdminCodes eventId={eventId} />}
+      {tab === 'codes' && <><HostLink eventId={eventId} /><AdminCodes eventId={eventId} /></>}
       {tab === 'notify' && <NotifyLog eventId={eventId} />}
     </Page>
   )
@@ -246,6 +246,31 @@ function AdminCodes({ eventId }: { eventId: string }) {
         ))}
         {q.data?.length === 0 && <Empty>발급된 코드가 없습니다.</Empty>}
       </div>
+    </Card>
+  )
+}
+
+/** 주최 화면 링크 — 주최 담당자가 로그인 없이 여는 한 장(숫자 · 공지 올리기 · 혼잡도). 링크를 가진 사람은 공지를 올릴 수 있으니 담당자에게만 보낸다 */
+function HostLink({ eventId }: { eventId: string }) {
+  const [tk, setTk] = useState<string | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+  const load = (fresh = false) => supabase.rpc('admin_host_link', { p_event: eventId, p_new: fresh }).then(({ data, error }) => { if (error) setErr(error.message); else setTk(data as string) })
+  useEffect(() => { load() }, [eventId]) // eslint-disable-line
+  const link = tk ? `${PUBLIC_BASE_URL}/h/${tk}` : ''
+  return (
+    <Card className="mb-4">
+      <h3 className="mb-1 font-bold">주최 화면 링크</h3>
+      <p className="mb-3 text-xs text-gray-500">주최 담당자에게 이 링크를 보내면 지금 숫자를 보고, 긴급 공지를 올리고, 주차장·푸드존 혼잡도를 누를 수 있어요. 지도·부스·메뉴는 못 바꿔요.</p>
+      {err && <Alert kind="error">{err}</Alert>}
+      {tk && (
+        <div className="flex flex-wrap items-center gap-2">
+          <code className="min-w-0 flex-1 truncate rounded-lg bg-gray-50 px-3 py-2 text-xs ring-1 ring-gray-200">{link}</code>
+          <Button variant="secondary" size="sm" className="!w-auto" onClick={() => navigator.clipboard?.writeText(link).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500) })}>{copied ? '복사됨' : '복사'}</Button>
+          <a href={link} target="_blank" rel="noreferrer" className="text-xs font-semibold underline">열기</a>
+          <button type="button" className="text-xs text-gray-500 underline" onClick={() => { if (confirm('링크를 새로 만들면 지금 링크는 못 써요.')) load(true) }}>새 링크</button>
+        </div>
+      )}
     </Card>
   )
 }

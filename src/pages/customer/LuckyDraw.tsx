@@ -50,11 +50,11 @@ function DrawCard({ d, slug, token, onChanged, stamp }: { d: DrawPublic; slug: s
   return (
     <div className="rounded-2xl bg-white p-5 ring-1 ring-gray-200">
       <div className="flex items-center gap-2 text-xs text-gray-500">
-        <span className={`rounded-full px-2 py-0.5 font-bold text-white ${d.status === 'drawn' ? 'bg-gray-900' : closed ? 'bg-gray-400' : 'bg-orange-500'}`}>{d.status === 'drawn' ? '발표' : closed ? '마감' : '응모 중'}</span>
+        <span className={`rounded-full px-2 py-0.5 font-bold text-white ${d.status === 'drawn' ? 'bg-gray-900' : closed ? 'bg-gray-400' : 'bg-blue-700'}`}>{d.status === 'drawn' ? '발표' : closed ? '마감' : '응모 중'}</span>
         {d.draw_at && <span>추첨 {fmtDateTime(d.draw_at)}</span>}<span>· 응모 {d.entries}명</span>
       </div>
       <h2 className="mt-2 text-lg font-bold text-gray-900">{d.title}</h2>
-      {d.prize && <p className="text-[15px] font-semibold text-orange-600">🎁 {d.prize} × {d.winners_count}명</p>}
+      {d.prize && <p className="text-[15px] font-semibold text-blue-700">경품 · {d.prize} × {d.winners_count}명</p>}
       {d.description && <p className="mt-1 text-sm text-gray-600">{d.description}</p>}
       {d.require_stamp && !short && !d.mine && <p className="mt-1 text-xs text-gray-500">스탬프 투어를 완주해야 응모할 수 있어요. <Link to={`/e/${slug}/stamp`} className="underline">내 스탬프</Link></p>}
 

@@ -88,16 +88,16 @@ export default function EventSchedule() {
                 const live = s <= now && now < e, past = e <= now
                 return (
                   <li key={p.id} className={`relative pb-5 ${past ? 'opacity-50' : ''}`}>
-                    <span className={`absolute -left-[27px] top-1.5 h-3 w-3 rounded-full ring-4 ring-white ${live ? 'bg-orange-500' : past ? 'bg-gray-300' : 'bg-gray-900'}`} />
+                    <span className={`absolute -left-[27px] top-1.5 h-3 w-3 rounded-full ring-4 ring-white ${live ? 'bg-blue-700' : past ? 'bg-gray-300' : 'bg-gray-900'}`} />
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <span className="tabular-nums font-semibold text-gray-900">{fmtTime(p.starts_at)}–{fmtTime(p.ends_at)}</span>
                       <span>{PROGRAM_KIND_LABEL[p.kind]}</span>
                       {p.place && <span>· {p.place.name}</span>}
-                      {live && <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[11px] font-bold text-white">진행 중</span>}
+                      {live && <span className="rounded-full bg-blue-700 px-2 py-0.5 text-[11px] font-bold text-white">진행 중</span>}
                     </div>
                     <div className="mt-0.5 flex items-start gap-2">
                       <div className="flex-1 text-[17px] font-bold text-gray-900">{p.title}</div>
-                      <button type="button" onClick={() => toggleFav(p.id)} aria-label="찜" className={`-mr-1 -mt-1 rounded-full p-1.5 text-lg leading-none ${fav.includes(p.id) ? 'text-amber-500' : 'text-gray-300'}`}>{fav.includes(p.id) ? '★' : '☆'}</button>
+                      <button type="button" onClick={() => toggleFav(p.id)} aria-label="찜" className={`-mr-1 -mt-1 rounded-full p-1.5 text-lg leading-none ${fav.includes(p.id) ? 'text-gray-900' : 'text-gray-300'}`}>{fav.includes(p.id) ? '★' : '☆'}</button>
                     </div>
                     {p.description && <p className="mt-0.5 text-sm text-gray-600">{p.description}</p>}
                   </li>

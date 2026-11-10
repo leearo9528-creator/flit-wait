@@ -105,16 +105,16 @@ export default function Reserve() {
       )}
 
       <Card className="mb-4">
-        <div className="mb-3 text-sm font-semibold text-gray-700">1. 날짜</div>
-        <div className="flex gap-2">
+        {days.length !== 1 && <><div className="mb-3 text-sm font-semibold text-gray-700">날짜</div>
+        <div className="mb-5 flex gap-2">
           {days.map(([d]) => (
             <button key={d} type="button" onClick={() => { setDay(d); setSlotId(null) }}
               className={`h-11 flex-1 rounded-xl text-sm font-semibold ring-1 ${activeDay === d ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300'}`}>{d}</button>
           ))}
           {days.length === 0 && <div className="text-sm text-gray-500">예약 가능한 회차가 없습니다.</div>}
-        </div>
+        </div></>}
 
-        <div className="mb-3 mt-5 text-sm font-semibold text-gray-700">2. 회차</div>
+        <div className="mb-3 text-sm font-semibold text-gray-700">회차{days.length === 1 ? ` · ${days[0][0]}` : ''}</div>
         <div className="grid grid-cols-2 gap-2">
           {(days.find(([d]) => d === activeDay)?.[1] ?? []).map(s => {
             const left = s.capacity - s.reserved
@@ -135,7 +135,7 @@ export default function Reserve() {
       </Card>
 
       <Card>
-        <div className="mb-3 text-sm font-semibold text-gray-700">3. 예약자 정보</div>
+        <div className="mb-3 text-sm font-semibold text-gray-700">예약자</div>
         <form onSubmit={submit} className="space-y-4">
           {selected && (
             <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 text-sm">

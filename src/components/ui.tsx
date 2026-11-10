@@ -2,7 +2,7 @@ import { ReactNode, ButtonHTMLAttributes, InputHTMLAttributes } from 'react'
 
 export function Page({ children, title, sub, wide }: { children: ReactNode; title?: string; sub?: string; wide?: boolean }) {
   return (
-    <div className={`mx-auto min-h-dvh px-4 pb-24 pt-6 ${wide ? 'max-w-5xl' : 'max-w-md'}`}>
+    <div className={`mx-auto min-h-dvh px-4 pb-24 pt-6 ${wide ? 'max-w-5xl' : 'max-w-md bg-white'}`}>
       {title && (
         <header className="mb-5">
           {sub && <div className="text-xs font-medium text-gray-500">{sub}</div>}
@@ -15,7 +15,7 @@ export function Page({ children, title, sub, wide }: { children: ReactNode; titl
 }
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 ${className}`}>{children}</div>
+  return <div className={`rounded-2xl bg-white p-5 ring-1 ring-gray-200 ${className}`}>{children}</div>
 }
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' | 'ghost'; size?: 'md' | 'lg' | 'sm'; loading?: boolean }

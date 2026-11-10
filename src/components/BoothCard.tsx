@@ -77,7 +77,7 @@ export function boothStatus(b: BoothLike, eventClosed: boolean | 'before'): Boot
 }
 
 export function StatusBadge({ st }: { st: BoothStatus }) {
-  const tone = st.kind === 'open' ? 'bg-orange-50 text-orange-600' : st.kind === 'upcoming' ? 'bg-sky-50 text-sky-700' : st.kind === 'soldout' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'
+  const tone = st.kind === 'open' ? 'bg-blue-50 text-blue-700' : st.kind === 'upcoming' ? 'bg-sky-50 text-sky-700' : st.kind === 'soldout' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'
   return <span className={`rounded-md px-2 py-1 text-[13px] font-semibold ${tone}`}>{st.label}</span>
 }
 

@@ -79,7 +79,7 @@ export default function MyTicket() {
   }
   const canDefer = DEFER_ENABLED && !noMore && !isSlot && t.status === 'waiting' && (t.booth.settings.defer_max ?? 3) > 0
 
-  const tone = ({ waiting: 'blue', called: 'amber', checked_in: 'green', done: 'green', no_show: 'red', cancelled: 'gray' } as const)[t.status]
+  const tone = ({ waiting: 'blue', called: 'red', checked_in: 'green', done: 'green', no_show: 'red', cancelled: 'gray' } as const)[t.status]
 
   return (
     <Page title={t.booth.name} sub={t.event.name}>
@@ -104,22 +104,22 @@ export default function MyTicket() {
                 <div className="text-sm text-gray-500">내 앞 대기</div>
                 <div className="text-3xl font-bold tabular-nums">{t.ahead}<span className="ml-1 text-base font-medium text-gray-500">팀</span></div>
                 {t.ahead! > 0 && fmtWait(t.est_wait_min, t.ahead!) && <div className="text-sm text-gray-500">예상 {fmtWait(t.est_wait_min, t.ahead!)}</div>}
-                {t.ahead !== null && t.ahead <= (t.booth.settings.notify_ahead_teams ?? 2) && <div className="mt-1 text-sm font-semibold text-amber-700">곧 차례예요. 부스 근처로 와주세요.</div>}
+                {t.ahead !== null && t.ahead <= (t.booth.settings.notify_ahead_teams ?? 2) && <div className="mt-1 text-sm font-semibold text-blue-700">곧 차례예요. 부스 근처로 와주세요.</div>}
               </div>
             )}
             {t.status === 'called' && (
-              <div className="mt-4 rounded-xl bg-amber-50 py-4 ring-1 ring-amber-200">
-                <div className="text-lg font-bold text-amber-900">지금 입장해 주세요</div>
-                <div className="mt-1 text-sm text-amber-800">{Math.floor(callLeft / 60)}:{String(callLeft % 60).padStart(2, '0')} 안에 부스로 오지 않으면 다음 순서로 넘어갑니다.</div>
+              <div className="mt-4 rounded-xl bg-red-600 px-3 py-4 text-white">
+                <div className="text-xl font-bold">지금 입장해 주세요</div>
+                <div className="mt-1 text-sm opacity-90">{Math.floor(callLeft / 60)}:{String(callLeft % 60).padStart(2, '0')} 안에 부스로 오지 않으면 다음 순서로 넘어갑니다.</div>
               </div>
             )}
           </>
         )}
 
         {isSlot && t.status === 'called' && (
-          <div className="mb-4 rounded-xl bg-amber-50 py-4 ring-1 ring-amber-200">
-            <div className="text-lg font-bold text-amber-900">자리가 났어요 · 지금 입장해 주세요</div>
-            <div className="mt-1 text-sm text-amber-800">{Math.floor(callLeft / 60)}:{String(callLeft % 60).padStart(2, '0')} 안에 부스로 오지 않으면 다음 대기자에게 넘어갑니다.</div>
+          <div className="mb-4 rounded-xl bg-red-600 px-3 py-4 text-white">
+            <div className="text-xl font-bold">자리가 났어요 · 지금 입장해 주세요</div>
+            <div className="mt-1 text-sm opacity-90">{Math.floor(callLeft / 60)}:{String(callLeft % 60).padStart(2, '0')} 안에 부스로 오지 않으면 다음 대기자에게 넘어갑니다.</div>
           </div>
         )}
         {isSlot && (

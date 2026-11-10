@@ -73,7 +73,6 @@ export default function QueueJoin() {
       {event.notice && <div className="mb-4"><Alert kind="warn">{event.notice}</Alert></div>}
       {booth.is_paused && (booth.settings.pause_mode === 'closed_today'
         ? <div className="mb-4 rounded-2xl bg-gray-100 p-5 text-center ring-1 ring-gray-300">
-            <div className="text-2xl">🌙</div>
             <div className="mt-1 text-lg font-bold text-gray-800">오늘 접수가 마감되었습니다</div>
             <div className="mt-1 text-sm text-gray-600">오늘은 더 이상 접수를 받지 않아요.<br />내일 운영 시간에 다시 만나요.</div>
           </div>
