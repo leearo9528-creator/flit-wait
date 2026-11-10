@@ -24,9 +24,11 @@ export default function ParkHome() {
   const mine = useMyTickets(slug, DEMO ? 6000 : 20000)
   const { data, error, loading, reload } = useAsync<EventGuide>(() => cachedRpc('event_guide', slug), [slug])
   const sched = useAsync<EventSchedule>(() => cachedRpc('event_schedule', slug), [slug])
+  // 지도에 올리지 않은 부스도 목록에는 나와야 한다 (부스만 만들고 배치도를 안 쓴 행사)
+  const sum = useAsync<{ booths: any[] } | null>(() => cachedRpc('event_summary', slug), [slug])
   useEffect(() => {
-    const iv = setInterval(() => { if (document.visibilityState === 'visible') reload() }, DEMO ? 6000 : 20000 + Math.random() * 5000)
-    const onVis = () => { if (document.visibilityState === 'visible') reload() }
+    const iv = setInterval(() => { if (document.visibilityState === 'visible') { reload(); sum.reload() } }, DEMO ? 6000 : 20000 + Math.random() * 5000)
+    const onVis = () => { if (document.visibilityState === 'visible') { reload(); sum.reload() } }
     document.addEventListener('visibilitychange', onVis)
     return () => { clearInterval(iv); document.removeEventListener('visibilitychange', onVis) }
   }, [slug]) // eslint-disable-line
@@ -42,7 +44,16 @@ export default function ParkHome() {
   const nav = useNavigate()
   const pickView = (v: 'map' | 'list') => { setView(v); LS.set(`view:${slug}`, v) }
 
-  const rows = useMemo(() => (data?.places ?? []).map(p => ({ p, live: liveOf(p) })), [data?.places])
+  const rows = useMemo(() => {
+    const places = data?.places ?? [], onMap = new Set(places.map(p => p.booth?.id).filter(Boolean))
+    const loose: GuidePlace[] = (sum.data?.booths ?? []).filter(b => !onMap.has(b.id)).map((b, i) => ({
+      id: `booth:${b.slug}`, kind: 'booth', name: b.name, description: b.description ?? null, image_url: b.image_url ?? null, x: null, y: null, sort_order: 9000 + i, menu: [], hours: null,
+      booth: { id: b.id, slug: b.slug, mode: b.mode, is_paused: b.is_paused, location: b.location ?? null, waiting_teams: b.waiting_teams ?? 0, today_left: b.today_left ?? 0, next_slot_at: b.next_slot_at ?? null },
+    } as unknown as GuidePlace))
+    return [...places, ...loose].map(p => ({ p, live: liveOf(p) }))
+  }, [data?.places, sum.data])
+  // 배치도에 없는 부스는 상세 화면이 없으니 바로 줄서기·예약으로 보낸다
+  const open = (p: GuidePlace) => nav(p.id.startsWith('booth:') ? (p.booth!.mode === 'slot' ? `/r/${p.booth!.slug}` : `/q/${p.booth!.slug}`) : `/e/${slug}/p/${p.id}`)
   // 한 번에 한 종류만 보여 준다 — 처음엔 대기가 있는 체험 (없으면 첫 종류). 핀 이름표가 서로 가리지 않게 하려는 것
   const groups = useMemo(() => GROUPS.filter(g => rows.some(r => groupOf(r.p.kind) === g.id)), [rows])
   const group = picked && groups.some(g => g.id === picked) ? picked : groups[0]?.id
@@ -116,7 +127,7 @@ export default function ParkHome() {
       {mode === 'map' && (
         <div className="relative mt-3">
           <img src={event.map_image_url!} alt={`${event.name} 배치도`} className="block w-full select-none" draggable={false} />
-          {shown.map(({ p, live }) => <Pin key={p.id} p={p} live={live} onClick={() => nav(`/e/${slug}/p/${p.id}`)} />)}
+          {shown.filter(({ p }) => p.x != null && p.y != null).map(({ p, live }) => <Pin key={p.id} p={p} live={live} onClick={() => open(p)} />)}
         </div>
       )}
       {mode === 'map' && event.map_note && <p className="px-4 pt-2 text-xs text-gray-500">{event.map_note}</p>}
@@ -124,7 +135,7 @@ export default function ParkHome() {
       <ul className={`divide-y divide-gray-100 px-4 ${mode === 'map' ? 'mt-2' : 'mt-1'}`}>
         {listed.map(({ p, live }) => (
           <li key={p.id}>
-            <button type="button" onClick={() => nav(`/e/${slug}/p/${p.id}`)} className="flex w-full items-center gap-3 py-3.5 text-left active:bg-gray-50">
+            <button type="button" onClick={() => open(p)} className="flex w-full items-center gap-3 py-3.5 text-left active:bg-gray-50">
               <div className="min-w-0 flex-1">
                 <div className="text-xs text-gray-500">{PLACE_KIND_LABEL[p.kind]}{p.booth?.location ? ` · ${p.booth.location}` : p.hours ? ` · ${p.hours}` : ''}</div>
                 <div className="truncate text-[17px] font-bold text-gray-900">{p.name}</div>
