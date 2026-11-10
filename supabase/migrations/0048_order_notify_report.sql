@@ -1,3 +1,4 @@
+-- 프로덕션 적용 완료 (2026-11-11) — notify Edge Function v9 도 같이 배포
 -- 2026-11-11 주문 알림톡 + 주문·매출 리포트
 --
 -- 1) 주문 알림: O01 주문 접수 · O02 준비 완료(픽업 호출) · O03 가게 취소. 기존 notifications 큐를 같이 쓴다 (order_id 추가, ticket_id 는 비워도 됨).
@@ -16,18 +17,19 @@ insert into templates(code, description, sms_fallback_text, button_name, button_
  ('O01', '주문 접수', '[#{행사명}] #{가게명} 주문 접수. 주문번호 #{주문번호}번, #{메뉴}, #{금액}. 준비되면 알려 드려요. #{링크}', '주문 확인', 'https://wait.flitunion.com/o/#{token}', false),
  ('O02', '주문 준비 완료', '[#{행사명}] #{이름}님 #{가게명} 주문번호 #{주문번호}번이 준비됐어요. 가게에서 받아 가세요. #{링크}', '주문 확인', 'https://wait.flitunion.com/o/#{token}', false),
  ('O03', '주문 취소', '[#{행사명}] #{가게명} 주문번호 #{주문번호}번이 취소됐어요. 사유: #{사유}', '주문 확인', 'https://wait.flitunion.com/o/#{token}', false)
-on conflict (code) do nothing;
+on conflict (code) do update set description = excluded.description, sms_fallback_text = excluded.sms_fallback_text, button_name = excluded.button_name, button_link = excluded.button_link, enabled = false
+  where templates.ncp_template_code is null;   -- 프로덕션에는 옛 주문 시스템용 O01~O03(켜진 상태, 변수 이름이 다름)이 이미 있었다 → 새 문구로 바꾸고 껐다
 
 create or replace function orders_notify() returns trigger language plpgsql security definer set search_path = public as $$
-declare code text;
+declare v_code text;   -- 변수 이름을 code 로 두면 templates.code 와 겹쳐 주문 입력이 통째로 실패한다 (적용 직후 발견해 고침)
 begin
   if new.phone is null then return new; end if;
-  if tg_op = 'INSERT' then code := 'O01';
-  elsif new.status = 'ready' and old.status is distinct from 'ready' then code := 'O02';
-  elsif new.status = 'cancelled' and old.status is distinct from 'cancelled' and coalesce(new.cancel_reason, '') <> '손님 취소' then code := 'O03';
+  if tg_op = 'INSERT' then v_code := 'O01';
+  elsif new.status = 'ready' and old.status is distinct from 'ready' then v_code := 'O02';
+  elsif new.status = 'cancelled' and old.status is distinct from 'cancelled' and coalesce(new.cancel_reason, '') <> '손님 취소' then v_code := 'O03';
   end if;
-  if code is null or not exists (select 1 from templates t where t.code = code and t.enabled) then return new; end if;
-  insert into notifications(order_id, template_code) values (new.id, code);
+  if v_code is null or not exists (select 1 from templates t where t.code = v_code and t.enabled) then return new; end if;
+  insert into notifications(order_id, template_code) values (new.id, v_code);
   perform kick_notify();
   return new;
 end $$;
