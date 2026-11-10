@@ -26,6 +26,7 @@ export default function ParkHome() {
   const mine = useMyTickets(slug, DEMO ? 6000 : 20000)
   const myOrders = useMyOrders(slug, DEMO ? 4000 : 10000).filter(orderActive)
   const [q, setQ] = useState('')
+  const [searching, setSearching] = useState(false)
   const { data, error, loading, reload } = useAsync<EventGuide>(() => cachedRpc('event_guide', slug), [slug])
   const sched = useAsync<EventSchedule>(() => cachedRpc('event_schedule', slug), [slug])
   // 지도에 올리지 않은 부스도 목록에는 나와야 한다 (부스만 만들고 배치도를 안 쓴 행사)
@@ -128,7 +129,6 @@ export default function ParkHome() {
     const ps = rows.map(r => r.p).filter(p => groupOf(p.kind) === id && p.x != null && p.y != null)
     return { id, label: id === 'food' ? '먹거리' : '마켓', n: ps.length, x: ps.reduce((a, p) => a + Number(p.x), 0) / (ps.length || 1), y: ps.reduce((a, p) => a + Number(p.y), 0) / (ps.length || 1) }
   }).filter(z => z.n > 0)
-  const ways = rows.map(r => r.p).filter(p => p.x != null && ['facility', 'info', 'medical', 'parking'].includes(p.kind))
 
   return (
     <div className="mx-auto min-h-dvh max-w-md bg-white pb-24">
@@ -138,6 +138,10 @@ export default function ParkHome() {
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-[19px] font-bold leading-tight text-gray-900">{event.name}</h1>
           </div>
+          <button type="button" onClick={() => setSearching(v => { if (v) setQ(''); return !v })} aria-label="찾기" aria-pressed={searching}
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${searching ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'}`}>
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg>
+          </button>
           {hasMap && (
             <div className="flex shrink-0 rounded-full bg-gray-100 p-0.5 text-sm font-semibold">
               {(['map', 'list'] as const).map(v => (
@@ -146,14 +150,14 @@ export default function ParkHome() {
             </div>
           )}
         </div>
-        <div className="px-4 pt-3">
-          <div className="relative">
-            <input value={q} onChange={e => setQ(e.target.value)} type="search" enterKeyHint="search" placeholder="어디 · 무엇을 찾으세요? (떡볶이, 화장실…)" aria-label="장소·메뉴 찾기"
-              className="h-11 w-full rounded-full bg-gray-100 pl-4 pr-10 text-[15px] text-gray-900 placeholder:text-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 [&::-webkit-search-cancel-button]:hidden" />
-            {q && <button type="button" onClick={() => setQ('')} aria-label="지우기" className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center text-gray-500">✕</button>}
+        {searching && (
+          <div className="flex items-center gap-2 px-4 py-3">
+            <input autoFocus value={q} onChange={e => setQ(e.target.value)} type="search" enterKeyHint="search" placeholder="떡볶이, 화장실, 키링…" aria-label="장소·메뉴 찾기"
+              className="h-11 min-w-0 flex-1 rounded-full bg-gray-100 px-4 text-[15px] text-gray-900 placeholder:text-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 [&::-webkit-search-cancel-button]:hidden" />
+            <button type="button" onClick={() => { setQ(''); setSearching(false) }} className="shrink-0 px-2 text-[15px] font-semibold text-gray-700">닫기</button>
           </div>
-        </div>
-        <div className={`flex gap-2 overflow-x-auto px-4 py-3 [scrollbar-width:none] ${term ? 'hidden' : ''}`}>
+        )}
+        <div className={`flex gap-2 overflow-x-auto px-4 py-3 [scrollbar-width:none] ${searching ? 'hidden' : ''}`}>
           {groups.map(g => (
             <button key={g.id} type="button" onClick={() => setGroup(g.id)}
               className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[15px] font-semibold ring-1 ${group === g.id ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 active:bg-gray-50'}`}>{g.label}</button>
@@ -233,7 +237,7 @@ export default function ParkHome() {
           {/* 구역 핀 — 먹거리·마켓 자리(가게들의 한가운데)에 자동으로 뜬다. 누르면 그 구역의 가게·메뉴가 아래에 펼쳐진다 */}
           {!target && zonePins.filter(z => z.id !== group).map(z => (
             <button key={z.id} type="button" onClick={() => { setGroup(z.id); setTimeout(() => document.getElementById('zone')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60) }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-gray-900 px-3 py-1.5 text-[12px] font-bold text-white shadow-md ring-2 ring-white transition active:scale-95" style={{ left: `${z.x}%`, top: `${z.y}%` }}>
+              className="absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-[12px] font-bold text-gray-900 shadow-md ring-1 ring-gray-300 transition active:scale-95" style={{ left: `${z.x}%`, top: `${z.y}%` }}>
               {z.label} {z.n}곳 ›
             </button>
           ))}
@@ -258,15 +262,6 @@ export default function ParkHome() {
         </div>
       )}
       {!term && mode === 'map' && me && !meIn && locOn && <p className="px-4 pt-2 text-sm text-gray-600">지금은 행사장 밖에 계세요.</p>}
-      {!term && mode === 'map' && ways.length > 0 && (
-        <div className="flex items-center gap-2 overflow-x-auto px-4 pt-3 [scrollbar-width:none]">
-          <span className="shrink-0 text-sm font-semibold text-gray-500">가는 길</span>
-          {ways.map(p => (
-            <button key={p.id} type="button" onClick={() => (toId === p.id ? clearTo() : goTo(p.id))}
-              className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 ${toId === p.id ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 active:bg-gray-50'}`}>{p.name.split(' · ')[0]}</button>
-          ))}
-        </div>
-      )}
       {!term && mode === 'map' && event.map_note && <p className="px-4 pt-2 text-xs text-gray-500">{event.map_note}</p>}
 
       {/* 먹거리 · 마켓: 그 구역의 가게와 메뉴(상품)를 한 화면에 다 편다 — 가게를 하나씩 열어 보지 않아도 뭐가 있는지 보인다 */}
@@ -312,6 +307,10 @@ export default function ParkHome() {
                 {!p.booth && p.menu?.length > 0 && <div className="truncate text-xs text-gray-500">{p.menu.slice(0, 3).map(m => m.name).join(' · ')}</div>}
               </div>
               {live && <span className={`shrink-0 text-right text-[17px] font-bold tabular-nums ${TONE_TEXT[live.tone]}`}>{live.text}</span>}
+              {hasMap && group === 'etc' && p.x != null && (
+                <span role="button" tabIndex={0} onClick={e => { e.stopPropagation(); toId === p.id ? clearTo() : goTo(p.id) }}
+                  className={`shrink-0 rounded-full px-3.5 py-2 text-sm font-semibold ring-1 ${toId === p.id ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-900 ring-gray-300'}`}>가는 길</span>
+              )}
             </button>
           </li>
         ))}
