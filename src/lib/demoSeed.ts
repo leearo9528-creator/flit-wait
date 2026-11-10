@@ -35,11 +35,11 @@ export async function seedDemoEvent(eventId: string) {
 
   const places = [
     ...booths.map((b, i) => ({ kind: 'booth', name: b.name, description: b.description, x: b.x, y: b.y, sort_order: (i + 1) * 10, booth_id: boothId(b.slug) })),
-    { kind: 'food', name: '어묵 · 떡볶이', description: '푸드 존', hours: `10:00~${closeH}:00`, x: 60, y: 68, sort_order: 110, crowd: 'high', menu: [{ name: '어묵 (3개)', price: '3,000원' }, { name: '떡볶이', price: '5,000원' }, { name: '순대', price: '5,000원' }] },
-    { kind: 'food', name: '닭꼬치 · 소떡소떡', description: '푸드 존', hours: `10:00~${closeH}:00`, x: 73, y: 72.5, sort_order: 120, crowd: 'mid', menu: [{ name: '닭꼬치', price: '4,000원' }, { name: '소떡소떡', price: '4,000원' }] },
-    { kind: 'food', name: '핫초코 · 뱅쇼', description: '푸드 존', hours: `10:00~${closeH}:00`, x: 60, y: 77.5, sort_order: 130, crowd: 'low', menu: [{ name: '핫초코', price: '4,000원' }, { name: '뱅쇼', price: '6,000원' }, { name: '군고구마', price: '3,000원' }] },
-    { kind: 'market', name: '핸드메이드 마켓', description: '소품 · 캔들 · 뜨개 — 셀러 12팀', x: 31, y: 69.5, sort_order: 210 },
-    { kind: 'market', name: '겨울 간식 마켓', description: '수제 쿠키 · 잼 · 차', x: 33, y: 77, sort_order: 220 },
+    { kind: 'food', name: '어묵 · 떡볶이', description: '푸드 존', hours: `10:00~${closeH}:00`, x: 60, y: 68, sort_order: 110, crowd: 'high', menu: [{ name: '떡볶이', price: '5,000원', desc: '쌀떡 · 보통 맵기' }, { name: '어묵 (3개)', price: '3,000원', desc: '국물 포함' }, { name: '순대', price: '5,000원' }, { name: '튀김 모둠', price: '6,000원', desc: '김말이 · 오징어 · 고구마', sold_out: true }] },
+    { kind: 'food', name: '닭꼬치 · 소떡소떡', description: '푸드 존', hours: `10:00~${closeH}:00`, x: 73, y: 72.5, sort_order: 120, crowd: 'mid', menu: [{ name: '닭꼬치', price: '4,000원', desc: '소금 / 양념' }, { name: '소떡소떡', price: '4,000원' }, { name: '회오리 감자', price: '4,000원' }] },
+    { kind: 'food', name: '핫초코 · 뱅쇼', description: '푸드 존', hours: `10:00~${closeH}:00`, x: 60, y: 77.5, sort_order: 130, crowd: 'low', menu: [{ name: '핫초코', price: '4,000원', desc: '마시멜로 올려 드려요' }, { name: '뱅쇼', price: '6,000원', desc: '무알코올' }, { name: '군고구마', price: '3,000원' }] },
+    { kind: 'market', name: '핸드메이드 마켓', description: '소품 · 캔들 · 뜨개 — 셀러 12팀', x: 31, y: 69.5, sort_order: 210, menu: [{ name: '소이 캔들', price: '12,000원' }, { name: '뜨개 키링', price: '6,000원' }, { name: '손뜨개 목도리', price: '28,000원' }, { name: '도자기 컵', price: '18,000원' }] },
+    { kind: 'market', name: '겨울 간식 마켓', description: '수제 쿠키 · 잼 · 차', x: 33, y: 77, sort_order: 220, menu: [{ name: '수제 쿠키 (5개)', price: '6,000원' }, { name: '딸기잼', price: '9,000원' }, { name: '유자차', price: '10,000원' }] },
     { kind: 'stage', name: '메인 무대', description: '공연 · 럭키드로우 추첨', x: 90, y: 44, sort_order: 310 },
     { kind: 'info', name: '안내소 · 경품 교환', description: '분실물 · 스탬프 경품 · 미아 보호', x: 50, y: 86, sort_order: 410 },
     { kind: 'medical', name: '의무실', description: '간호 인력 상주 · 구급함 · 핫팩', x: 64, y: 90, sort_order: 420 },

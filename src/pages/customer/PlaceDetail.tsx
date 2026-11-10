@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { cachedRpc, DEMO, rpc } from '../../lib/supabase'
 import { useAsync, fmtTime } from '../../lib/util'
@@ -6,6 +6,7 @@ import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import { PLACE_KIND_LABEL, type EventGuide } from '../../lib/types'
 import { liveOf, TONE_PIN, TONE_TEXT } from '../../lib/live'
+import { cart, cartLines, cartTotal, cartCount, priceOf, won, type Cart } from '../../lib/orders'
 
 /**
  * 장소 상세 — 지도 핀·목록을 누르면 오는 화면. 체험·먹거리·마켓·편의시설 모두 같은 틀이다.
@@ -20,12 +21,21 @@ export default function PlaceDetail() {
     return () => clearInterval(iv)
   }, [slug]) // eslint-disable-line
 
+  // 장바구니 — 이 가게 것만. 탭을 닫기 전까지 남는다
+  const [bag, setBag] = useState<Cart>({})
+  const [bagFor, setBagFor] = useState('')
   const sched = useAsync<{ programs: { id: string; title: string; starts_at: string; ends_at: string | null; place: { id: string } | null }[] } | null>(() => rpc('event_schedule', { p_slug: slug }), [slug])
   if (loading && !data) return <Spinner />
   const p = data?.places.find(x => boothSlug ? x.booth?.slug === boothSlug : x.id === placeId)
   if (!data?.event || !p) return <div className="p-6"><Alert kind="error">{error ?? '장소를 찾을 수 없습니다.'}</Alert><Link to={`/e/${slug}`} className="mt-4 block text-center text-sm font-semibold underline">지도로 돌아가기</Link></div>
   const { event } = data
+  if (bagFor !== p.id) { setBagFor(p.id); setBag(cart.get(p.id)) }
   const b = p.booth
+  const canOrder = !!p.order_open && event.status === 'open'
+  const ordering = canOrder && !p.order_paused
+  const lines = ordering ? cartLines(p.menu ?? [], bag) : []
+  const count = cartCount(lines)
+  const put = (name: string, d: number) => setBag(prev => { const n = Math.max(0, Math.min(20, (prev[name] ?? 0) + d)); const next = { ...prev, [name]: n }; if (!n) delete next[name]; cart.set(p.id, next); return next })
   const live = liveOf(p)
   const here = (sched.data?.programs ?? []).filter(g => g.place?.id === p.id && new Date(g.ends_at ?? g.starts_at).getTime() > Date.now() && new Date(g.starts_at).toDateString() === new Date().toDateString()).slice(0, 5)   // 오늘 남은 일정만
   const to = b && !b.is_paused ? (b.mode === 'queue' ? `/q/${b.slug}` : `/r/${b.slug}`) : null
@@ -34,7 +44,7 @@ export default function PlaceDetail() {
     : null
 
   return (
-    <div className={`mx-auto min-h-dvh max-w-md bg-white ${to ? 'pb-40' : 'pb-24'}`}>
+    <div className={`mx-auto min-h-dvh max-w-md bg-white ${to || count > 0 ? 'pb-40' : 'pb-24'}`}>
       {/* 배치도에서 이 장소 주변을 확대해 보여 준다 */}
       <div className="relative">
         {p.image_url
@@ -83,9 +93,27 @@ export default function PlaceDetail() {
 
         {p.menu?.length > 0 && (
           <div className="mt-6">
-            <h2 className="text-sm font-semibold text-gray-500">메뉴</h2>
+            <div className="flex items-baseline justify-between">
+              <h2 className="text-sm font-semibold text-gray-500">{p.kind === 'market' ? '상품' : '메뉴'}</h2>
+              {canOrder && <span className={`text-xs font-semibold ${ordering ? 'text-blue-700' : 'text-gray-500'}`}>{ordering ? '앱으로 주문하고 준비되면 받으러 가요' : '지금은 주문이 잠시 멈춰 있어요'}</span>}
+            </div>
             <ul className="mt-2 divide-y divide-gray-100">
-              {p.menu.map((m, i) => <li key={i} className="flex justify-between gap-3 py-3 text-[16px]"><span className="font-semibold text-gray-900">{m.name}</span>{m.price && <span className="shrink-0 tabular-nums text-gray-600">{m.price}</span>}</li>)}
+              {p.menu.map((m, i) => { const n = bag[m.name] ?? 0, can = ordering && !m.sold_out && priceOf(m) > 0; return (
+                <li key={i} className={`flex items-center gap-3 py-3 ${m.sold_out ? 'opacity-50' : ''}`}>
+                  {m.image_url && <img src={m.image_url} alt="" loading="lazy" className="h-16 w-16 shrink-0 rounded-xl bg-gray-100 object-cover" />}
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[16px] font-semibold text-gray-900">{m.name}</div>
+                    {m.desc && <div className="truncate text-xs text-gray-500">{m.desc}</div>}
+                    <div className="mt-0.5 text-[15px] tabular-nums text-gray-700">{m.sold_out ? '품절' : m.price}</div>
+                  </div>
+                  {can && (n > 0
+                    ? <div className="flex shrink-0 items-center rounded-full ring-1 ring-gray-300">
+                        <button type="button" onClick={() => put(m.name, -1)} aria-label={`${m.name} 빼기`} className="flex h-10 w-10 items-center justify-center text-xl text-gray-900 active:bg-gray-100">−</button>
+                        <span className="w-6 text-center text-[15px] font-bold tabular-nums">{n}</span>
+                        <button type="button" onClick={() => put(m.name, 1)} aria-label={`${m.name} 더하기`} className="flex h-10 w-10 items-center justify-center text-xl text-gray-900 active:bg-gray-100">+</button>
+                      </div>
+                    : <button type="button" onClick={() => put(m.name, 1)} className="h-10 shrink-0 rounded-full px-4 text-sm font-bold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">담기</button>)}
+                </li>) })}
             </ul>
           </div>
         )}
@@ -95,6 +123,13 @@ export default function PlaceDetail() {
       {to && (
         <div className="fixed inset-x-0 bottom-14 z-20 mx-auto max-w-md bg-white/95 px-4 pb-3 pt-3 backdrop-blur" style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
           <Link to={to} className="flex h-14 items-center justify-center rounded-2xl bg-gray-900 text-[17px] font-bold text-white active:bg-gray-800">{b!.mode === 'queue' ? '줄서기' : '회차 예약하기'}</Link>
+        </div>
+      )}
+      {count > 0 && (
+        <div className="fixed inset-x-0 bottom-14 z-20 mx-auto max-w-md bg-white/95 px-4 pb-3 pt-3 backdrop-blur" style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
+          <Link to={`/e/${slug}/p/${p.id}/order`} className="flex h-14 items-center justify-between rounded-2xl bg-gray-900 px-5 text-[17px] font-bold text-white active:bg-gray-800">
+            <span>{count}개 주문하기</span><span className="tabular-nums">{won(cartTotal(lines))}</span>
+          </Link>
         </div>
       )}
       <CustomerNav slug={slug} active="hub" />

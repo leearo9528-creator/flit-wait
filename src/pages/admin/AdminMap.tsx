@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import { useEffect, useState } from 'react'
+import { supabase, rpc, PUBLIC_BASE_URL } from '../../lib/supabase'
 import { useAsync } from '../../lib/util'
 import { Card, Button, Field, Input, Alert, Spinner, Empty } from '../../components/ui'
 import ImageUpload from '../../components/ImageUpload'
@@ -145,6 +145,7 @@ function PlaceEditor({ p, booths, selected, onSelect, onSave, onRemove }: { p: P
   const [edit, setEdit] = useState(false)
   const [f, setF] = useState({ kind: p.kind, name: p.name, description: p.description ?? '', hours: p.hours ?? '', booth_id: p.booth_id ?? '', lat: p.lat ?? '', lng: p.lng ?? '', sort_order: p.sort_order, image_url: p.image_url, menu: (p.menu ?? []).map(m => m.price ? `${m.name} ${m.price}` : m.name).join('\n') })
   const booth = booths.find(b => b.id === p.booth_id)
+  const [pics, setPics] = useState<Record<string, string | null>>({})   // 메뉴 사진 — 저장할 때 메뉴에 합친다
   return (
     <li className={`py-2.5 ${selected ? 'bg-orange-50' : ''}`}>
       <div className="flex items-center gap-3 px-1">
@@ -164,7 +165,7 @@ function PlaceEditor({ p, booths, selected, onSelect, onSave, onRemove }: { p: P
         <Button variant="ghost" size="sm" className="!w-auto text-red-600" onClick={onRemove}>삭제</Button>
       </div>
       {edit && (
-        <form className="mt-3 grid gap-3 px-1 md:grid-cols-3" onSubmit={ev => { ev.preventDefault(); onSave({ kind: f.kind, name: f.name.trim(), description: f.description || null, hours: f.hours || null, booth_id: f.booth_id || null, lat: f.lat === '' ? null : Number(f.lat), lng: f.lng === '' ? null : Number(f.lng), sort_order: Number(f.sort_order) || 0, image_url: f.image_url, menu: parseMenu(f.menu) }); setEdit(false) }}>
+        <form className="mt-3 grid gap-3 px-1 md:grid-cols-3" onSubmit={ev => { ev.preventDefault(); onSave({ kind: f.kind, name: f.name.trim(), description: f.description || null, hours: f.hours || null, booth_id: f.booth_id || null, lat: f.lat === '' ? null : Number(f.lat), lng: f.lng === '' ? null : Number(f.lng), sort_order: Number(f.sort_order) || 0, image_url: f.image_url, menu: parseMenu(f.menu).map(m => ({ ...(p.menu ?? []).find(o => o.name === m.name), ...m, ...(pics[m.name] !== undefined ? { image_url: pics[m.name] } : {}) })) }); setEdit(false) }}>
           <Field label="종류">
             <select value={f.kind} onChange={x => setF({ ...f, kind: x.target.value as PlaceKind })} className="h-12 w-full rounded-xl border border-gray-300 bg-white px-3">
               {KINDS.map(k => <option key={k} value={k}>{PLACE_KIND_LABEL[k]}</option>)}
@@ -189,12 +190,60 @@ function PlaceEditor({ p, booths, selected, onSelect, onSave, onRemove }: { p: P
           <Field label="경도"><Input value={f.lng} onChange={x => setF({ ...f, lng: x.target.value as any })} inputMode="decimal" /></Field>
           <Field label="정렬"><Input type="number" value={f.sort_order} onChange={x => setF({ ...f, sort_order: +x.target.value })} /></Field>
           {(f.kind === 'food' || f.kind === 'market') && (
-            <div className="md:col-span-3"><Field label="메뉴 (한 줄에 하나, '이름 가격' — 가격은 선택)" hint="예: 떡볶이 5,000원 / 핫도그 4,000원"><textarea value={f.menu} onChange={x => setF({ ...f, menu: x.target.value })} rows={4} className="w-full rounded-xl border border-gray-300 p-3 text-sm" /></Field></div>
+            <div className="md:col-span-3"><Field label="메뉴 (한 줄에 하나, '이름 가격')" hint="예: 떡볶이 5,000원 / 핫도그 4,000원 — 가격이 있어야 앱으로 주문할 수 있어요"><textarea value={f.menu} onChange={x => setF({ ...f, menu: x.target.value })} rows={4} className="w-full rounded-xl border border-gray-300 p-3 text-sm" /></Field></div>
           )}
+          {(f.kind === 'food' || f.kind === 'market') && parseMenu(f.menu).length > 0 && (
+            <div className="md:col-span-3">
+              <div className="mb-1 text-sm font-semibold text-gray-700">메뉴 사진 (선택)</div>
+              <div className="flex flex-wrap gap-3">
+                {parseMenu(f.menu).map(m => (
+                  <div key={m.name} className="w-28">
+                    <ImageUpload value={pics[m.name] !== undefined ? pics[m.name] : (p.menu ?? []).find(o => o.name === m.name)?.image_url ?? null} folder={`events/${p.event_id}/menu`} onChange={u => setPics(v => ({ ...v, [m.name]: u }))} aspect="aspect-square" />
+                    <div className="mt-1 truncate text-xs text-gray-600">{m.name}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {(p.kind === 'food' || p.kind === 'market') && <div className="md:col-span-3"><OrderAdmin placeId={p.id} /></div>}
           <div className="md:col-span-3"><Field label="사진 (선택)"><ImageUpload value={f.image_url} folder={`events/${p.event_id}/places`} onChange={u => setF({ ...f, image_url: u })} aspect="aspect-[3/1] max-w-xs" /></Field></div>
           <div className="md:col-span-3 flex gap-2"><Button type="submit" className="!w-auto px-6">저장</Button><Button type="button" variant="ghost" className="!w-auto" onClick={() => setEdit(false)}>취소</Button></div>
         </form>
       )}
     </li>
+  )
+}
+
+/** 앱 주문 켜기 + 사장님 화면 링크. 링크를 가진 사람은 그 가게 주문을 처리할 수 있으니 사장님께만 보낸다 */
+function OrderAdmin({ placeId }: { placeId: string }) {
+  const [st, setSt] = useState<{ enabled: boolean; paused: boolean; token: string; today: { count: number; total: number } } | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+  const call = (args: Record<string, unknown> = {}) => rpc('admin_order_settings', { p_place: placeId, ...args }).then(setSt).catch((e: any) => setErr(e.message))
+  useEffect(() => { call() }, [placeId]) // eslint-disable-line
+  if (err) return <p className="text-sm text-red-600">앱 주문 설정을 불러오지 못했어요: {err}</p>
+  if (!st) return null
+  const link = `${PUBLIC_BASE_URL}/vo/${st.token}`
+  return (
+    <div className="rounded-xl bg-gray-50 p-4 ring-1 ring-gray-200">
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-bold text-gray-900">앱 주문 {st.enabled ? (st.paused ? '· 사장님이 잠시 멈춤' : '· 받는 중') : '· 꺼짐'}</div>
+          <div className="text-xs text-gray-500">손님이 메뉴를 담아 주문하고, 준비되면 받으러 가요. 결제는 받을 때 가게에서. 오늘 {st.today.count}건</div>
+        </div>
+        <Button type="button" variant={st.enabled ? 'secondary' : 'primary'} size="sm" className="!w-auto" onClick={() => call({ p_enabled: !st.enabled })}>{st.enabled ? '끄기' : '켜기'}</Button>
+      </div>
+      {st.enabled && (
+        <div className="mt-3">
+          <div className="text-xs font-semibold text-gray-600">사장님 주문 화면 (이 링크를 사장님께만 보내세요)</div>
+          <div className="mt-1 flex items-center gap-2">
+            <code className="min-w-0 flex-1 truncate rounded-lg bg-white px-3 py-2 text-xs ring-1 ring-gray-200">{link}</code>
+            <Button type="button" variant="secondary" size="sm" className="!w-auto" onClick={() => navigator.clipboard?.writeText(link).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500) })}>{copied ? '복사됨' : '복사'}</Button>
+            <a href={link} target="_blank" rel="noreferrer" className="shrink-0 text-xs font-semibold underline">열기</a>
+          </div>
+          <button type="button" className="mt-2 text-xs text-gray-500 underline" onClick={() => { if (confirm('링크를 새로 만들면 지금 링크는 못 써요. 사장님께 새 링크를 다시 보내야 해요.')) call({ p_new_token: true }) }}>링크 새로 만들기</button>
+        </div>
+      )}
+    </div>
   )
 }

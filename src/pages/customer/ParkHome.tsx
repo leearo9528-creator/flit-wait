@@ -9,6 +9,7 @@ import DemoBanner from '../../components/DemoBanner'
 import { PLACE_KIND_LABEL, type EventGuide, type EventSchedule, type GuidePlace, type PlaceKind } from '../../lib/types'
 import { useMyTickets, isActive } from '../../lib/myTickets'
 import { liveOf, TONE_PIN, TONE_TEXT, type Live } from '../../lib/live'
+import { useMyOrders, orderActive } from '../../lib/orders'
 
 /**
  * 행사 홈 — 지도가 곧 첫 화면이고, 핀마다 지금 대기가 붙는다 (2026-11-10, 테마파크 앱 구조).
@@ -23,6 +24,8 @@ const groupOf = (k: PlaceKind): Group => (k === 'booth' || k === 'food' || k ===
 export default function ParkHome() {
   const { slug = '' } = useParams()
   const mine = useMyTickets(slug, DEMO ? 6000 : 20000)
+  const myOrders = useMyOrders(slug, DEMO ? 4000 : 10000).filter(orderActive)
+  const [q, setQ] = useState('')
   const { data, error, loading, reload } = useAsync<EventGuide>(() => cachedRpc('event_guide', slug), [slug])
   const sched = useAsync<EventSchedule>(() => cachedRpc('event_schedule', slug), [slug])
   // 지도에 올리지 않은 부스도 목록에는 나와야 한다 (부스만 만들고 배치도를 안 쓴 행사)
@@ -97,6 +100,14 @@ export default function ParkHome() {
   // 목록: 대기가 있는 곳(체험) 먼저, 그 안에서 짧은 순 → 나머지는 원래 순서
   const listed = useMemo(() => [...shown].sort((a, b) => Number(!!b.p.booth) - Number(!!a.p.booth) || (a.p.booth && b.p.booth ? (a.live?.sort ?? 0) - (b.live?.sort ?? 0) : 0)), [shown])
 
+  // 찾기 — 장소 이름 · 설명 · 메뉴(상품) 이름. 종류와 상관없이 전체에서 찾는다
+  const term = q.trim().toLowerCase()
+  const hits = useMemo(() => !term ? [] : rows.map(r => {
+    const inName = `${r.p.name} ${r.p.description ?? ''}`.toLowerCase().includes(term)
+    const items = (r.p.menu ?? []).filter(m => m.name.toLowerCase().includes(term))
+    return inName || items.length ? { ...r, items } : null
+  }).filter(Boolean) as { p: GuidePlace; live: Live | null; items: GuidePlace['menu'] }[], [rows, term])
+
   if (loading && !data) return <Spinner />
   if (!data?.event) return <div className="p-6"><Alert kind="error">{error ?? '행사를 찾을 수 없습니다.'}</Alert></div>
   const { event } = data
@@ -130,7 +141,14 @@ export default function ParkHome() {
             </div>
           )}
         </div>
-        <div className="flex gap-2 overflow-x-auto px-4 py-3 [scrollbar-width:none]">
+        <div className="px-4 pt-3">
+          <div className="relative">
+            <input value={q} onChange={e => setQ(e.target.value)} type="search" enterKeyHint="search" placeholder="어디 · 무엇을 찾으세요? (떡볶이, 화장실…)" aria-label="장소·메뉴 찾기"
+              className="h-11 w-full rounded-full bg-gray-100 pl-4 pr-10 text-[15px] text-gray-900 placeholder:text-gray-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 [&::-webkit-search-cancel-button]:hidden" />
+            {q && <button type="button" onClick={() => setQ('')} aria-label="지우기" className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center text-gray-500">✕</button>}
+          </div>
+        </div>
+        <div className={`flex gap-2 overflow-x-auto px-4 py-3 [scrollbar-width:none] ${term ? 'hidden' : ''}`}>
           {groups.map(g => (
             <button key={g.id} type="button" onClick={() => setGroup(g.id)}
               className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[15px] font-semibold ring-1 ${group === g.id ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 active:bg-gray-50'}`}>{g.label}</button>
@@ -140,6 +158,13 @@ export default function ParkHome() {
 
       <div className="space-y-2 px-4">
         {/* 내 대기·예약 — 줄 서 있는 동안 지도에서도 차례가 보인다 */}
+        {myOrders.slice(0, 2).map(o => (
+          <Link key={o.token} to={`/o/${o.token}`} className={`flex items-center gap-2 rounded-xl px-3 py-3 text-white ${o.status === 'ready' ? 'bg-red-600' : 'bg-blue-700'}`}>
+            <span className="min-w-0 flex-1 truncate text-[15px] font-bold">{o.place.name}</span>
+            <span className="shrink-0 text-[15px] font-bold tabular-nums">{o.status === 'ready' ? `${o.order_no}번 받으러 오세요` : o.status === 'accepted' ? `${o.order_no}번 준비 중` : `${o.order_no}번 주문 확인 중`}</span>
+            <span className="shrink-0 text-sm opacity-80">›</span>
+          </Link>
+        ))}
         {active.slice(0, 3).map(r => (
           <Link key={r.token} to={`/t/${r.token}`} className={`flex items-center gap-2 rounded-xl px-3 py-3 ${r.status === 'called' ? 'bg-red-600 text-white' : 'bg-blue-700 text-white'}`}>
             <span className="min-w-0 flex-1 truncate text-[15px] font-bold">{r.booth}</span>
@@ -172,7 +197,24 @@ export default function ParkHome() {
         )}
       </div>
 
-      {mode === 'map' && (
+      {term && (
+        <ul className="mt-1 divide-y divide-gray-100 px-4">
+          {hits.map(({ p, live, items }) => (
+            <li key={p.id}>
+              <button type="button" onClick={() => open(p)} className="flex w-full items-center gap-3 py-3.5 text-left active:bg-gray-50">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs text-gray-500">{PLACE_KIND_LABEL[p.kind]}{p.order_open ? ' · 앱 주문' : ''}</div>
+                  <div className="truncate text-[17px] font-bold text-gray-900">{p.name}</div>
+                  {items.length > 0 && <div className="truncate text-sm text-gray-700">{items.slice(0, 3).map(m => `${m.name}${m.sold_out ? ' (품절)' : m.price ? ` ${m.price}` : ''}`).join(' · ')}</div>}
+                </div>
+                {live && <span className={`shrink-0 text-right text-[17px] font-bold tabular-nums ${TONE_TEXT[live.tone]}`}>{live.text}</span>}
+              </button>
+            </li>
+          ))}
+          {hits.length === 0 && <li className="py-16 text-center text-sm text-gray-400">'{q.trim()}' — 찾는 곳이 없어요.</li>}
+        </ul>
+      )}
+      {!term && mode === 'map' && (
         <div className="relative mt-3">
           <img src={event.map_image_url!} alt={`${event.name} 배치도`} className="block w-full select-none" draggable={false}
             onLoad={e => { const im = e.currentTarget; if (im.naturalWidth) setAspect(im.naturalHeight / im.naturalWidth) }} />
@@ -203,8 +245,8 @@ export default function ParkHome() {
           )}
         </div>
       )}
-      {mode === 'map' && me && !meIn && locOn && <p className="px-4 pt-2 text-sm text-gray-600">지금은 행사장 밖에 계세요.</p>}
-      {mode === 'map' && ways.length > 0 && (
+      {!term && mode === 'map' && me && !meIn && locOn && <p className="px-4 pt-2 text-sm text-gray-600">지금은 행사장 밖에 계세요.</p>}
+      {!term && mode === 'map' && ways.length > 0 && (
         <div className="flex items-center gap-2 overflow-x-auto px-4 pt-3 [scrollbar-width:none]">
           <span className="shrink-0 text-sm font-semibold text-gray-500">가는 길</span>
           {ways.map(p => (
@@ -213,14 +255,14 @@ export default function ParkHome() {
           ))}
         </div>
       )}
-      {mode === 'map' && event.map_note && <p className="px-4 pt-2 text-xs text-gray-500">{event.map_note}</p>}
+      {!term && mode === 'map' && event.map_note && <p className="px-4 pt-2 text-xs text-gray-500">{event.map_note}</p>}
 
-      <ul className={`divide-y divide-gray-100 px-4 ${mode === 'map' ? 'mt-2' : 'mt-1'}`}>
+      <ul className={`divide-y divide-gray-100 px-4 ${mode === 'map' ? 'mt-2' : 'mt-1'} ${term ? 'hidden' : ''}`}>
         {listed.map(({ p, live }) => (
           <li key={p.id}>
             <button type="button" onClick={() => open(p)} className="flex w-full items-center gap-3 py-3.5 text-left active:bg-gray-50">
               <div className="min-w-0 flex-1">
-                <div className="text-xs text-gray-500">{PLACE_KIND_LABEL[p.kind]}{p.booth?.location ? ` · ${p.booth.location}` : p.hours ? ` · ${p.hours}` : ''}</div>
+                <div className="text-xs text-gray-500">{PLACE_KIND_LABEL[p.kind]}{p.booth?.location ? ` · ${p.booth.location}` : p.hours ? ` · ${p.hours}` : ''}{p.order_open ? <span className="font-semibold text-blue-700"> · 앱 주문</span> : null}</div>
                 <div className="truncate text-[17px] font-bold text-gray-900">{p.name}</div>
                 {p.booth && p.booth.mode === 'queue' && p.booth.waiting_teams > 0 && !live?.text.endsWith('팀') && <div className="text-xs text-gray-500">대기 {p.booth.waiting_teams}팀</div>}
                 {p.booth && p.booth.mode !== 'queue' && p.booth.today_left > 0 && <div className="text-xs text-gray-500">오늘 잔여 {p.booth.today_left}석</div>}

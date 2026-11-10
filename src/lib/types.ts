@@ -181,10 +181,13 @@ export interface PlaceRow {
   sort_order: number
   menu: MenuItem[]
 }
-export interface MenuItem { name: string; price?: string }
+/** 메뉴·상품 한 줄. price 는 '5,000원' 같은 글자 — 주문 금액은 숫자만 뽑아 계산한다. sold_out 은 사장님 화면에서 켠다 */
+export interface MenuItem { name: string; price?: string; desc?: string; image_url?: string | null; sold_out?: boolean }
 
 export interface GuidePlace extends Omit<PlaceRow, 'event_id'> {
   crowd?: Crowd | null; crowd_updated_at?: string | null
+  /** 앱 주문을 받는 가게 (0046). order_paused 면 잠시 멈춤 */
+  order_open?: boolean; order_paused?: boolean
   /** est_wait_min · next_slot_at 은 서버 event_guide 가 아직 안 준다(데모만) — 없으면 화면은 '대기 N팀' / '잔여 N석' 으로 보여 준다 */
   booth: { id: string; slug: string; mode: BoothMode; is_paused: boolean; location: string | null; waiting_teams: number; today_left: number; est_wait_min?: number | null; next_slot_at?: string | null } | null
 }
@@ -224,3 +227,20 @@ export interface DrawPublic extends Omit<DrawRow, 'event_id'> { entries: number;
 export type SurveyQuestion = { id: string; type: 'rating' | 'choice' | 'text'; label: string; options?: string[] }
 export interface SurveyPublic { enabled: boolean; title: string | null; questions: SurveyQuestion[]; thanks: string | null; done: boolean }
 export interface VendorSubmissionRow { id: string; event_id: string; kind: 'market' | 'food' | 'booth' | 'other'; name: string; description: string | null; menu: MenuItem[]; image_url: string | null; contact: string | null; status: 'pending' | 'approved' | 'rejected'; place_id: string | null; created_at: string }
+
+// ───────── 주문 · 픽업 호출 (0046)
+export type OrderStatus = 'placed' | 'accepted' | 'ready' | 'picked_up' | 'cancelled'
+export interface OrderLine { name: string; price: number; qty: number }
+export interface OrderPublic {
+  order_no: number; status: OrderStatus; items: OrderLine[]; total: number; name: string; note: string | null
+  pay_method: 'onsite' | 'app'; pay_status: 'unpaid' | 'paid' | 'refunded'; cancel_reason: string | null
+  created_at: string; accepted_at: string | null; ready_at: string | null; picked_at: string | null
+  ahead: number | null; can_cancel: boolean
+  place: { id: string; name: string; kind: PlaceKind }; event: { slug: string; name: string }
+}
+export interface VendorOrder extends Omit<OrderPublic, 'ahead' | 'can_cancel' | 'place' | 'event'> { id: string; phone_tail: string | null }
+export interface VendorBoard {
+  place: { id: string; name: string; menu: MenuItem[] }; event: { name: string; slug: string }
+  enabled: boolean; paused: boolean; pay_mode: 'onsite' | 'app'
+  orders: VendorOrder[]; stats: { count: number; total: number }
+}

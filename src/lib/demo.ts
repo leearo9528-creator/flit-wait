@@ -6,12 +6,14 @@ export const DEMO_KEY = 'flit:demo'
 /** 데모를 켜 둔 기기에서 실제 행사 QR 을 찍으면 데모의 가짜 서버가 응답해 '행사를 찾을 수 없습니다' 가 뜬다.
  *  주소가 가리키는 행사·부스·표가 데모 저장소에 없으면 실제 주소로 보고 데모를 끈다 (데모 내용은 남겨 둔다). */
 function pathIsReal(): boolean {
-  const m = /^\/(e|board|q|r|s|t|v)\/([^/]+)/.exec(location.pathname); if (!m) return false
+  const m = /^\/(e|board|q|r|s|t|vo|v|o)\/([^/]+)/.exec(location.pathname); if (!m) return false
   const db = load(), key = decodeURIComponent(m[2])
   const has = (table: string, col: string) => (db[table] ?? []).some(r => r[col] === key)
   if (m[1] === 'e' || m[1] === 'board') return key !== 'demo' && !has('events', 'slug')
   if (m[1] === 't') return !has('tickets', 'token')
   if (m[1] === 'v') return !has('events', 'vendor_token')
+  if (m[1] === 'o') return !has('orders', 'token')
+  if (m[1] === 'vo') return !key.startsWith('demo-vo-')
   return !key.startsWith('demo-') && !has('booths', 'slug')
 }
 /** 데모가 심어 둔 가짜 로그인 토큰을 지운다 — 남아 있으면 실제 서버가 요청을 거절한다 */
@@ -117,7 +119,87 @@ export function makeDemoFetch(): typeof fetch {
     return { id: t.id, name: t.name, party_size: t.party_size, ticket_no: t.ticket_no, status: st.status, called_at: t.called_at ?? null, created_at: t.created_at, phone_tail: String(t.phone ?? '').slice(-4), ahead: st.ahead, est_wait_min: st.ahead != null ? st.ahead * svc(b) : null, source: t.source ?? 'online', booth: { name: b.name, slug: b.slug, mode: b.mode, location: b.location, is_paused: b.is_paused, settings: b.settings }, event: { name: e.name, slug: e.slug, notice: e.notice ?? null }, slot: slot ? { starts_at: slot.starts_at, ends_at: slot.ends_at, status: slot.status } : null, can_cancel: st.status === 'waiting' }
   }
 
+  // ── 주문 · 픽업 (0046) — 먹거리 가게마다 주문 설정을 깔고, 손님 주문은 저절로 접수→준비 완료로 흘러간다.
+  // 사장님 화면(/vo/demo-vo-1)을 연 가게는 저절로 흐르지 않고 버튼으로만 움직이며, 가상 주문이 가끔 들어온다.
+  const priceInt = (v: unknown) => Number(String(v ?? '').replace(/\D/g, '')) || 0
+  const osOf = (placeId: string) => T('order_settings').find(o => o.place_id === placeId)
+  const ordersOf = (placeId: string) => T('orders').filter(o => o.place_id === placeId && o.order_date === today())
+  const fakeOrder = (pl: Row, agoMs = 0): Row => {
+    const no = Math.max(0, ...ordersOf(pl.id).map(o => o.order_no)) + 1, menu = (pl.menu ?? []).filter((m: Row) => !m.sold_out && priceInt(m.price) > 0)
+    const items = menu.slice(no % Math.max(1, menu.length)).slice(0, 1 + (no % 2)).map((m: Row, i: number) => ({ name: m.name, price: priceInt(m.price), qty: 1 + ((no + i) % 2) }))
+    return { id: uid(), token: uid(), event_id: pl.event_id, place_id: pl.id, order_no: no, order_date: today(), name: `${FAM[no % FAM.length]}○○`, phone: `0100000${String(1000 + (no * 53) % 9000)}`, items, total: items.reduce((a: number, l: Row) => a + l.price * l.qty, 0), note: no % 4 === 0 ? '덜 맵게 해 주세요' : null, status: 'placed', cancel_reason: null, pay_method: 'onsite', pay_status: 'unpaid', created_at: new Date(Date.now() - agoMs).toISOString(), accepted_at: null, ready_at: null, picked_at: null, fake: true }
+  }
+  const tickOrders = () => {
+    let dirty = false
+    T('places').filter(p => p.kind === 'food' && (p.menu ?? []).length).forEach((pl, i) => {
+      if (!osOf(pl.id)) { T('order_settings').push({ place_id: pl.id, enabled: true, paused: false, token: `demo-vo-${i + 1}`, pay_mode: 'onsite', manual: false, fake_at: 0 }); dirty = true }
+      const os = osOf(pl.id)!
+      for (const o of ordersOf(pl.id)) {
+        const age = Date.now() - new Date(o.created_at).getTime()
+        if (os.manual) continue
+        if (o.status === 'placed' && age > 5_000) { o.status = 'accepted'; o.accepted_at = now(); dirty = true }
+        else if (o.status === 'accepted' && age > 20_000) { o.status = 'ready'; o.ready_at = now(); dirty = true }
+      }
+      if (os.manual && os.enabled && !os.paused && Date.now() - (os.fake_at ?? 0) > 25_000 && ordersOf(pl.id).filter(o => o.status === 'placed' || o.status === 'accepted').length < 3) {
+        T('orders').push(fakeOrder(pl)); os.fake_at = Date.now(); dirty = true
+      }
+    })
+    if (dirty) persist()
+  }
+  const orderOut = (o: Row) => {
+    const pl = T('places').find(p => p.id === o.place_id) ?? {}, e = T('events').find(x => x.id === o.event_id) ?? {}
+    const busy = o.status === 'placed' || o.status === 'accepted'
+    return { order_no: o.order_no, status: o.status, items: o.items, total: o.total, name: o.name, note: o.note ?? null, pay_method: o.pay_method, pay_status: o.pay_status, cancel_reason: o.cancel_reason ?? null, created_at: o.created_at, accepted_at: o.accepted_at, ready_at: o.ready_at, picked_at: o.picked_at,
+      ahead: busy ? ordersOf(o.place_id).filter(x => (x.status === 'placed' || x.status === 'accepted') && x.order_no < o.order_no).length : null, can_cancel: o.status === 'placed',
+      place: { id: pl.id, name: pl.name, kind: pl.kind }, event: { slug: e.slug, name: e.name } }
+  }
+  const vendorPlace = (token: string) => { const os = T('order_settings').find(o => o.token === token); const pl = os && T('places').find(p => p.id === os.place_id); if (!os || !pl) throw new Error('주문 화면 주소가 맞지 않아요. 플릿에 문의해 주세요.'); return { os, pl } }
+
   const rpc: Record<string, (a: Row) => unknown> = {
+    place_order: ({ p_place, p_name, p_phone, p_items, p_consent, p_note }) => {
+      if (!p_consent) throw new Error('개인정보 수집·이용에 동의해 주세요.')
+      const pl = T('places').find(p => p.id === p_place), os = pl && osOf(pl.id)
+      if (!pl) throw new Error('가게를 찾을 수 없습니다.')
+      if (!os?.enabled) throw new Error('이 가게는 앱 주문을 받지 않아요.')
+      if (os.paused) throw new Error('지금은 주문이 잠시 멈춰 있어요. 조금 뒤에 다시 해 주세요.')
+      if (String(p_phone ?? '').replace(/\D/g, '').length < 10) throw new Error('휴대폰번호를 확인해 주세요.')
+      if (!Array.isArray(p_items) || !p_items.length) throw new Error('메뉴를 담아 주세요.')
+      const items = p_items.map((it: Row) => { const m = (pl.menu ?? []).find((x: Row) => x.name === it.name); if (!m) throw new Error(`메뉴가 바뀌었어요. 다시 담아 주세요. (${it.name})`); if (m.sold_out) throw new Error(`${m.name} 은(는) 품절됐어요.`); return { name: m.name, price: priceInt(m.price), qty: it.qty } })
+      const o: Row = { ...fakeOrder(pl), name: String(p_name).trim(), phone: String(p_phone).replace(/\D/g, ''), items, total: items.reduce((a: number, l: Row) => a + l.price * l.qty, 0), note: p_note || null, fake: false }
+      T('orders').push(o); persist(); return { token: o.token, order_no: o.order_no, total: o.total }
+    },
+    get_order: ({ p_token }) => { const o = T('orders').find(x => x.token === p_token); return o ? orderOut(o) : null },
+    cancel_order: ({ p_token }) => { const o = T('orders').find(x => x.token === p_token); if (!o) throw new Error('주문을 찾을 수 없습니다.'); if (o.status !== 'placed') throw new Error('가게에서 이미 준비를 시작했어요. 취소는 가게에 직접 말씀해 주세요.'); o.status = 'cancelled'; o.cancel_reason = '손님 취소'; persist(); return orderOut(o) },
+    vendor_board: ({ p_token }) => {
+      const { os, pl } = vendorPlace(p_token), e = T('events').find(x => x.id === pl.event_id) ?? {}
+      if (!os.manual) { os.manual = true; os.fake_at = Date.now() - 20_000; if (!ordersOf(pl.id).some(o => o.status === 'placed')) T('orders').push(fakeOrder(pl, 40_000)); persist() }
+      const os2 = ordersOf(pl.id).sort((a, b) => a.order_no - b.order_no), picked = os2.filter(o => o.status === 'picked_up')
+      return { place: { id: pl.id, name: pl.name, menu: pl.menu ?? [] }, event: { name: e.name, slug: e.slug }, enabled: os.enabled, paused: os.paused, pay_mode: os.pay_mode,
+        orders: os2.map(o => ({ id: o.id, order_no: o.order_no, status: o.status, items: o.items, total: o.total, name: o.name, phone_tail: String(o.phone ?? '').slice(-4), note: o.note ?? null, pay_status: o.pay_status, pay_method: o.pay_method, cancel_reason: o.cancel_reason ?? null, created_at: o.created_at, accepted_at: o.accepted_at, ready_at: o.ready_at, picked_at: o.picked_at })),
+        stats: { count: picked.length, total: picked.reduce((a, o) => a + o.total, 0) } }
+    },
+    vendor_update_order: ({ p_token, p_order, p_action, p_reason }) => {
+      const { pl } = vendorPlace(p_token), o = T('orders').find(x => x.id === p_order && x.place_id === pl.id); if (!o) throw new Error('주문을 찾을 수 없습니다.')
+      const s = o.status
+      if (p_action === 'accept' && s === 'placed') { o.status = 'accepted'; o.accepted_at = now() }
+      else if (p_action === 'ready' && (s === 'placed' || s === 'accepted')) { o.status = 'ready'; o.ready_at = now() }
+      else if (p_action === 'picked' && (s === 'ready' || s === 'accepted')) { o.status = 'picked_up'; o.picked_at = now() }
+      else if (p_action === 'cancel' && s !== 'picked_up' && s !== 'cancelled') { o.status = 'cancelled'; o.cancel_reason = p_reason || '가게 사정' }
+      else if (p_action === 'back' && s === 'ready') { o.status = 'accepted'; o.ready_at = null }
+      else if (p_action === 'back' && s === 'picked_up') { o.status = 'ready'; o.picked_at = null }
+      else if (p_action === 'back' && s === 'cancelled') { o.status = 'placed'; o.cancel_reason = null }
+      else throw new Error('이미 처리된 주문이에요. 화면을 새로 고쳐 주세요.')
+      persist(); return { ok: true }
+    },
+    vendor_set_soldout: ({ p_token, p_name, p_sold }) => { const { pl } = vendorPlace(p_token); pl.menu = (pl.menu ?? []).map((m: Row) => m.name === p_name ? { ...m, sold_out: !!p_sold } : m); persist(); return { ok: true } },
+    vendor_set_paused: ({ p_token, p_paused }) => { const { os } = vendorPlace(p_token); os.paused = !!p_paused; persist(); return { ok: true } },
+    admin_order_settings: ({ p_place, p_enabled, p_new_token }) => {
+      let os = osOf(p_place); if (!os) { os = { place_id: p_place, enabled: false, paused: false, token: `demo-vo-${uid().slice(0, 8)}`, pay_mode: 'onsite', manual: false, fake_at: 0 }; T('order_settings').push(os) }
+      if (p_enabled != null) os.enabled = !!p_enabled
+      if (p_new_token) os.token = `demo-vo-${uid().slice(0, 8)}`
+      persist(); const os2 = ordersOf(p_place)
+      return { enabled: os.enabled, paused: os.paused, token: os.token, pay_mode: os.pay_mode, today: { count: os2.filter(o => o.status !== 'cancelled').length, total: os2.filter(o => o.status === 'picked_up').reduce((a, o) => a + o.total, 0) } }
+    },
     my_admin_scope: () => ({ owner: true, event_ids: T('events').map(e => e.id) }),
     create_my_event: ({ p_name, p_slug, p_starts_at, p_ends_at }) => {
       const id = uid()
@@ -171,7 +253,7 @@ export function makeDemoFetch(): typeof fetch {
     staff_add_walkin: ({ p_booth, p_name, p_party, p_slot }) => { const b = T('booths').find(x => x.id === p_booth); if (!b) throw new Error('부스를 찾을 수 없습니다.'); const no = p_slot ? null : (b.next_no = (b.next_no ?? 0) + 1); T('tickets').push({ id: uid(), token: uid(), booth_id: b.id, event_id: b.event_id, slot_id: p_slot ?? null, name: p_name || '현장 손님', phone: null, party_size: p_party ?? 1, ticket_no: no, status: 'waiting', source: 'staff', ticket_date: today(), created_at: now(), called_at: null }); persist(); return true },
     // 손님용
     event_schedule: ({ p_slug }) => { const e = T('events').find(x => x.slug === p_slug); if (!e || e.status !== 'open') return null; return { event: { ...e, booth_count: T('booths').filter(b => b.event_id === e.id).length, survey_enabled: !!T('surveys').find(s => s.event_id === e.id)?.enabled, draw_open: T('draws').some(d => d.event_id === e.id && ['open', 'drawn'].includes(d.status)) }, programs: T('programs').filter(p => p.event_id === e.id).sort((a, b) => a.starts_at.localeCompare(b.starts_at)).map(p => ({ ...p, place: p.place_id ? { id: p.place_id, name: T('places').find(x => x.id === p.place_id)?.name } : null })), notices: T('notices').filter(n => n.event_id === e.id).map((n): Row => ({ ...n, publish_at: n.publish_at ?? n.created_at })).sort((a, b) => Number(b.pinned) - Number(a.pinned)) } },
-    event_guide: ({ p_slug }) => { const e = T('events').find(x => x.slug === p_slug); if (!e || e.status !== 'open') return null; return { event: e, places: T('places').filter(p => p.event_id === e.id).sort((a, b) => a.sort_order - b.sort_order).map(p => { const b = p.booth_id ? T('booths').find(x => x.id === p.booth_id) : null; return { ...p, menu: p.menu ?? [], booth: b ? { id: b.id, slug: b.slug, mode: b.mode, is_paused: b.is_paused, location: b.location ?? null, ...boothLive(b) } : null } }) } },
+    event_guide: ({ p_slug }) => { const e = T('events').find(x => x.slug === p_slug); if (!e || e.status !== 'open') return null; return { event: e, places: T('places').filter(p => p.event_id === e.id).sort((a, b) => a.sort_order - b.sort_order).map(p => { const b = p.booth_id ? T('booths').find(x => x.id === p.booth_id) : null; return { ...p, menu: p.menu ?? [], order_open: !!osOf(p.id)?.enabled, order_paused: !!osOf(p.id)?.paused, booth: b ? { id: b.id, slug: b.slug, mode: b.mode, is_paused: b.is_paused, location: b.location ?? null, ...boothLive(b) } : null } }) } },
     event_summary: ({ p_slug }) => { const e = T('events').find(x => x.slug === p_slug); return e ? { event: e, booths: T('booths').filter(b => b.event_id === e.id).sort((a, b) => a.sort_order - b.sort_order).map(b => ({ id: b.id, name: b.name, slug: b.slug, mode: b.mode, is_paused: b.is_paused, location: b.location ?? null, image_url: b.image_url ?? null, icon_url: b.icon_url ?? null, description: b.description ?? null, max_party_size: String(b.settings?.max_party_size ?? 4), reserve_open_at: null, group_name: b.group_name ?? null, category: b.category ?? null, ...boothLive(b) })) } : null },
     booth_summary: ({ p_slug }) => { const b = T('booths').find(x => x.slug === p_slug); if (!b) return null; const e = evOf(b); return { booth: b, event: { id: e.id, name: e.name, slug: e.slug, status: e.status, privacy_text: e.privacy_text, notice: e.notice ?? null, starts_at: e.starts_at, ends_at: e.ends_at }, waiting_teams: liveWait(b), avg_service_min: svc(b), slots: slotsOf(b) } },
     join_queue: ({ p_slug, p_name, p_phone, p_party }) => { const b = T('booths').find(x => x.slug === p_slug); if (!b) throw new Error('부스를 찾을 수 없습니다.'); if (b.is_paused) throw new Error('지금은 접수를 받지 않아요.'); const no = b.next_no = (b.next_no ?? 0) + 1; const t = { id: uid(), token: uid(), booth_id: b.id, event_id: b.event_id, slot_id: null, name: p_name, phone: p_phone, party_size: p_party ?? 1, ticket_no: no, status: 'waiting', source: 'online', ticket_date: today(), created_at: now(), called_at: null }; T('tickets').push(t); persist(); return { token: t.token } },
@@ -236,7 +318,7 @@ export function makeDemoFetch(): typeof fetch {
     if (path.startsWith('/auth/v1/token')) return json({ access_token: 'demo', refresh_token: 'demo', expires_in: 999999, expires_at: Math.floor(Date.now() / 1000) + 999999, token_type: 'bearer', user: DEMO_USER })
     if (path.startsWith('/auth/v1/logout')) { try { localStorage.removeItem(DEMO_KEY) } catch {} return json({}) }
     if (path.startsWith('/storage/v1/object/')) return json({ Key: path.replace('/storage/v1/object/', '') })
-    if (path.startsWith('/rest/v1/rpc/')) { const fn = path.split('/rpc/')[1]; const b = (await body()) ?? {}; if (!rpc[fn]) return json({ message: `데모에는 ${fn} 이 없어요` }, 404); try { tick(); return json(rpc[fn](b) ?? null) } catch (e: any) { return json({ message: e.message, code: 'P0001' }, 400) } }
+    if (path.startsWith('/rest/v1/rpc/')) { const fn = path.split('/rpc/')[1]; const b = (await body()) ?? {}; if (!rpc[fn]) return json({ message: `데모에는 ${fn} 이 없어요` }, 404); try { tick(); tickOrders(); return json(rpc[fn](b) ?? null) } catch (e: any) { return json({ message: e.message, code: 'P0001' }, 400) } }
     if (path.startsWith('/rest/v1/')) {
       const table = path.split('/rest/v1/')[1]; if (table === 'tickets') tick(); const rows = T(table); const q = parse(url.searchParams)
       if (method === 'HEAD') { const n = apply(rows, q).length; return new Response('', { status: 200, headers: { 'Content-Range': `0-${Math.max(0, n - 1)}/${n}` } }) }

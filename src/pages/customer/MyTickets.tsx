@@ -6,6 +6,8 @@ import { Card, Button, Field, Input, Alert, Badge } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import KakaoStart from '../../components/KakaoStart'
 import { useMyTickets } from '../../lib/myTickets'
+import { useMyOrders, orderActive, ORDER_LABEL, won } from '../../lib/orders'
+import { fmtTime } from '../../lib/util'
 import { useCustomer, LOGIN_ENABLED, type Customer } from '../../lib/customer'
 
 interface Row { token: string; booth: string; status: string; ticket_no: number | null; slot_at: string | null; created_at: string; ahead?: number | null; est_wait_min?: number | null }
@@ -14,6 +16,7 @@ interface Row { token: string; booth: string; status: string; ticket_no: number 
 export default function MyTickets() {
   const { slug = '' } = useParams()
   const mine: Row[] = useMyTickets(slug, DEMO ? 6000 : 20000)
+  const orders = useMyOrders(slug, DEMO ? 4000 : 10000)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [found, setFound] = useState<Row[] | null>(null)
@@ -52,9 +55,22 @@ export default function MyTickets() {
   const all = [...mine, ...acct.filter(a => !mine.some(m => m.token === a.token))]
   return (
     <div className="mx-auto min-h-dvh max-w-md bg-gray-50 px-4 pb-24 pt-6">
-      <h1 className="mb-4 text-2xl font-bold">내 대기·예약</h1>
+      <h1 className="mb-4 text-2xl font-bold">내 대기·예약·주문</h1>
       {LOGIN_ENABLED && cust.ready && <div className="mb-4">{cust.loggedIn ? <Account cust={cust} /> : <Card><KakaoStart cust={cust} note="이름·번호를 다시 안 적어도 되고, 폰을 바꿔도 내 대기가 보여요" /></Card>}</div>}
-      {all.length > 0 ? <List rows={all} /> : <Card><p className="text-sm text-gray-500">이 기기에서 접수한 내역이 없어요. 다른 폰으로 접수했다면 아래에서 찾을 수 있어요.</p></Card>}
+      {orders.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {orders.map(o => (
+            <Link key={o.token} to={`/o/${o.token}`} className={`block rounded-xl p-4 ring-1 active:opacity-90 ${o.status === 'ready' ? 'bg-red-600 text-white ring-red-600' : 'bg-white ring-gray-200'}`}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 truncate font-bold">{o.place.name}</div>
+                <span className={`shrink-0 text-sm font-bold ${o.status === 'ready' ? '' : orderActive(o) ? 'text-blue-700' : 'text-gray-500'}`}>{o.status === 'ready' ? '받으러 오세요' : ORDER_LABEL[o.status]}</span>
+              </div>
+              <div className={`mt-1 truncate text-sm ${o.status === 'ready' ? 'opacity-90' : 'text-gray-500'}`}>주문번호 {o.order_no}번 · {o.items.map(l => `${l.name} ${l.qty}`).join(', ')} · {won(o.total)} · {fmtTime(o.created_at)}</div>
+            </Link>
+          ))}
+        </div>
+      )}
+      {all.length > 0 ? <List rows={all} /> : orders.length > 0 ? null : <Card><p className="text-sm text-gray-500">이 기기에서 접수한 내역이 없어요. 다른 폰으로 접수했다면 아래에서 찾을 수 있어요.</p></Card>}
 
       <Card className="mt-5">
         <div className="mb-3 text-sm font-semibold text-gray-700">이름·전화번호로 찾기</div>
