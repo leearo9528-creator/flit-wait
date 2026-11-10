@@ -27,7 +27,7 @@ export default function PlaceDetail() {
   const { event } = data
   const b = p.booth
   const live = liveOf(p)
-  const here = (sched.data?.programs ?? []).filter(g => g.place?.id === p.id && new Date(g.ends_at ?? g.starts_at).getTime() > Date.now()).slice(0, 5)
+  const here = (sched.data?.programs ?? []).filter(g => g.place?.id === p.id && new Date(g.ends_at ?? g.starts_at).getTime() > Date.now() && new Date(g.starts_at).toDateString() === new Date().toDateString()).slice(0, 5)   // 오늘 남은 일정만
   const to = b && !b.is_paused ? (b.mode === 'queue' ? `/q/${b.slug}` : `/r/${b.slug}`) : null
   const sub = b
     ? (b.mode === 'queue' ? (b.waiting_teams > 0 ? `지금 ${b.waiting_teams}팀이 기다리고 있어요` : '기다리는 팀이 없어요') : b.today_left > 0 ? `오늘 남은 자리 ${b.today_left}석` : '오늘 회차가 모두 찼어요')
@@ -68,7 +68,7 @@ export default function PlaceDetail() {
 
         {here.length > 0 && (
           <div className="mt-6">
-            <h2 className="text-sm font-semibold text-gray-500">여기서 열리는 일정</h2>
+            <h2 className="text-sm font-semibold text-gray-500">오늘 여기서 열리는 일정</h2>
             <ul className="mt-2 divide-y divide-gray-100">
               {here.map(g => { const on = new Date(g.starts_at).getTime() <= Date.now(); return (
                 <li key={g.id} className="flex items-center gap-3 py-3">
