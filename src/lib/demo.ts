@@ -28,6 +28,7 @@ export function makeDemoFetch(): typeof fetch {
   const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' })
   const evOf = (b: Row) => T('events').find(e => e.id === b.event_id) ?? {}
   const svc = (b: Row) => b.settings?.service_min ?? 5
+  const ord = (t: Row): number => t.ord ?? t.ticket_no   // 대기 순서 — 순서를 미룬 표는 ord 가 따로 있다
   const qOf = (b: Row) => T('tickets').filter(t => t.booth_id === b.id && !t.slot_id && t.ticket_date === today())
   const fakeTicket = (b: Row, status: string, agoMs = 0): Row => {
     const no = b.next_no = (b.next_no ?? 0) + 1, at = new Date(Date.now() - agoMs).toISOString()
@@ -55,7 +56,7 @@ export function makeDemoFetch(): typeof fetch {
         if (!b.manual && !b.is_paused) {
           const oldCalled = q.filter(t => t.status === 'called' && t.fake)
           if (oldCalled.length) { oldCalled[0].status = 'done'; oldCalled[0].checked_in_at = now() }
-          const head = q.filter(t => t.status === 'waiting').sort((x, y) => x.ticket_no - y.ticket_no)[0]
+          const head = q.filter(t => t.status === 'waiting').sort((x, y) => ord(x) - ord(y))[0]
           if (head && q.filter(t => t.status === 'called' && t.fake).length < 2) { head.status = 'called'; head.called_at = now() }
         }
         if (qOf(b).filter(t => t.status === 'waiting').length < target(b)) T('tickets').push(fakeTicket(b, 'waiting'))
@@ -65,7 +66,7 @@ export function makeDemoFetch(): typeof fetch {
   }
   const tState = (t: Row) => {
     if (t.slot_id || t.status !== 'waiting') return { status: t.status as string, ahead: null as number | null }
-    return { status: 'waiting', ahead: T('tickets').filter(x => x.booth_id === t.booth_id && !x.slot_id && x.ticket_date === t.ticket_date && x.status === 'waiting' && x.ticket_no < t.ticket_no).length }
+    return { status: 'waiting', ahead: T('tickets').filter(x => x.booth_id === t.booth_id && !x.slot_id && x.ticket_date === t.ticket_date && x.status === 'waiting' && ord(x) < ord(t)).length }
   }
   const liveWait = (b: Row) => b.mode === 'slot' ? 0 : qOf(b).filter(t => t.status === 'waiting').length
   const staffT = (t: Row) => ({ id: t.id, ticket_no: t.ticket_no, name: t.name, phone_tail: t.phone ? String(t.phone).replace(/\D/g, '').slice(-4) : null, party_size: t.party_size, status: t.status, called_at: t.called_at ?? null, created_at: t.created_at, source: t.source ?? 'online', checked_in_at: t.checked_in_at ?? null, updated_at: t.updated_at ?? t.created_at })
@@ -125,13 +126,13 @@ export function makeDemoFetch(): typeof fetch {
         const fake = Array.from({ length: fakeN }, (_, k) => ({ id: `fake|${sl.id}|${k}`, ticket_no: null, name: `${FAM[(k * 5 + 3) % FAM.length]}○○`, phone_tail: String(1000 + (k * 811) % 9000), party_size: 2, status: (past && k % 4 !== 3 ? 'checked_in' : 'waiting'), called_at: null, created_at: sl.starts_at, source: 'online', checked_in_at: past ? sl.starts_at : null, updated_at: sl.starts_at }))
         return { id: sl.id, starts_at: sl.starts_at, ends_at: sl.ends_at, capacity: sl.capacity, status: sl.status, tickets: [...real, ...fake] }
       })
-      return { booth: b, date: today(), dates: [today()], queue: q.filter(t => t.status === 'waiting' || t.status === 'called').sort((x, y) => x.ticket_no - y.ticket_no).map(staffT), history: q.filter(t => !['waiting', 'called'].includes(t.status)).sort((x, y) => y.ticket_no - x.ticket_no).slice(0, 30).map(staffT), done_today: q.filter(t => t.status === 'done' || t.status === 'checked_in').length, noshow_today: q.filter(t => t.status === 'no_show').length, slots }
+      return { booth: b, date: today(), dates: [today()], queue: q.filter(t => t.status === 'waiting' || t.status === 'called').sort((x, y) => ord(x) - ord(y)).map(staffT), history: q.filter(t => !['waiting', 'called'].includes(t.status)).sort((x, y) => y.ticket_no - x.ticket_no).slice(0, 30).map(staffT), done_today: q.filter(t => t.status === 'done' || t.status === 'checked_in').length, noshow_today: q.filter(t => t.status === 'no_show').length, slots }
     },
     staff_update_ticket: ({ p_booth, p_ticket, p_action }) => {
       const b = T('booths').find(x => x.id === p_booth); if (!b) throw new Error('부스를 찾을 수 없습니다.')
       if (String(p_ticket ?? '').startsWith('fake|')) return { ok: true }
       let t = p_ticket ? T('tickets').find(x => x.id === p_ticket) : null
-      if (p_action === 'call_next') { t = qOf(b).filter(x => x.status === 'waiting').sort((x, y) => x.ticket_no - y.ticket_no)[0]; if (!t) return { ok: false, message: '기다리는 팀이 없어요.' } }
+      if (p_action === 'call_next') { t = qOf(b).filter(x => x.status === 'waiting').sort((x, y) => ord(x) - ord(y))[0]; if (!t) return { ok: false, message: '기다리는 팀이 없어요.' } }
       if (!t) return { ok: false, message: '표를 찾을 수 없어요.' }
       if (p_action === 'call_next' || p_action === 'call') { t.status = 'called'; t.called_at = now() }
       else if (p_action === 'checkin' || p_action === 'done') { t.status = t.slot_id ? 'checked_in' : 'done'; t.checked_in_at = now() }
@@ -151,6 +152,17 @@ export function makeDemoFetch(): typeof fetch {
     join_queue: ({ p_slug, p_name, p_phone, p_party }) => { const b = T('booths').find(x => x.slug === p_slug); if (!b) throw new Error('부스를 찾을 수 없습니다.'); if (b.is_paused) throw new Error('지금은 접수를 받지 않아요.'); const no = b.next_no = (b.next_no ?? 0) + 1; const t = { id: uid(), token: uid(), booth_id: b.id, event_id: b.event_id, slot_id: null, name: p_name, phone: p_phone, party_size: p_party ?? 1, ticket_no: no, status: 'waiting', source: 'online', ticket_date: today(), created_at: now(), called_at: null }; T('tickets').push(t); persist(); return { token: t.token } },
     reserve_slot: ({ p_slot, p_name, p_phone, p_party }) => { const b = T('booths').find(x => x.id === String(p_slot).split('|')[0]); const sl = b && slotsOf(b).find(x => x.id === p_slot); if (!b || !sl) throw new Error('회차를 찾을 수 없습니다.'); if (sl.capacity - sl.reserved < (p_party ?? 1)) throw new Error('남은 자리가 부족해요.'); const t = { id: uid(), token: uid(), booth_id: b.id, slot_id: p_slot, name: p_name, phone: p_phone, party_size: p_party ?? 1, ticket_no: null, status: 'waiting', source: 'online', event_id: b.event_id, ticket_date: today(), created_at: now(), called_at: null }; T('tickets').push(t); persist(); return { token: t.token } },
     get_ticket: ({ p_token }) => { const t = T('tickets').find(x => x.token === p_token); return t ? ticketOut(t) : null },
+    defer_ticket: ({ p_token }) => {
+      const t = T('tickets').find(x => x.token === p_token); if (!t) throw new Error('대기표를 찾을 수 없습니다.')
+      if (t.slot_id) throw new Error('회차 예약은 순서를 미룰 수 없어요.')
+      if (!['waiting', 'called'].includes(t.status)) throw new Error('지금은 순서를 미룰 수 없어요.')
+      const b = T('booths').find(x => x.id === t.booth_id) ?? {}, n = Math.max(1, b.settings?.defer_teams ?? 3), mx = b.settings?.defer_max ?? 2
+      if ((t.defer_count ?? 0) >= mx) throw new Error(`순서는 ${mx}번까지만 미룰 수 있어요.`)
+      const behind = qOf(b).filter(x => x.status === 'waiting' && x.id !== t.id && (t.status === 'called' || ord(x) > ord(t))).sort((x, y) => ord(x) - ord(y)).slice(0, n)
+      if (!behind.length) throw new Error('뒤에 기다리는 팀이 없어요.')
+      t.ord = ord(behind[behind.length - 1]) + 0.5; t.status = 'waiting'; t.called_at = null; t.defer_count = (t.defer_count ?? 0) + 1; persist()
+      return { ok: true, moved: behind.length, ahead: tState(t).ahead, left: mx - t.defer_count }
+    },
     cancel_ticket: ({ p_token }) => { const t = T('tickets').find(x => x.token === p_token); if (t) { t.status = 'cancelled'; persist() } return true },
     find_my_tickets: ({ p_name, p_phone }) => T('tickets').filter(t => t.name === p_name && String(t.phone).replace(/\D/g, '') === String(p_phone).replace(/\D/g, '')).map(t => { const o = ticketOut(t); return { token: t.token, booth: o.booth.name, status: o.status, ticket_no: o.ticket_no, slot_at: o.slot?.starts_at ?? null, created_at: o.created_at } }),
     event_board: ({ p_slug }) => { const e = T('events').find(x => x.slug === p_slug); if (!e) return null; return { event: { name: e.name, notice: e.notice ?? null, status: e.status }, now: now(), booths: T('booths').filter(b => b.event_id === e.id).sort((a, b) => a.sort_order - b.sort_order).map(b => { const q = qOf(b), cl = q.filter(t => t.status === 'called').sort((x, y) => String(y.called_at).localeCompare(String(x.called_at))).slice(0, 2).map(t => t.ticket_no), li = Math.max(0, ...q.filter(t => t.status === 'done' || t.status === 'checked_in').map(t => t.ticket_no)), si = slotInfo(b), cur = slotsOf(b).find(x => new Date(x.starts_at).getTime() <= Date.now() && Date.now() < new Date(x.ends_at).getTime()); return { id: b.id, name: b.name, mode: b.mode, is_paused: b.is_paused, window_state: 'open', waiting_teams: liveWait(b), called: b.mode === 'queue' ? cl : [], last_in: b.mode === 'queue' ? li || null : null, avg_service_min: svc(b), next_slot: si.next ? { starts_at: si.next.starts_at, left: si.next.capacity - si.next.reserved } : null, current_slot: cur ? { starts_at: cur.starts_at, ends_at: cur.ends_at } : null } }) } },

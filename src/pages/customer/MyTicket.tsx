@@ -1,17 +1,21 @@
 import { useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { rpc } from '../../lib/supabase'
+import { rpc, DEMO } from '../../lib/supabase'
 import { useAsync, fmtTime, fmtDate, fmtDur, fmtWait, STATUS_LABEL, useTick, LS } from '../../lib/util'
 import { Ticket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import { useEffect } from 'react'
+/** 순서 미루기는 서버 변경(0044)이 들어간 뒤 VITE_DEFER=1 로 연다. 데모에서는 항상 켜져 있다 */
+const DEFER_ENABLED = DEMO || import.meta.env.VITE_DEFER === '1'
 
 export default function MyTicket() {
   const { token = '' } = useParams()
   const { data: t, error, loading, reload } = useAsync<Ticket>(() => rpc('get_ticket', { p_token: token }), [token])
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [note, setNote] = useState<string | null>(null)
+  const [noMore, setNoMore] = useState(false)
   useTick(1000)
 
   // 호출되면 진동 + 소리 + 브라우저 알림 (알림톡이 늦을 때 보조)
@@ -62,6 +66,18 @@ export default function MyTicket() {
     setBusy(true); setErr(null)
     try { await rpc('cancel_ticket', { p_token: token }); reload() } catch (e: any) { setErr(e.message) } finally { setBusy(false) }
   }
+
+  // 순서 미루기 — 대기 중이거나 호출됐을 때 몇 팀 뒤로 물러난다 (서버가 팀 수와 횟수를 정한다)
+  async function defer() {
+    if (!confirm('순서를 뒤로 미룰까요?')) return
+    setBusy(true); setErr(null); setNote(null)
+    try {
+      const r = await rpc<{ moved: number; left: number }>('defer_ticket', { p_token: token })
+      setNote(`${r.moved}팀 뒤로 미뤘어요.${r.left > 0 ? ` ${r.left}번 더 미룰 수 있어요.` : ' 더는 미룰 수 없어요.'}`); reload()
+      if (r.left <= 0) setNoMore(true)
+    } catch (e: any) { setErr(e.message); if (/번까지만/.test(e.message)) setNoMore(true) } finally { setBusy(false) }
+  }
+  const canDefer = DEFER_ENABLED && !noMore && !isSlot && (t.status === 'waiting' || t.status === 'called')
 
   const tone = ({ waiting: 'blue', called: 'amber', checked_in: 'green', done: 'green', no_show: 'red', cancelled: 'gray' } as const)[t.status]
 
@@ -138,6 +154,8 @@ export default function MyTicket() {
       )}
 
       {err && <div className="mb-4"><Alert kind="error">{err}</Alert></div>}
+      {note && <div className="mb-4"><Alert kind="success">{note}</Alert></div>}
+      {canDefer && <div className="mb-2"><Button onClick={defer} loading={busy}>순서 미루기</Button></div>}
       {t.can_cancel && <Button variant="secondary" onClick={cancel} loading={busy}>{isSlot ? '예약 취소' : '대기 취소'}</Button>}
       {!t.can_cancel && isSlot && t.status === 'waiting' && (
         <p className="text-center text-xs text-gray-500">
