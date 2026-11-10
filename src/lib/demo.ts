@@ -19,6 +19,47 @@ export function makeDemoFetch(): typeof fetch {
   const persist = () => save(db)
   const json = (b: unknown, status = 200, headers: Record<string, string> = {}) => new Response(JSON.stringify(b), { status, headers: { 'Content-Type': 'application/json', ...headers } })
 
+
+  // ── 대기·예약 가짜 로직 (2026-11-10) — 지도 홈의 '실시간 현황' 과 줄서기→호출 흐름을 시연하려고 넣었다.
+  // 대기 팀 수 = 부스별 가상 기준치(demo_wait) + 시간에 따라 ±1~2 흔들림 + 이 브라우저에서 접수한 표. 한 팀이 12초에 빠진다(시연 속도).
+  const TEAM_MS = 12_000
+  const evOf = (b: Row) => T('events').find(e => e.id === b.event_id) ?? {}
+  const svc = (b: Row) => b.settings?.service_min ?? 5
+  const tState = (t: Row) => {
+    if (t.status === 'cancelled') return { status: 'cancelled', ahead: null as number | null }
+    if (t.slot_id) return { status: 'waiting', ahead: null as number | null }
+    const ahead = Math.max(0, t.ahead0 - Math.floor((Date.now() - new Date(t.created_at).getTime()) / TEAM_MS))
+    return { status: ahead === 0 ? 'called' : 'waiting', ahead }
+  }
+  const liveWait = (b: Row) => {
+    if (b.mode === 'slot') return 0
+    const base = b.demo_wait ?? 0, i = T('booths').indexOf(b)
+    const drift = base ? Math.round(1.6 * Math.sin(Date.now() / 90_000 + i * 1.7)) : 0
+    return Math.max(0, base + drift) + T('tickets').filter(t => t.booth_id === b.id && !t.slot_id && tState(t).status === 'waiting').length
+  }
+  const runNo = (b: Row) => 20 + T('booths').indexOf(b) * 7 + Math.floor((Date.now() % 86_400_000) / 60_000 / svc(b)) % 60
+  const slotsOf = (b: Row) => {
+    if (b.mode === 'queue') return []
+    const cap = b.slug === 'demo-kids' ? 30 : 60, h0 = new Date(); h0.setMinutes(0, 0, 0)
+    return [0, 1, 2, 3, 4, 5].map(k => {
+      const st = new Date(h0.getTime() + k * 3600_000), id = `${b.id}|${st.toISOString()}`
+      const mine = T('tickets').filter(t => t.slot_id === id && t.status !== 'cancelled').reduce((a, t) => a + t.party_size, 0)
+      const fake = k === 0 ? cap : Math.round(cap * [1, 0.9, 0.55, 0.3, 0.12, 0.05][k])
+      return { id, starts_at: st.toISOString(), ends_at: new Date(st.getTime() + 50 * 60_000).toISOString(), capacity: cap, status: 'open', reserved: Math.min(cap, fake + mine) }
+    })
+  }
+  const slotInfo = (b: Row) => {
+    const fut = slotsOf(b).filter(x => new Date(x.starts_at).getTime() > Date.now())
+    const left = fut.reduce((a, x) => a + Math.max(0, x.capacity - x.reserved), 0)
+    return { today_slots: fut.length, today_left: left, total_left: left, next_slot_at: fut.find(x => x.capacity > x.reserved)?.starts_at ?? null, next: fut.find(x => x.capacity > x.reserved) ?? null }
+  }
+  const boothLive = (b: Row) => { const w = liveWait(b), si = slotInfo(b); return { waiting_teams: w, est_wait_min: b.mode === 'slot' ? null : w * svc(b), today_slots: si.today_slots, today_left: si.today_left, total_left: si.total_left, next_slot_at: si.next_slot_at } }
+  const ticketOut = (t: Row) => {
+    const b = T('booths').find(x => x.id === t.booth_id) ?? {}, e = evOf(b), st = tState(t)
+    const slot = t.slot_id ? slotsOf(b).find(x => x.id === t.slot_id) ?? { starts_at: t.slot_id.split('|')[1], ends_at: new Date(new Date(t.slot_id.split('|')[1]).getTime() + 50 * 60_000).toISOString(), status: 'open' } : null
+    return { id: t.id, name: t.name, party_size: t.party_size, ticket_no: t.ticket_no, status: st.status, called_at: st.status === 'called' ? new Date(new Date(t.created_at).getTime() + t.ahead0 * TEAM_MS).toISOString() : null, created_at: t.created_at, phone_tail: String(t.phone ?? '').slice(-4), ahead: st.ahead, est_wait_min: st.ahead != null ? st.ahead * svc(b) : null, source: 'web', booth: { name: b.name, slug: b.slug, mode: b.mode, location: b.location, is_paused: b.is_paused, settings: b.settings }, event: { name: e.name, slug: e.slug, notice: e.notice ?? null }, slot: slot ? { starts_at: slot.starts_at, ends_at: slot.ends_at, status: slot.status } : null, can_cancel: st.status === 'waiting' }
+  }
+
   const rpc: Record<string, (a: Row) => unknown> = {
     my_admin_scope: () => ({ owner: true, event_ids: T('events').map(e => e.id) }),
     create_my_event: ({ p_name, p_slug, p_starts_at, p_ends_at }) => {
@@ -38,8 +79,15 @@ export function makeDemoFetch(): typeof fetch {
     admin_event_dataset: ({ p_event }) => SAMPLE.dataset(p_event, T),
     // 손님용
     event_schedule: ({ p_slug }) => { const e = T('events').find(x => x.slug === p_slug); if (!e || e.status !== 'open') return null; return { event: { ...e, booth_count: T('booths').filter(b => b.event_id === e.id).length, survey_enabled: !!T('surveys').find(s => s.event_id === e.id)?.enabled, draw_open: T('draws').some(d => d.event_id === e.id && ['open', 'drawn'].includes(d.status)) }, programs: T('programs').filter(p => p.event_id === e.id).sort((a, b) => a.starts_at.localeCompare(b.starts_at)).map(p => ({ ...p, place: p.place_id ? { id: p.place_id, name: T('places').find(x => x.id === p.place_id)?.name } : null })), notices: T('notices').filter(n => n.event_id === e.id).map((n): Row => ({ ...n, publish_at: n.publish_at ?? n.created_at })).sort((a, b) => Number(b.pinned) - Number(a.pinned)) } },
-    event_guide: ({ p_slug }) => { const e = T('events').find(x => x.slug === p_slug); if (!e || e.status !== 'open') return null; return { event: e, places: T('places').filter(p => p.event_id === e.id).sort((a, b) => a.sort_order - b.sort_order).map(p => ({ ...p, menu: p.menu ?? [], booth: null })) } },
-    event_summary: ({ p_slug }) => { const e = T('events').find(x => x.slug === p_slug); return e ? { event: e, booths: [] } : null },
+    event_guide: ({ p_slug }) => { const e = T('events').find(x => x.slug === p_slug); if (!e || e.status !== 'open') return null; return { event: e, places: T('places').filter(p => p.event_id === e.id).sort((a, b) => a.sort_order - b.sort_order).map(p => { const b = p.booth_id ? T('booths').find(x => x.id === p.booth_id) : null; return { ...p, menu: p.menu ?? [], booth: b ? { id: b.id, slug: b.slug, mode: b.mode, is_paused: b.is_paused, location: b.location ?? null, ...boothLive(b) } : null } }) } },
+    event_summary: ({ p_slug }) => { const e = T('events').find(x => x.slug === p_slug); return e ? { event: e, booths: T('booths').filter(b => b.event_id === e.id).sort((a, b) => a.sort_order - b.sort_order).map(b => ({ id: b.id, name: b.name, slug: b.slug, mode: b.mode, is_paused: b.is_paused, location: b.location ?? null, image_url: b.image_url ?? null, icon_url: b.icon_url ?? null, description: b.description ?? null, max_party_size: String(b.settings?.max_party_size ?? 4), reserve_open_at: null, group_name: b.group_name ?? null, category: b.category ?? null, ...boothLive(b) })) } : null },
+    booth_summary: ({ p_slug }) => { const b = T('booths').find(x => x.slug === p_slug); if (!b) return null; const e = evOf(b); return { booth: b, event: { id: e.id, name: e.name, slug: e.slug, status: e.status, privacy_text: e.privacy_text, notice: e.notice ?? null, starts_at: e.starts_at, ends_at: e.ends_at }, waiting_teams: liveWait(b), avg_service_min: svc(b), slots: slotsOf(b) } },
+    join_queue: ({ p_slug, p_name, p_phone, p_party }) => { const b = T('booths').find(x => x.slug === p_slug); if (!b) throw new Error('부스를 찾을 수 없습니다.'); const ahead0 = liveWait(b); const t = { id: uid(), token: uid(), booth_id: b.id, slot_id: null, name: p_name, phone: p_phone, party_size: p_party ?? 1, ticket_no: runNo(b) + ahead0 + 1, ahead0, status: 'waiting', created_at: now() }; T('tickets').push(t); persist(); return { token: t.token } },
+    reserve_slot: ({ p_slot, p_name, p_phone, p_party }) => { const b = T('booths').find(x => x.id === String(p_slot).split('|')[0]); const sl = b && slotsOf(b).find(x => x.id === p_slot); if (!b || !sl) throw new Error('회차를 찾을 수 없습니다.'); if (sl.capacity - sl.reserved < (p_party ?? 1)) throw new Error('남은 자리가 부족해요.'); const t = { id: uid(), token: uid(), booth_id: b.id, slot_id: p_slot, name: p_name, phone: p_phone, party_size: p_party ?? 1, ticket_no: null, ahead0: 0, status: 'waiting', created_at: now() }; T('tickets').push(t); persist(); return { token: t.token } },
+    get_ticket: ({ p_token }) => { const t = T('tickets').find(x => x.token === p_token); return t ? ticketOut(t) : null },
+    cancel_ticket: ({ p_token }) => { const t = T('tickets').find(x => x.token === p_token); if (t) { t.status = 'cancelled'; persist() } return true },
+    find_my_tickets: ({ p_name, p_phone }) => T('tickets').filter(t => t.name === p_name && String(t.phone).replace(/\D/g, '') === String(p_phone).replace(/\D/g, '')).map(t => { const o = ticketOut(t); return { token: t.token, booth: o.booth.name, status: o.status, ticket_no: o.ticket_no, slot_at: o.slot?.starts_at ?? null, created_at: o.created_at } }),
+    event_board: ({ p_slug }) => { const e = T('events').find(x => x.slug === p_slug); if (!e) return null; return { event: { name: e.name, notice: e.notice ?? null, status: e.status }, now: now(), booths: T('booths').filter(b => b.event_id === e.id).sort((a, b) => a.sort_order - b.sort_order).map(b => { const n = runNo(b), si = slotInfo(b), cur = slotsOf(b).find(x => new Date(x.starts_at).getTime() <= Date.now() && Date.now() < new Date(x.ends_at).getTime()); return { id: b.id, name: b.name, mode: b.mode, is_paused: b.is_paused, window_state: 'open', waiting_teams: liveWait(b), called: b.mode === 'queue' ? [n, n - 1] : [], last_in: b.mode === 'queue' ? n - 2 : null, avg_service_min: svc(b), next_slot: si.next ? { starts_at: si.next.starts_at, left: si.next.capacity - si.next.reserved } : null, current_slot: cur ? { starts_at: cur.starts_at, ends_at: cur.ends_at } : null } }) } },
     stamp_status: ({ p_slug, p_card }) => { const e = T('events').find(x => x.slug === p_slug); if (!e) return null; const card = T('stamp_cards').find(c => c.event_id === e.id && c.card_token === p_card); const spots = T('stamp_spots').filter(s => s.event_id === e.id).sort((a, b) => a.sort_order - b.sort_order); const got = new Set(T('stamps').filter(s => s.card_id === card?.id).map(s => s.spot_id)); const goal = e.stamp_goal ?? spots.length; return { enabled: e.stamp_enabled, goal, reward_text: e.stamp_reward_text, spots: spots.map(s => ({ id: s.id, name: s.name, collected: got.has(s.id) })), collected: got.size, count: got.size, completed: got.size >= goal, reward_code: got.size >= goal && card ? (card.reward_code ??= String(100000 + Math.floor(Math.random() * 900000))) : null } },
     stamp_collect: ({ p_slug, p_card, p_code }) => { const e = T('events').find(x => x.slug === p_slug); const spot = T('stamp_spots').find(s => s.event_id === e?.id && s.code === p_code); if (!e || !spot) throw new Error('이 QR 은 이 행사의 스탬프가 아니에요.'); let card = T('stamp_cards').find(c => c.event_id === e.id && c.card_token === p_card); if (!card) { card = { id: uid(), event_id: e.id, card_token: p_card, created_at: now() }; T('stamp_cards').push(card) } if (!T('stamps').some(s => s.card_id === card!.id && s.spot_id === spot.id)) T('stamps').push({ id: uid(), card_id: card.id, spot_id: spot.id, created_at: now() }); persist(); return { spot: spot.name, ...(rpc.stamp_status({ p_slug, p_card }) as object) } },
     draw_status: ({ p_slug, p_card }) => { const e = T('events').find(x => x.slug === p_slug); return T('draws').filter(d => d.event_id === e?.id && d.status !== 'draft').map(d => { const mine = T('draw_entries').find(x => x.draw_id === d.id && x.card_token === p_card); return { id: d.id, title: d.title, prize: d.prize, description: d.description, draw_at: d.draw_at, winners_count: d.winners_count, status: d.status, entered: !!mine, won: mine?.won ?? null, require_stamp: d.require_stamp ?? false, entries: T('draw_entries').filter(x => x.draw_id === d.id).length + 377 } }) },

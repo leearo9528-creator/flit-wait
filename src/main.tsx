@@ -7,7 +7,7 @@ import Reserve from './pages/customer/Reserve'
 import MyTicket from './pages/customer/MyTicket'
 import Home from './pages/Home'
 import EventHome from './pages/customer/EventHome'
-import EventHub from './pages/customer/EventHub'
+import ParkHome from './pages/customer/ParkHome'
 import MyTickets from './pages/customer/MyTickets'
 import EventMap from './pages/customer/EventMap'
 import EventSchedule from './pages/customer/EventSchedule'
@@ -30,7 +30,7 @@ const AdminBooth = lazy(() => import('./pages/admin/AdminBooth'))
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/demo', element: <Demo /> },
-  { path: '/e/:slug', element: <EventHub /> },
+  { path: '/e/:slug', element: <ParkHome /> },
   { path: '/e/:slug/booths', element: <EventHome /> },
   { path: '/e/:slug/map', element: <EventMap /> },
   { path: '/e/:slug/schedule', element: <EventSchedule /> },

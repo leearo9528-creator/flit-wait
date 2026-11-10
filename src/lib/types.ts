@@ -181,7 +181,8 @@ export interface MenuItem { name: string; price?: string }
 
 export interface GuidePlace extends Omit<PlaceRow, 'event_id'> {
   crowd?: Crowd | null; crowd_updated_at?: string | null
-  booth: { id: string; slug: string; mode: BoothMode; is_paused: boolean; location: string | null; waiting_teams: number; today_left: number } | null
+  /** est_wait_min · next_slot_at 은 서버 event_guide 가 아직 안 준다(데모만) — 없으면 화면은 '대기 N팀' / '잔여 N석' 으로 보여 준다 */
+  booth: { id: string; slug: string; mode: BoothMode; is_paused: boolean; location: string | null; waiting_teams: number; today_left: number; est_wait_min?: number | null; next_slot_at?: string | null } | null
 }
 
 export interface EventGuide {

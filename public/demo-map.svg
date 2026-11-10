@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" font-family="Pretendard, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif">
+  <rect width="800" height="1000" fill="#eef2f6"/>
+  <!-- 산책로 -->
+  <path d="M400 1000 V820 M400 820 H150 V560 M400 820 H650 V560 M150 560 H650 M400 560 V330 M150 560 V330 H650 V560" fill="none" stroke="#ffffff" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M400 1000 V820 M400 820 H150 V560 M400 820 H650 V560 M150 560 H650 M400 560 V330 M150 560 V330 H650 V560" fill="none" stroke="#d7dee7" stroke-width="2" stroke-dasharray="2 14" stroke-linecap="round"/>
+  <!-- 눈썰매 슬로프 -->
+  <rect x="60" y="50" width="680" height="240" rx="28" fill="#dbeafe"/>
+  <g stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity=".9">
+    <path d="M150 80 V260"/><path d="M230 80 V260"/><path d="M310 80 V260"/><path d="M390 80 V260"/>
+    <path d="M520 120 V260"/><path d="M590 120 V260"/><path d="M660 120 V260"/>
+  </g>
+  <text x="80" y="42" font-size="22" font-weight="700" fill="#1e3a8a">눈썰매 슬로프</text>
+  <!-- 체험 존 -->
+  <rect x="190" y="370" width="170" height="150" rx="22" fill="#ffedd5"/>
+  <text x="206" y="394" font-size="18" font-weight="700" fill="#9a3412">체험 존</text>
+  <!-- 얼음 광장 -->
+  <ellipse cx="525" cy="445" rx="95" ry="75" fill="#cffafe"/>
+  <text x="525" y="396" text-anchor="middle" font-size="18" font-weight="700" fill="#155e75">얼음 광장</text>
+  <!-- 푸드 존 -->
+  <rect x="445" y="600" width="170" height="180" rx="22" fill="#fee2e2"/>
+  <text x="461" y="628" font-size="18" font-weight="700" fill="#991b1b">푸드 존</text>
+  <!-- 마켓 거리 -->
+  <rect x="185" y="600" width="170" height="180" rx="22" fill="#fef3c7"/>
+  <text x="201" y="628" font-size="18" font-weight="700" fill="#92400e">마켓 거리</text>
+  <!-- 무대 -->
+  <rect x="690" y="380" width="80" height="150" rx="18" fill="#ede9fe"/>
+  <text x="730" y="500" text-anchor="middle" font-size="18" font-weight="700" fill="#5b21b6">무대</text>
+  <!-- 주차 -->
+  <rect x="30" y="860" width="250" height="110" rx="20" fill="#e2e8f0"/>
+  <text x="155" y="950" text-anchor="middle" font-size="18" font-weight="700" fill="#334155">주차장</text>
+  <!-- 입구 -->
+  <rect x="330" y="930" width="140" height="50" rx="14" fill="#111827"/>
+  <text x="400" y="963" text-anchor="middle" font-size="20" font-weight="700" fill="#ffffff">입구</text>
+  <!-- 나무 -->
+  <g fill="#bbf7d0"><circle cx="60" cy="350" r="22"/><circle cx="50" cy="700" r="26"/><circle cx="740" cy="640" r="24"/><circle cx="730" cy="820" r="28"/><circle cx="620" cy="900" r="22"/><circle cx="90" cy="470" r="18"/></g>
+</svg>
