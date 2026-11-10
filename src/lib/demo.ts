@@ -3,7 +3,29 @@
 // 데이터는 localStorage 에 두고, '데모 초기화' 로 다시 깐다. 프로덕션 DB 는 전혀 안 건드린다.
 // ⚠️ 기획자 흐름(e2e)에서 쓰는 /home/claude/fakesb.js 와 같은 논리 — 테이블 CRUD + RPC 스텁. 리포트 숫자는 샘플(가상).
 export const DEMO_KEY = 'flit:demo'
-export const isDemo = () => { try { return localStorage.getItem(DEMO_KEY) === '1' } catch { return false } }
+/** 데모를 켜 둔 기기에서 실제 행사 QR 을 찍으면 데모의 가짜 서버가 응답해 '행사를 찾을 수 없습니다' 가 뜬다.
+ *  주소가 가리키는 행사·부스·표가 데모 저장소에 없으면 실제 주소로 보고 데모를 끈다 (데모 내용은 남겨 둔다). */
+function pathIsReal(): boolean {
+  const m = /^\/(e|board|q|r|s|t|v)\/([^/]+)/.exec(location.pathname); if (!m) return false
+  const db = load(), key = decodeURIComponent(m[2])
+  const has = (table: string, col: string) => (db[table] ?? []).some(r => r[col] === key)
+  if (m[1] === 'e' || m[1] === 'board') return key !== 'demo' && !has('events', 'slug')
+  if (m[1] === 't') return !has('tickets', 'token')
+  if (m[1] === 'v') return !has('events', 'vendor_token')
+  return !key.startsWith('demo-') && !has('booths', 'slug')
+}
+/** 데모가 심어 둔 가짜 로그인 토큰을 지운다 — 남아 있으면 실제 서버가 요청을 거절한다 */
+function dropDemoToken() {
+  for (const k of Object.keys(localStorage)) if (/^sb-.*-auth-token$/.test(k) && (localStorage.getItem(k) ?? '').includes('"access_token":"demo"')) localStorage.removeItem(k)
+}
+export function leaveDemo() { localStorage.removeItem(DEMO_KEY); dropDemoToken() }
+export const isDemo = () => {
+  try {
+    if (localStorage.getItem(DEMO_KEY) !== '1') { dropDemoToken(); return false }   // 예전에 데모를 끝낸 기기에 남은 가짜 토큰 정리
+    if (pathIsReal()) { leaveDemo(); return false }
+    return true
+  } catch { return false }
+}
 
 type Row = Record<string, any>
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`)

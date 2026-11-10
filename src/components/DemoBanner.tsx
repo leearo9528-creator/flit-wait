@@ -1,5 +1,5 @@
 import { DEMO } from '../lib/supabase'
-import { DEMO_KEY } from '../lib/demo'
+import { DEMO_KEY, leaveDemo } from '../lib/demo'
 
 /** 데모 모드 띠 — 어느 화면에서든 "이건 가짜 데이터" 를 알린다 */
 export default function DemoBanner() {
@@ -13,7 +13,7 @@ export default function DemoBanner() {
         <a href="/admin" className="underline">관리자</a>
         <a href="/board/demo" className="underline">현황판</a>
         <a href="/demo?reset=1" className="underline">초기화</a>
-        <button type="button" className="underline" onClick={() => { localStorage.removeItem(DEMO_KEY); localStorage.removeItem(`${DEMO_KEY}:db`); location.href = '/' }}>끝내기</button>
+        <button type="button" className="underline" onClick={() => { leaveDemo(); localStorage.removeItem(`${DEMO_KEY}:db`); location.href = '/' }}>끝내기</button>
       </span>
     </div>
   )
