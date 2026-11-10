@@ -13,7 +13,7 @@ create table if not exists order_settings (
   place_id uuid primary key references places(id) on delete cascade,
   enabled boolean not null default false,
   paused boolean not null default false,
-  token text not null unique default encode(gen_random_bytes(12), 'hex'),
+  token text not null unique default encode(extensions.gen_random_bytes(12), 'hex'),
   pay_mode text not null default 'onsite' check (pay_mode in ('onsite', 'app')),
   created_at timestamptz not null default now()
 );
@@ -27,7 +27,7 @@ create table if not exists orders (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references events(id) on delete cascade,
   place_id uuid not null references places(id) on delete cascade,
-  token text not null unique default encode(gen_random_bytes(16), 'hex'),
+  token text not null unique default encode(extensions.gen_random_bytes(16), 'hex'),
   order_no int not null,
   order_date date not null default (now() at time zone 'Asia/Seoul')::date,
   name text not null,
@@ -217,7 +217,7 @@ begin
   insert into order_settings(place_id) values (pl.id) on conflict (place_id) do nothing;
   update order_settings set
     enabled = coalesce(p_enabled, enabled),
-    token = case when p_new_token then encode(gen_random_bytes(12), 'hex') else token end
+    token = case when p_new_token then encode(extensions.gen_random_bytes(12), 'hex') else token end
   where place_id = pl.id returning * into os;
   return jsonb_build_object('enabled', os.enabled, 'paused', os.paused, 'token', os.token, 'pay_mode', os.pay_mode,
     'today', (select jsonb_build_object('count', count(*) filter (where status <> 'cancelled'), 'total', coalesce(sum(total) filter (where status = 'picked_up'), 0)) from orders o where o.place_id = pl.id and o.order_date = kst_today()));
