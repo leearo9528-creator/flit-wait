@@ -15,6 +15,8 @@ export interface BoothSettings {
   noshow_after_start_min: number
   transfer_noshow_to_queue: boolean
   cancel_until_before_min: number
+  /** 손님이 순서를 미룰 수 있는 횟수 (표 하나당). 비우면 3, 0 이면 미루기 끔 */
+  defer_max?: number
   sms_fallback: boolean
   /** 접수 중단 종류: 'paused' 잠시 중단 · 'closed_today' 오늘 마감(자정에 자동 해제). is_paused 가 true 일 때만 의미 */
   pause_mode?: 'paused' | 'closed_today' | null

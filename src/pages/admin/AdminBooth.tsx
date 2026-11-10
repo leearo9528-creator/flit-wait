@@ -68,6 +68,7 @@ const NUM: Array<[keyof BoothSettings, string, string]> = [
   ['reserve_close_before_min', '사전 예약 마감 (회차 시작 N분 전)', '분'],
   ['noshow_after_start_min', '회차 시작 후 미체크인 노쇼', '분'],
   ['cancel_until_before_min', '손님 자체 취소 가능 (시작 N분 전까지)', '분'],
+  ['defer_max', '손님 순서 미루기 (표 하나당 N번, 0이면 끔)', '번'],
 ]
 
 function Settings({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
@@ -101,7 +102,7 @@ function Settings({ booth, onSaved }: { booth: Booth; onSaved: () => void }) {
       <h2 className="mb-3 font-bold">운영 설정</h2>
       <div className="grid gap-3 md:grid-cols-2">
         {NUM.map(([k, label, unit]) => (
-          <Field key={k} label={`${label} (${unit})`}><Input type="number" value={(s[k] as number) ?? ''} onChange={e => setS({ ...s, [k]: +e.target.value })} /></Field>
+          <Field key={k} label={`${label} (${unit})`}><Input type="number" placeholder={k === 'defer_max' ? '3' : undefined} value={(s[k] as number) ?? ''} onChange={e => setS({ ...s, [k]: +e.target.value })} /></Field>
         ))}
         <Field label="사전 예약 오픈 일시 (비우면 즉시)"><Input type="datetime-local" value={openAt} onChange={e => setOpenAt(e.target.value)} /></Field>
         <Field label="일별 예약 오픈 시각 (매일 HH:MM, 비우면 없음)" hint="설정하면 각 날짜 회차는 그날 이 시각부터 예약 가능. 위 오픈 일시와 둘 중 늦은 쪽 적용"><Input value={dailyTime} onChange={e => setDailyTime(e.target.value)} placeholder="12:00" /></Field>

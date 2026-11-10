@@ -77,7 +77,7 @@ export default function MyTicket() {
       if (r.left <= 0) setNoMore(true)
     } catch (e: any) { setErr(e.message); if (/번까지만/.test(e.message)) setNoMore(true) } finally { setBusy(false) }
   }
-  const canDefer = DEFER_ENABLED && !noMore && !isSlot && t.status === 'waiting'
+  const canDefer = DEFER_ENABLED && !noMore && !isSlot && t.status === 'waiting' && (t.booth.settings.defer_max ?? 3) > 0
 
   const tone = ({ waiting: 'blue', called: 'amber', checked_in: 'green', done: 'green', no_show: 'red', cancelled: 'gray' } as const)[t.status]
 

@@ -17,6 +17,9 @@ export default function LuckyDraw() {
   const { slug = '' } = useParams()
   const token = cardToken(slug)
   const { data, error, loading, reload } = useAsync<DrawPublic[]>(() => rpc('draw_status', { p_slug: slug, p_card: token }), [slug])
+  // 스탬프 완주가 조건인 추첨이 있으면 내 스탬프 수를 같이 본다 — 못 채웠으면 응모 폼 대신 안내
+  const needStamp = !!data?.some(d => d.require_stamp)
+  const stamp = useAsync<{ count: number; goal: number } | null>(() => needStamp ? rpc('stamp_status', { p_slug: slug, p_card: token }) : Promise.resolve(null), [slug, needStamp])
   if (loading && !data) return <Spinner />
   if (error && !data) return <div className="p-6"><Alert kind="error">{error}</Alert></div>
   return (
@@ -24,7 +27,7 @@ export default function LuckyDraw() {
       <header className="sticky top-0 z-10 bg-white/95 backdrop-blur"><div className="flex h-14 items-center px-4"><h1 className="text-xl font-bold">럭키드로우</h1></div></header>
       <div className="space-y-4 px-4">
         {data?.length === 0 && <p className="py-16 text-center text-sm text-gray-400">진행 중인 추첨이 없어요.</p>}
-        {data?.map(d => <DrawCard key={d.id} d={d} slug={slug} token={token} onChanged={reload} />)}
+        {data?.map(d => <DrawCard key={d.id} d={d} slug={slug} token={token} onChanged={reload} stamp={stamp.data ?? null} />)}
         <p className="pt-4 text-center text-xs text-gray-400">응모 정보는 당첨 안내에만 쓰고 행사 후 삭제돼요 · 운영 플릿 (FLIT)</p>
       </div>
       <CustomerNav slug={slug} active="hub" />
@@ -32,7 +35,8 @@ export default function LuckyDraw() {
   )
 }
 
-function DrawCard({ d, slug, token, onChanged }: { d: DrawPublic; slug: string; token: string; onChanged: () => void }) {
+function DrawCard({ d, slug, token, onChanged, stamp }: { d: DrawPublic; slug: string; token: string; onChanged: () => void; stamp: { count: number; goal: number } | null }) {
+  const short = d.require_stamp && !!stamp && stamp.goal > 0 && stamp.count < stamp.goal
   const [f, setF] = useState({ name: LS.get<string>('draw:name') ?? me.get().name, phone: fmtPhone(LS.get<string>('draw:phone') ?? me.get().phone) })
   const [err, setErr] = useState<string | null>(null); const [busy, setBusy] = useState(false)
   const closed = d.status !== 'open' || (d.draw_at != null && new Date(d.draw_at).getTime() < Date.now())
@@ -52,7 +56,7 @@ function DrawCard({ d, slug, token, onChanged }: { d: DrawPublic; slug: string; 
       <h2 className="mt-2 text-lg font-bold text-gray-900">{d.title}</h2>
       {d.prize && <p className="text-[15px] font-semibold text-orange-600">🎁 {d.prize} × {d.winners_count}명</p>}
       {d.description && <p className="mt-1 text-sm text-gray-600">{d.description}</p>}
-      {d.require_stamp && <p className="mt-1 text-xs text-gray-500">스탬프 투어를 완주해야 응모할 수 있어요. <Link to={`/e/${slug}/stamp`} className="underline">내 스탬프</Link></p>}
+      {d.require_stamp && !short && !d.mine && <p className="mt-1 text-xs text-gray-500">스탬프 투어를 완주해야 응모할 수 있어요. <Link to={`/e/${slug}/stamp`} className="underline">내 스탬프</Link></p>}
 
       {d.status === 'drawn' ? (
         <div className="mt-3 rounded-xl bg-gray-50 p-3">
@@ -63,7 +67,13 @@ function DrawCard({ d, slug, token, onChanged }: { d: DrawPublic; slug: string; 
         </div>
       ) : d.mine ? (
         <Alert kind="success">{d.mine.name}님, 응모 완료. 추첨 결과는 이 화면에서 확인할 수 있어요.</Alert>
-      ) : closed ? null : (
+      ) : closed ? null : short ? (
+        <div className="mt-3 rounded-xl bg-gray-50 p-4 text-center ring-1 ring-gray-200">
+          <div className="text-[15px] font-bold text-gray-900">스탬프 {stamp!.count} / {stamp!.goal}</div>
+          <p className="mt-1 text-sm text-gray-600">{stamp!.goal - stamp!.count}개만 더 모으면 응모할 수 있어요.</p>
+          <Link to={`/e/${slug}/stamp`} className="mt-3 flex h-12 items-center justify-center rounded-xl bg-gray-900 text-[15px] font-bold text-white active:bg-gray-800">스탬프 투어 가기</Link>
+        </div>
+      ) : (
         <form onSubmit={submit} className="mt-3 space-y-3">
           <Field label="이름"><Input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} required maxLength={20} /></Field>
           <Field label="휴대폰 번호" hint="당첨 안내용"><Input type="tel" inputMode="tel" value={f.phone} onChange={e => setF({ ...f, phone: fmtPhone(e.target.value) })} required placeholder="010-0000-0000" /></Field>
