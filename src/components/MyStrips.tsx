@@ -4,7 +4,7 @@ import { fmtTime } from '../lib/util'
 import { useMyTickets, isActive } from '../lib/myTickets'
 import { useMyOrders, orderActive } from '../lib/orders'
 
-/** 내 대기·예약·주문 띠 — 급한 것 하나만 크게 보여 주고, 더 있으면 '내 것 N건' 으로 묶는다 (지도·홈을 밀어내지 않게) */
+/** 내 대기·예약·주문 띠 — 급한 것 하나만 크게 보여 주고, 더 있으면 '마이페이지 N건' 으로 묶는다 (지도·홈을 밀어내지 않게) */
 export default function MyStrips({ slug }: { slug: string }) {
   const orders = useMyOrders(slug, DEMO ? 4000 : 10000).filter(orderActive)
   const tickets = useMyTickets(slug, DEMO ? 6000 : 20000).filter(isActive)

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { thirdTab } from '../lib/guide'
 
 /**
- * 손님 화면 공통 하단 바 — 홈 · 지도 · 먹거리 · 내 것 (2026-11-11 개편).
+ * 손님 화면 공통 하단 바 — 홈 · 지도 · 먹거리 · 마이페이지 (2026-11-11 개편).
  * 홈은 '지금 뭐 하지', 지도는 '어디 있지'. 먹거리가 없는 행사는 셋째 칸이 '체험' 으로 바뀐다.
  * active 의 옛 이름(hub·home·schedule·stamp)도 받아 준다.
  */
@@ -30,7 +30,7 @@ export default function CustomerNav({ slug, active }: { slug?: string | null; ac
       {item('now', 'now', `/e/${slug}`, '홈')}
       {item('map', 'map', `/e/${slug}/map`, '지도')}
       {third === 'food' ? item('food', 'food', `/e/${slug}/food`, '먹거리') : item('food', 'booth', `/e/${slug}/booths`, '체험')}
-      {item('my', 'my', `/e/${slug}/my`, '내 것')}
+      {item('my', 'my', `/e/${slug}/my`, '마이페이지')}
     </nav>
   )
 }

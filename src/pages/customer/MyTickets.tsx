@@ -58,7 +58,7 @@ export default function MyTickets() {
   const all = [...mine, ...acct.filter(a => !mine.some(m => m.token === a.token))]
   return (
     <div className="mx-auto min-h-dvh max-w-md bg-white px-4 pb-24 pt-6">
-      <h1 className="mb-4 text-2xl font-bold">내 것</h1>
+      <h1 className="mb-4 text-2xl font-bold">마이페이지</h1>
       {orders.length > 0 && (
         <div className="mb-4 space-y-2">
           {orders.map(o => (
@@ -79,7 +79,7 @@ export default function MyTickets() {
         </Link>
       )}
       {all.length > 0 ? <List rows={all} /> : orders.length > 0 ? null : <Card><p className="text-sm text-gray-500">아직 줄 선 곳이나 주문이 없어요. 다른 폰으로 접수했다면 아래에서 찾을 수 있어요.</p></Card>}
-      {LOGIN_ENABLED && cust.ready && <div className="mt-5">{cust.loggedIn ? <Account cust={cust} /> : <Card><KakaoStart cust={cust} note="이름·번호를 다시 안 적어도 되고, 폰을 바꿔도 내 것이 보여요" /></Card>}</div>}
+      {LOGIN_ENABLED && cust.ready && <div className="mt-5">{cust.loggedIn ? <Account cust={cust} /> : <Card><KakaoStart cust={cust} note="이름·번호를 다시 안 적어도 되고, 폰을 바꿔도 내 대기·주문이 보여요" /></Card>}</div>}
 
       <details className="mt-5 rounded-2xl bg-white p-5 ring-1 ring-gray-200" open={!!found}>
         <summary className="cursor-pointer text-sm font-semibold text-gray-700">다른 폰으로 접수했나요? 이름·전화번호로 찾기</summary>
