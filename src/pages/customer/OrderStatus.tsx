@@ -90,7 +90,7 @@ export default function OrderStatus() {
 
         {err && <div className="mt-4"><Alert kind="error">{err}</Alert></div>}
         <div className="mt-6 space-y-2">
-          {!cancelled && !done && <Link to={`/e/${slug}?to=${o.place.id}`} className="flex h-12 items-center justify-center rounded-xl text-[15px] font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">가게 가는 길 보기</Link>}
+          {!cancelled && !done && <Link to={`/e/${slug}/map?to=${o.place.id}`} className="flex h-12 items-center justify-center rounded-xl text-[15px] font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">가게 가는 길 보기</Link>}
           {o.can_cancel && !ask && <button type="button" onClick={() => setAsk(true)} className="block w-full py-3 text-center text-sm font-semibold text-gray-500 underline">주문 취소</button>}
           {o.can_cancel && ask && (
             <div className="rounded-2xl bg-gray-50 p-4 ring-1 ring-gray-200">

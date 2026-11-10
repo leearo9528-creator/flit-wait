@@ -30,7 +30,7 @@ export default function LuckyDraw() {
         {data?.map(d => <DrawCard key={d.id} d={d} slug={slug} token={token} onChanged={reload} stamp={stamp.data ?? null} />)}
         <p className="pt-4 text-center text-xs text-gray-400">응모 정보는 당첨 안내에만 쓰고 행사 후 삭제돼요 · 운영 플릿 (FLIT)</p>
       </div>
-      <CustomerNav slug={slug} active="hub" />
+      <CustomerNav slug={slug} active="now" />
     </div>
   )
 }

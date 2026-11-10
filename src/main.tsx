@@ -1,13 +1,14 @@
 import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, RouterProvider, Navigate, useParams } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import './index.css'
 import { isDemo } from './lib/demo'
 import QueueJoin from './pages/customer/QueueJoin'
 import Reserve from './pages/customer/Reserve'
 import MyTicket from './pages/customer/MyTicket'
 import Home from './pages/Home'
-import EventHome from './pages/customer/EventHome'
+import NowHome from './pages/customer/NowHome'
+import Browse from './pages/customer/Browse'
 import ParkHome from './pages/customer/ParkHome'
 import PlaceDetail from './pages/customer/PlaceDetail'
 import MyTickets from './pages/customer/MyTickets'
@@ -31,19 +32,19 @@ const AdminEvents = lazy(() => import('./pages/admin/AdminEvents'))
 const AdminEvent = lazy(() => import('./pages/admin/AdminEvent'))
 const AdminBooth = lazy(() => import('./pages/admin/AdminBooth'))
 
-function ToHome() { const { slug } = useParams(); return <Navigate to={`/e/${slug}`} replace /> }
 
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/demo', element: <Demo /> },
-  { path: '/e/:slug', element: <ParkHome /> },
+  { path: '/e/:slug', element: <NowHome /> },
+  { path: '/e/:slug/map', element: <ParkHome /> },
+  { path: '/e/:slug/food', element: <Browse tab="food" /> },
   { path: '/e/:slug/p/:placeId', element: <PlaceDetail /> },
   { path: '/e/:slug/p/:placeId/order', element: <OrderCheckout /> },
   { path: '/o/:token', element: <OrderStatus /> },
   { path: '/vo/:token', element: <VendorOrders /> },
-  { path: '/e/:slug/booths', element: <EventHome /> },
+  { path: '/e/:slug/booths', element: <Browse tab="booth" /> },
   { path: '/e/:slug/b/:boothSlug', element: <PlaceDetail /> },
-  { path: '/e/:slug/map', element: <ToHome /> },   // 옛 지도 화면 — 지도 홈으로 합쳤다
   { path: '/e/:slug/schedule', element: <EventSchedule /> },
   { path: '/e/:slug/stamp', element: <StampTour /> },
   { path: '/e/:slug/stamp/:code', element: <StampTour /> },

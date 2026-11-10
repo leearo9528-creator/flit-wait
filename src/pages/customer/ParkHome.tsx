@@ -7,9 +7,8 @@ import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import DemoBanner from '../../components/DemoBanner'
 import { PLACE_KIND_LABEL, type EventGuide, type EventSchedule, type GuidePlace, type PlaceKind } from '../../lib/types'
-import { useMyTickets, isActive } from '../../lib/myTickets'
+import MyStrips from '../../components/MyStrips'
 import { liveOf, TONE_PIN, TONE_TEXT, type Live } from '../../lib/live'
-import { useMyOrders, orderActive } from '../../lib/orders'
 
 /**
  * 행사 홈 — 지도가 곧 첫 화면이고, 핀마다 지금 대기가 붙는다 (2026-11-10, 테마파크 앱 구조).
@@ -23,12 +22,8 @@ const groupOf = (k: PlaceKind): Group => (k === 'booth' || k === 'food' || k ===
 
 export default function ParkHome() {
   const { slug = '' } = useParams()
-  const mine = useMyTickets(slug, DEMO ? 6000 : 20000)
-  const myOrders = useMyOrders(slug, DEMO ? 4000 : 10000).filter(orderActive)
   const [q, setQ] = useState('')
-  const [searching, setSearching] = useState(false)
   const { data, error, loading, reload } = useAsync<EventGuide>(() => cachedRpc('event_guide', slug), [slug])
-  const sched = useAsync<EventSchedule>(() => cachedRpc('event_schedule', slug), [slug])
   // 지도에 올리지 않은 부스도 목록에는 나와야 한다 (부스만 만들고 배치도를 안 쓴 행사)
   const sum = useAsync<{ booths: any[] } | null>(() => cachedRpc('event_summary', slug), [slug])
   useEffect(() => {
@@ -37,12 +32,6 @@ export default function ParkHome() {
     document.addEventListener('visibilitychange', onVis)
     return () => { clearInterval(iv); document.removeEventListener('visibilitychange', onVis) }
   }, [slug]) // eslint-disable-line
-  useEffect(() => {
-    if (!data?.event) return
-    LS.set('lastEvent', slug)
-    const k = `viewed:${slug}`   // 방문 집계 — 세션당 1회
-    if (!sessionStorage.getItem(k)) { sessionStorage.setItem(k, '1'); rpc('track_view', { p_slug: slug, p_page: 'home' }).catch(() => {}) }
-  }, [data?.event?.id]) // eslint-disable-line
 
   const [view, setView] = useState<'map' | 'list'>(() => LS.get<'map' | 'list'>(`view:${slug}`) ?? 'map')
   const [picked, setGroup] = useState<Group | null>(null)
@@ -53,6 +42,7 @@ export default function ParkHome() {
   // 가는 길: ?to=<장소 id> — 그 장소를 지도에 띄우고, 내 위치가 있으면 선과 거리를 보여 준다.
   const [sp, setSp] = useSearchParams()
   const toId = sp.get('to')
+  const [searching, setSearching] = useState(() => sp.get('find') === '1')
   const [aspect, setAspect] = useState(0)                      // 지도 그림의 세로/가로
   const [locOn, setLocOn] = useState(() => { try { return sessionStorage.getItem('loc:on') === '1' } catch { return false } })
   const [pos, setPos] = useState<{ lat: number; lng: number; acc: number } | null>(null)
@@ -112,14 +102,7 @@ export default function ParkHome() {
   if (loading && !data) return <Spinner />
   if (!data?.event) return <div className="p-6"><Alert kind="error">{error ?? '행사를 찾을 수 없습니다.'}</Alert></div>
   const { event } = data
-  const now = Date.now()
-  const programs = sched.data?.programs ?? []
-  const livePg = programs.find(p => new Date(p.starts_at).getTime() <= now && now < new Date(p.ends_at).getTime())
-  const nextPg = programs.find(p => new Date(p.starts_at).getTime() > now)
-  const urgent = (sched.data?.notices ?? []).find(n => n.urgent)
-  const ev2 = sched.data?.event
   const hasMap = !!event.map_image_url
-  const active = mine.filter(isActive)
   const target = toId ? rows.find(r => r.p.id === toId && r.p.x != null)?.p ?? null : null
   const mode = hasMap ? (target ? 'map' : view) : 'list'
   const meIn = !!me && me.x > -5 && me.x < 105 && me.y > -5 && me.y < 105
@@ -167,21 +150,7 @@ export default function ParkHome() {
 
       <div className="space-y-2 px-4">
         {/* 내 대기·예약 — 줄 서 있는 동안 지도에서도 차례가 보인다 */}
-        {myOrders.slice(0, 2).map(o => (
-          <Link key={o.token} to={`/o/${o.token}`} className={`flex items-center gap-2 rounded-xl px-3 py-3 text-white ${o.status === 'ready' ? 'bg-red-600' : 'bg-blue-700'}`}>
-            <span className="min-w-0 flex-1 truncate text-[15px] font-bold">{o.place.name}</span>
-            <span className="shrink-0 text-[15px] font-bold tabular-nums">{o.status === 'ready' ? `${o.order_no}번 받으러 오세요` : o.status === 'accepted' ? `${o.order_no}번 준비 중` : `${o.order_no}번 주문 확인 중`}</span>
-            <span className="shrink-0 text-sm opacity-80">›</span>
-          </Link>
-        ))}
-        {active.slice(0, 3).map(r => (
-          <Link key={r.token} to={`/t/${r.token}`} className={`flex items-center gap-2 rounded-xl px-3 py-3 ${r.status === 'called' ? 'bg-red-600 text-white' : 'bg-blue-700 text-white'}`}>
-            <span className="min-w-0 flex-1 truncate text-[15px] font-bold">{r.booth}</span>
-            <span className="shrink-0 text-[15px] font-bold tabular-nums">{r.status === 'called' ? '지금 입장하세요' : r.slot_at ? `${fmtTime(r.slot_at)} 회차` : r.ahead ? `앞 ${r.ahead}팀${r.est_wait_min ? ` · 약 ${r.est_wait_min}분` : ''}` : '곧 차례예요'}</span>
-            <span className="shrink-0 text-sm opacity-80">›</span>
-          </Link>
-        ))}
-        {active.length > 3 && <Link to={`/e/${slug}/my`} className="block text-center text-sm font-semibold text-gray-600 underline">내 대기 {active.length}건 모두 보기</Link>}
+        <MyStrips slug={slug} />
         {target && (
           <div className="flex items-center gap-2 rounded-xl bg-gray-900 px-3 py-3 text-white">
             <span className="min-w-0 flex-1 truncate text-[15px] font-bold">{target.name}</span>
@@ -190,20 +159,6 @@ export default function ParkHome() {
           </div>
         )}
         {locErr && <Alert kind="warn">{locErr}</Alert>}
-        {event.status !== 'open' && <Alert kind="info">지금은 운영 시간이 아니에요.</Alert>}
-        {event.notice && <Alert kind="warn">{event.notice}</Alert>}
-        {urgent && (
-          <Link to={`/e/${slug}/schedule`} className="flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2.5 ring-1 ring-red-200">
-            <span className="shrink-0 rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">긴급</span><span className="truncate text-sm font-semibold text-gray-900">{urgent.title}</span>
-          </Link>
-        )}
-        {(livePg || nextPg) && (
-          <Link to={`/e/${slug}/schedule`} className="flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2.5 ring-1 ring-gray-200">
-            <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${livePg ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-700'}`}>{livePg ? '지금' : fmtTime(nextPg!.starts_at)}</span>
-            <span className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">{(livePg ?? nextPg)!.title}{(livePg ?? nextPg)!.place ? <span className="font-normal text-gray-500"> · {(livePg ?? nextPg)!.place!.name}</span> : null}</span>
-            <span className="shrink-0 text-xs text-gray-400">일정 ›</span>
-          </Link>
-        )}
       </div>
 
       {term && (
@@ -317,18 +272,9 @@ export default function ParkHome() {
         {listed.length === 0 && <li className="py-16 text-center text-sm text-gray-400">표시할 장소가 없어요.</li>}
       </ul>
 
-      {/* 행사 즐기기 — 스탬프·럭키드로우·설문·오시는 길. 켜진 것만 보인다 */}
-      {ev2 && (ev2.stamp_enabled || ev2.draw_open || ev2.survey_enabled || ev2.directions_text) && (
-        <div className="mx-4 mt-4 divide-y divide-gray-100 rounded-2xl ring-1 ring-gray-200">
-          {ev2.stamp_enabled && <More to={`/e/${slug}/stamp`} title="스탬프 투어" sub="부스를 돌고 경품 받기" />}
-          {ev2.draw_open && <More to={`/e/${slug}/draw`} title="럭키드로우" sub="응모하고 경품 받기" />}
-          {ev2.survey_enabled && <More to={`/e/${slug}/survey`} title="한마디 남기기" sub="30초 만족도 설문" />}
-          {ev2.directions_text && <More to={`/e/${slug}/schedule#way`} title="오시는 길 · 주차" sub={ev2.directions_text.split('\n')[0]} />}
-        </div>
-      )}
       <p className="pt-6 text-center text-xs text-gray-400">운영 플릿 (FLIT)</p>
 
-      <CustomerNav slug={slug} active="hub" stamp={!!event.stamp_enabled} />
+      <CustomerNav slug={slug} active="map" />
     </div>
   )
 }

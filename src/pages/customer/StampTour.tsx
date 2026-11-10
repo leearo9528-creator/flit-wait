@@ -80,7 +80,7 @@ export default function StampTour() {
               ))}
             </ul>
             <p className="mt-4 text-center text-sm text-gray-500">부스에 붙어 있는 스탬프 QR 을 카메라로 찍으면 자동으로 적립돼요.</p>
-            <div className="mt-3"><Link to={`/e/${slug}`}><Button variant="secondary">지도에서 부스 찾기</Button></Link></div>
+            <div className="mt-3"><Link to={`/e/${slug}/map`}><Button variant="secondary">지도에서 부스 찾기</Button></Link></div>
           </>
         )}
         <p className="pt-6 text-center text-xs text-gray-400">운영 플릿 (FLIT)</p>

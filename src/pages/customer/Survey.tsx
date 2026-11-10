@@ -58,7 +58,7 @@ export default function Survey() {
         )}
         <p className="pt-6 text-center text-xs text-gray-400">익명으로 집계돼요 · 운영 플릿 (FLIT)</p>
       </div>
-      <CustomerNav slug={slug} active="hub" />
+      <CustomerNav slug={slug} active="now" />
     </div>
   )
 }

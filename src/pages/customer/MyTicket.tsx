@@ -83,7 +83,7 @@ export default function MyTicket() {
 
   return (
     <Page title={t.booth.name} sub={t.event.name}>
-      {(t.event as any).slug && <Link to={`/e/${(t.event as any).slug}`} className="-mt-3 mb-3 inline-block text-sm font-semibold text-gray-600 underline">← 지도로</Link>}
+      {(t.event as any).slug && <Link to={`/e/${(t.event as any).slug}`} className="-mt-3 mb-3 inline-block text-sm font-semibold text-gray-600 underline">← 홈으로</Link>}
       {t.event.notice && <div className="mb-4"><Alert kind="warn">{t.event.notice}</Alert></div>}
 
       <Card className="mb-4 text-center">

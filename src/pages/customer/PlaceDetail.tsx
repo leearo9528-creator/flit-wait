@@ -27,7 +27,7 @@ export default function PlaceDetail() {
   const sched = useAsync<{ programs: { id: string; title: string; starts_at: string; ends_at: string | null; place: { id: string } | null }[] } | null>(() => rpc('event_schedule', { p_slug: slug }), [slug])
   if (loading && !data) return <Spinner />
   const p = data?.places.find(x => boothSlug ? x.booth?.slug === boothSlug : x.id === placeId)
-  if (!data?.event || !p) return <div className="p-6"><Alert kind="error">{error ?? '장소를 찾을 수 없습니다.'}</Alert><Link to={`/e/${slug}`} className="mt-4 block text-center text-sm font-semibold underline">지도로 돌아가기</Link></div>
+  if (!data?.event || !p) return <div className="p-6"><Alert kind="error">{error ?? '장소를 찾을 수 없습니다.'}</Alert><Link to={`/e/${slug}/map`} className="mt-4 block text-center text-sm font-semibold underline">지도로 돌아가기</Link></div>
   const { event } = data
   if (bagFor !== p.id) { setBagFor(p.id); setBag(cart.get(p.id)) }
   const b = p.booth
@@ -58,14 +58,14 @@ export default function PlaceDetail() {
                 </span>
               </div>
             : <div className="aspect-[16/10] w-full bg-gray-100" />}
-        <button type="button" onClick={() => (history.length > 1 ? nav(-1) : nav(`/e/${slug}`))} aria-label="뒤로" className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl text-gray-900 shadow ring-1 ring-gray-200 active:bg-gray-50">‹</button>
+        <button type="button" onClick={() => (history.length > 1 ? nav(-1) : nav(`/e/${slug}/map`))} aria-label="뒤로" className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl text-gray-900 shadow ring-1 ring-gray-200 active:bg-gray-50">‹</button>
       </div>
 
       <div className="px-4 pt-5">
         <div className="text-sm text-gray-500">{PLACE_KIND_LABEL[p.kind]}{b?.location ? ` · ${b.location}` : ''}{p.hours ? ` · ${p.hours}` : ''}</div>
         <h1 className="mt-0.5 text-2xl font-bold leading-tight text-gray-900">{p.name}</h1>
         {p.description && <p className="mt-2 text-[15px] leading-relaxed text-gray-600">{p.description}</p>}
-        {event.map_image_url && p.x != null && <Link to={`/e/${slug}?to=${p.id}`} className="mt-3 inline-flex h-10 items-center rounded-full bg-white px-4 text-sm font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">가는 길 보기</Link>}
+        {event.map_image_url && p.x != null && <Link to={`/e/${slug}/map?to=${p.id}`} className="mt-3 inline-flex h-10 items-center rounded-full bg-white px-4 text-sm font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">가는 길 보기</Link>}
 
         {live && (
           <div className="mt-5 flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-4 ring-1 ring-gray-200">

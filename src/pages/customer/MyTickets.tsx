@@ -55,8 +55,7 @@ export default function MyTickets() {
   const all = [...mine, ...acct.filter(a => !mine.some(m => m.token === a.token))]
   return (
     <div className="mx-auto min-h-dvh max-w-md bg-gray-50 px-4 pb-24 pt-6">
-      <h1 className="mb-4 text-2xl font-bold">내 대기·예약·주문</h1>
-      {LOGIN_ENABLED && cust.ready && <div className="mb-4">{cust.loggedIn ? <Account cust={cust} /> : <Card><KakaoStart cust={cust} note="이름·번호를 다시 안 적어도 되고, 폰을 바꿔도 내 대기가 보여요" /></Card>}</div>}
+      <h1 className="mb-4 text-2xl font-bold">내 것</h1>
       {orders.length > 0 && (
         <div className="mb-4 space-y-2">
           {orders.map(o => (
@@ -70,10 +69,12 @@ export default function MyTickets() {
           ))}
         </div>
       )}
-      {all.length > 0 ? <List rows={all} /> : orders.length > 0 ? null : <Card><p className="text-sm text-gray-500">이 기기에서 접수한 내역이 없어요. 다른 폰으로 접수했다면 아래에서 찾을 수 있어요.</p></Card>}
+      {all.length > 0 ? <List rows={all} /> : orders.length > 0 ? null : <Card><p className="text-sm text-gray-500">아직 줄 선 곳이나 주문이 없어요. 다른 폰으로 접수했다면 아래에서 찾을 수 있어요.</p></Card>}
+      {LOGIN_ENABLED && cust.ready && <div className="mt-5">{cust.loggedIn ? <Account cust={cust} /> : <Card><KakaoStart cust={cust} note="이름·번호를 다시 안 적어도 되고, 폰을 바꿔도 내 것이 보여요" /></Card>}</div>}
 
-      <Card className="mt-5">
-        <div className="mb-3 text-sm font-semibold text-gray-700">이름·전화번호로 찾기</div>
+      <details className="mt-5 rounded-2xl bg-white p-5 ring-1 ring-gray-200" open={!!found}>
+        <summary className="cursor-pointer text-sm font-semibold text-gray-700">다른 폰으로 접수했나요? 이름·전화번호로 찾기</summary>
+        <div className="h-3" />
         <form onSubmit={search} className="space-y-3">
           <Field label="접수할 때 쓴 이름"><Input value={name} onChange={e => setName(e.target.value)} required /></Field>
           <Field label="휴대폰번호"><Input value={phone} onChange={e => setPhone(fmtPhone(e.target.value))} inputMode="numeric" required /></Field>
@@ -81,7 +82,7 @@ export default function MyTickets() {
           <Button type="submit" loading={busy}>찾기</Button>
         </form>
         {found && (found.length ? <div className="mt-4"><List rows={found} /></div> : <div className="mt-4"><Alert kind="info">일치하는 내역이 없어요. 이름과 번호를 확인해 주세요.</Alert></div>)}
-      </Card>
+      </details>
       <CustomerNav slug={slug} active="my" />
     </div>
   )
