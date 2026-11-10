@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { rpc, cachedRpc } from '../../lib/supabase'
-import { useAsync, useBoothLive, fmtPhone, fmtDateTime, fmtWait, LS } from '../../lib/util'
+import { useAsync, useBoothLive, fmtPhone, fmtDateTime, fmtWait, LS, me } from '../../lib/util'
 import { BoothSummary } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
@@ -14,9 +14,9 @@ export default function QueueJoin() {
   const { data, error, loading, reload } = useAsync<BoothSummary>(() => cachedRpc('booth_summary', slug), [slug])
   useBoothLive(data?.booth.id, reload, 15000, false)
 
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [party, setParty] = useState(1)
+  const [name, setName] = useState(() => me.get().name)
+  const [phone, setPhone] = useState(() => me.get().phone)
+  const [party, setParty] = useState(() => me.get().party)
   const [consent, setConsent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -44,6 +44,7 @@ export default function QueueJoin() {
     setErr(null); setBusy(true)
     try {
       const r = await rpc<{ token: string }>('join_queue', { p_slug: slug, p_name: name, p_phone: phone, p_party: party, p_consent: consent })
+      me.set({ name, phone, party })
       LS.set(`ticket:${slug}`, { token: r.token, slug, at: Date.now() })
       nav(`/t/${r.token}`, { replace: true })
     } catch (e: any) { setErr(e.message) } finally { setBusy(false) }

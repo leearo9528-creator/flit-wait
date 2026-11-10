@@ -13,9 +13,8 @@ import { liveOf, TONE_PIN, TONE_TEXT, type Live } from '../../lib/live'
  * 지도 ↔ 목록 전환 · 종류 필터 · 핀이나 목록을 누르면 그 장소의 상세 화면(PlaceDetail)으로 넘어간다.
  * 행사 종류가 달라도 이 틀은 그대로고 안에 든 장소만 바뀐다.
  */
-type Group = 'all' | 'booth' | 'food' | 'market' | 'stage' | 'etc'
-const GROUPS: { id: Group; label: string }[] = [
-  { id: 'all', label: '전체' }, { id: 'booth', label: '체험' }, { id: 'food', label: '먹거리' }, { id: 'market', label: '마켓' }, { id: 'stage', label: '공연' }, { id: 'etc', label: '편의시설' },
+type Group = 'booth' | 'food' | 'market' | 'stage' | 'etc'
+const GROUPS: { id: Group; label: string }[] = [ { id: 'booth', label: '체험' }, { id: 'food', label: '먹거리' }, { id: 'market', label: '마켓' }, { id: 'stage', label: '공연' }, { id: 'etc', label: '편의시설' },
 ]
 const groupOf = (k: PlaceKind): Group => (k === 'booth' || k === 'food' || k === 'market' || k === 'stage' ? k : 'etc')
 
@@ -37,13 +36,15 @@ export default function ParkHome() {
   }, [data?.event?.id]) // eslint-disable-line
 
   const [view, setView] = useState<'map' | 'list'>(() => LS.get<'map' | 'list'>(`view:${slug}`) ?? 'map')
-  const [group, setGroup] = useState<Group>('all')
+  const [picked, setGroup] = useState<Group | null>(null)
   const nav = useNavigate()
   const pickView = (v: 'map' | 'list') => { setView(v); LS.set(`view:${slug}`, v) }
 
   const rows = useMemo(() => (data?.places ?? []).map(p => ({ p, live: liveOf(p) })), [data?.places])
-  const groups = useMemo(() => GROUPS.filter(g => g.id === 'all' || rows.some(r => groupOf(r.p.kind) === g.id)), [rows])
-  const shown = useMemo(() => rows.filter(r => group === 'all' || groupOf(r.p.kind) === group), [rows, group])
+  // 한 번에 한 종류만 보여 준다 — 처음엔 대기가 있는 체험 (없으면 첫 종류). 핀 이름표가 서로 가리지 않게 하려는 것
+  const groups = useMemo(() => GROUPS.filter(g => rows.some(r => groupOf(r.p.kind) === g.id)), [rows])
+  const group = picked && groups.some(g => g.id === picked) ? picked : groups[0]?.id
+  const shown = useMemo(() => rows.filter(r => groupOf(r.p.kind) === group), [rows, group])
   // 목록: 대기가 있는 곳(체험) 먼저, 그 안에서 짧은 순 → 나머지는 원래 순서
   const listed = useMemo(() => [...shown].sort((a, b) => Number(!!b.p.booth) - Number(!!a.p.booth) || (a.p.booth && b.p.booth ? (a.live?.sort ?? 0) - (b.live?.sort ?? 0) : 0)), [shown])
 

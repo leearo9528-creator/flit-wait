@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { rpc } from '../../lib/supabase'
-import { useAsync, LS, fmtDateTime, fmtPhone } from '../../lib/util'
+import { useAsync, LS, me, fmtDateTime, fmtPhone } from '../../lib/util'
 import { Alert, Spinner, Button, Field, Input } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import type { DrawPublic } from '../../lib/types'
@@ -33,7 +33,7 @@ export default function LuckyDraw() {
 }
 
 function DrawCard({ d, slug, token, onChanged }: { d: DrawPublic; slug: string; token: string; onChanged: () => void }) {
-  const [f, setF] = useState({ name: LS.get<string>('draw:name') ?? '', phone: LS.get<string>('draw:phone') ?? '' })
+  const [f, setF] = useState({ name: LS.get<string>('draw:name') ?? me.get().name, phone: LS.get<string>('draw:phone') ?? me.get().phone })
   const [err, setErr] = useState<string | null>(null); const [busy, setBusy] = useState(false)
   const closed = d.status !== 'open' || (d.draw_at != null && new Date(d.draw_at).getTime() < Date.now())
   async function submit(e: React.FormEvent) {

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { rpc, cachedRpc } from '../../lib/supabase'
-import { useAsync, useBoothLive, fmtPhone, fmtTime, fmtDate, fmtDateTime, fmtDur, LS } from '../../lib/util'
+import { useAsync, useBoothLive, fmtPhone, fmtTime, fmtDate, fmtDateTime, fmtDur, LS, me } from '../../lib/util'
 import { BoothSummary, SlotPublic } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner, Badge } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
@@ -15,9 +15,9 @@ export default function Reserve() {
   useBoothLive(data?.booth.id, reload, 20000, false)
 
   const [slotId, setSlotId] = useState<string | null>(null)
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [party, setParty] = useState(1)
+  const [name, setName] = useState(() => me.get().name)
+  const [phone, setPhone] = useState(() => me.get().phone)
+  const [party, setParty] = useState(() => me.get().party)
   const [consent, setConsent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -66,6 +66,7 @@ export default function Reserve() {
     setErr(null); setBusy(true)
     try {
       const r = await rpc<{ token: string }>('reserve_slot', { p_slot: slotId, p_name: name, p_phone: phone, p_party: party, p_consent: consent })
+      me.set({ name, phone, party })
       LS.set(`resv:${slug}`, { token: r.token, at: Date.now() })
       nav(`/t/${r.token}`, { replace: true })
     } catch (e: any) { setErr(e.message); reload() } finally { setBusy(false) }

@@ -92,3 +92,11 @@ export const mapLinks = (name: string, lat?: number | null, lng?: number | null)
   kakao: lat != null && lng != null ? `https://map.kakao.com/link/to/${encodeURIComponent(name)},${lat},${lng}` : `https://map.kakao.com/link/search/${encodeURIComponent(name)}`,
   naver: lat != null && lng != null ? `https://map.naver.com/p/directions/-/${lng},${lat},${encodeURIComponent(name)}/-/transit` : `https://map.naver.com/p/search/${encodeURIComponent(name)}`,
 })
+
+/** 줄서기·예약 때 적은 이름·전화번호를 이 기기에만 기억해 둔다 — 부스마다 다시 적지 않게 (서버로는 등록할 때만 간다) */
+export type Me = { name: string; phone: string; party: number }
+export const me = {
+  get: (): Me => ({ name: '', phone: '', party: 1, ...(LS.get<Partial<Me>>('me') ?? {}) }),
+  set: (m: Me) => LS.set('me', m),
+  clear: () => LS.del('me'),
+}
