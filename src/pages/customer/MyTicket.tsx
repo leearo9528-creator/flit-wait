@@ -79,70 +79,46 @@ export default function MyTicket() {
   }
   const canDefer = DEFER_ENABLED && !noMore && !isSlot && t.status === 'waiting' && (t.booth.settings.defer_max ?? 3) > 0
 
-  const tone = ({ waiting: 'blue', called: 'red', checked_in: 'green', done: 'green', no_show: 'red', cancelled: 'gray' } as const)[t.status]
+  const slug: string | undefined = (t.event as any).slug
 
   return (
-    <Page title={t.booth.name} sub={t.event.name}>
-      {(t.event as any).slug && <Link to={`/e/${(t.event as any).slug}`} className="-mt-3 mb-3 inline-block text-sm font-semibold text-gray-600 underline">← 홈으로</Link>}
-      {t.event.notice && <div className="mb-4"><Alert kind="warn">{t.event.notice}</Alert></div>}
-
-      <Card className="mb-4 text-center">
-        <div className="mb-2"><Badge tone={tone}>{isSlot && t.status === 'waiting' ? '예약 완료' : STATUS_LABEL[t.status]}</Badge></div>
-
-        {(t.status === 'checked_in' || t.status === 'done') && (
-          <div className="mb-4 rounded-xl bg-green-50 py-4 ring-1 ring-green-200">
-            <div className="text-lg font-bold text-green-900">입장 완료 · 즐거운 체험 되세요</div>
-            <div className="mt-1 text-sm text-green-800">{isSlot ? '체크인이 확인되었습니다.' : '대기가 끝났습니다. 이 화면은 닫으셔도 돼요.'}</div>
-          </div>
-        )}
-        {!isSlot && (
-          <>
-            <div className="text-sm text-gray-500">대기번호</div>
-            <div className="text-7xl font-black tabular-nums tracking-tight">{t.ticket_no}</div>
-            {t.status === 'waiting' && (
-              <div className="mt-4 rounded-xl bg-gray-50 py-3">
-                <div className="text-sm text-gray-500">내 앞 대기</div>
-                <div className="text-3xl font-bold tabular-nums">{t.ahead}<span className="ml-1 text-base font-medium text-gray-500">팀</span></div>
-                {t.ahead! > 0 && fmtWait(t.est_wait_min, t.ahead!) && <div className="text-sm text-gray-500">예상 {fmtWait(t.est_wait_min, t.ahead!)}</div>}
-                {t.ahead !== null && t.ahead <= (t.booth.settings.notify_ahead_teams ?? 2) && <div className="mt-1 text-sm font-semibold text-blue-700">곧 차례예요. 부스 근처로 와주세요.</div>}
-              </div>
-            )}
-            {t.status === 'called' && (
-              <div className="mt-4 rounded-xl bg-red-600 px-3 py-4 text-white">
-                <div className="text-xl font-bold">지금 입장해 주세요</div>
-                <div className="mt-1 text-sm opacity-90">{Math.floor(callLeft / 60)}:{String(callLeft % 60).padStart(2, '0')} 안에 부스로 오지 않으면 다음 순서로 넘어갑니다.</div>
-              </div>
-            )}
-          </>
-        )}
-
-        {isSlot && t.status === 'called' && (
-          <div className="mb-4 rounded-xl bg-red-600 px-3 py-4 text-white">
-            <div className="text-xl font-bold">자리가 났어요 · 지금 입장해 주세요</div>
-            <div className="mt-1 text-sm opacity-90">{Math.floor(callLeft / 60)}:{String(callLeft % 60).padStart(2, '0')} 안에 부스로 오지 않으면 다음 대기자에게 넘어갑니다.</div>
-          </div>
-        )}
-        {isSlot && (
-          <>
-            <div className="text-sm text-gray-500">{t.source === 'transfer' ? '배정된 회차' : '예약 회차'}</div>
-            <div className="text-3xl font-bold">{fmtDate(t.slot!.starts_at)}</div>
-            <div className="text-5xl font-black tabular-nums tracking-tight">{fmtTime(t.slot!.starts_at)}</div>
-            <div className="mt-1 text-sm text-gray-500">~ {fmtTime(t.slot!.ends_at)}</div>
-            {t.status === 'waiting' && (
-              <div className="mt-4 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700">
-                시작 10분 전까지 부스에 도착해 이 화면을 스태프에게 보여주세요. 시작 {t.booth.settings.noshow_after_start_min ?? 10}분 후까지 미도착 시 자동 취소됩니다.
-              </div>
-            )}
-          </>
-        )}
-
-        <div className="mt-4 grid grid-cols-2 gap-2 text-left text-sm">
-          <div className="rounded-xl bg-gray-50 p-3"><div className="text-xs text-gray-500">예약자</div><div className="font-semibold">{t.name}</div></div>
-          <div className="rounded-xl bg-gray-50 p-3"><div className="text-xs text-gray-500">인원</div><div className="font-semibold">{t.party_size}명</div></div>
-          {t.phone_tail && <div className="rounded-xl bg-gray-50 p-3 col-span-2"><div className="text-xs text-gray-500">연락처</div><div className="font-semibold">010-****-{t.phone_tail}</div></div>}
+    <div className="mx-auto min-h-dvh max-w-md bg-white pb-24">
+      {/* 주문 화면과 같은 틀 — 위 색 띠에 번호와 지금 할 일, 아래에 내역과 버튼 */}
+      <div className={`px-5 pb-7 pt-6 ${t.status === 'called' ? 'bg-red-600 text-white' : t.status === 'waiting' ? 'bg-blue-700 text-white' : 'bg-gray-100 text-gray-900'}`}>
+        <div className="flex items-center justify-between text-sm font-semibold opacity-90">
+          {slug ? <Link to={`/e/${slug}/b/${t.booth.slug}`}>{t.booth.name} ›</Link> : <span>{t.booth.name}</span>}
+          <span>{isSlot && t.status === 'waiting' ? '예약 완료' : STATUS_LABEL[t.status]}</span>
         </div>
-        <div className="mt-3 text-sm text-gray-500">{t.booth.location ? `위치 · ${t.booth.location} ` : ''}{(t.event as any).slug && <Link to={`/e/${(t.event as any).slug}/b/${t.booth.slug}`} className="font-semibold text-gray-700 underline">지도에서 보기</Link>}</div>
-      </Card>
+        {!isSlot
+          ? <>
+              <div className="mt-3 text-sm font-semibold opacity-90">대기번호</div>
+              <div className="text-7xl font-bold leading-none tabular-nums">{t.ticket_no}</div>
+            </>
+          : <>
+              <div className="mt-3 text-sm font-semibold opacity-90">{t.source === 'transfer' ? '배정된 회차' : '예약 회차'} · {fmtDate(t.slot!.starts_at)}</div>
+              <div className="text-6xl font-bold leading-none tabular-nums">{fmtTime(t.slot!.starts_at)}<span className="ml-2 text-xl font-semibold opacity-80">~{fmtTime(t.slot!.ends_at)}</span></div>
+            </>}
+        <div className="mt-4 text-2xl font-bold leading-snug">
+          {t.status === 'called' ? (isSlot ? '자리가 났어요. 지금 입장하세요' : '지금 입장하세요')
+            : t.status === 'waiting' ? (isSlot ? '시간에 맞춰 오세요' : t.ahead ? `앞에 ${t.ahead}팀${fmtWait(t.est_wait_min, t.ahead) ? ` · ${fmtWait(t.est_wait_min, t.ahead)}` : ''}` : '곧 차례예요')
+            : t.status === 'checked_in' || t.status === 'done' ? '입장했어요. 즐거운 시간 되세요'
+            : t.status === 'no_show' ? '순서가 지나갔어요' : '취소됐어요'}
+        </div>
+        <div className="mt-1 text-[15px] opacity-90">
+          {t.status === 'called' ? `${Math.floor(callLeft / 60)}:${String(callLeft % 60).padStart(2, '0')} 안에 오지 않으면 다음 순서로 넘어가요`
+            : t.status === 'waiting' && isSlot ? `시작 10분 전까지 와서 이 화면을 보여 주세요. 시작 ${t.booth.settings.noshow_after_start_min ?? 10}분 뒤까지 안 오면 취소돼요`
+            : t.status === 'waiting' ? (t.ahead !== null && t.ahead <= (t.booth.settings.notify_ahead_teams ?? 2) ? '부스 근처로 와 주세요. 차례가 되면 알림톡으로 불러요' : '차례가 되면 알림톡으로 불러요. 이 화면을 닫아도 돼요')
+            : t.status === 'checked_in' || t.status === 'done' ? '이 화면은 닫아도 돼요' : ''}
+        </div>
+      </div>
+
+      <div className="px-5 pt-5">
+      {t.event.notice && <div className="mb-4"><Alert kind="warn">{t.event.notice}</Alert></div>}
+      <dl className="mb-5 divide-y divide-gray-100 text-[15px]">
+        <div className="flex justify-between py-2.5"><dt className="text-gray-500">이름 · 인원</dt><dd className="font-semibold text-gray-900">{t.name} · {t.party_size}명</dd></div>
+        {t.phone_tail && <div className="flex justify-between py-2.5"><dt className="text-gray-500">연락처</dt><dd className="font-semibold tabular-nums text-gray-900">010-****-{t.phone_tail}</dd></div>}
+        {t.booth.location && <div className="flex justify-between py-2.5"><dt className="text-gray-500">위치</dt><dd className="font-semibold text-gray-900">{t.booth.location}</dd></div>}
+      </dl>
 
       {(t.status === 'no_show' || t.status === 'cancelled') && (
         <div className="mb-4">
@@ -155,7 +131,8 @@ export default function MyTicket() {
 
       {err && <div className="mb-4"><Alert kind="error">{err}</Alert></div>}
       {note && <div className="mb-4"><Alert kind="success">{note}</Alert></div>}
-      {canDefer && !pick && <div className="mb-2"><Button onClick={() => { setPick(true); setErr(null); setNote(null) }}>순서 미루기</Button></div>}
+      {slug && (t.status === 'waiting' || t.status === 'called') && <Link to={`/e/${slug}/b/${t.booth.slug}`} className="mb-2 flex h-12 items-center justify-center rounded-xl text-[15px] font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">위치 보기 · 가는 길</Link>}
+      {canDefer && !pick && <div className="mb-2"><Button variant="secondary" onClick={() => { setPick(true); setErr(null); setNote(null) }}>순서 미루기</Button></div>}
       {canDefer && pick && (
         <Card className="mb-3">
           <div className="mb-3 text-[15px] font-bold text-gray-900">몇 팀 뒤로 갈까요?</div>
@@ -166,7 +143,7 @@ export default function MyTicket() {
           <button type="button" onClick={() => setPick(false)} className="mt-3 block w-full text-center text-sm text-gray-500 underline">닫기</button>
         </Card>
       )}
-      {t.can_cancel && <Button variant="secondary" onClick={cancel} loading={busy}>{isSlot ? '예약 취소' : '대기 취소'}</Button>}
+      {t.can_cancel && <button type="button" onClick={cancel} disabled={busy} className="block w-full py-3 text-center text-sm font-semibold text-gray-500 underline disabled:opacity-50">{busy ? '처리 중…' : isSlot ? '예약 취소' : '대기 취소'}</button>}
       {!t.can_cancel && isSlot && t.status === 'waiting' && (
         <p className="text-center text-xs text-gray-500">
           취소는 시작 {fmtDur(t.booth.settings.cancel_until_before_min ?? 120)} 전까지 가능했어요. 지금 취소가 필요하면 부스 스태프에게 말씀해 주세요.
@@ -174,8 +151,9 @@ export default function MyTicket() {
       )}
 
       <p className="mt-6 text-center text-xs text-gray-400">운영 플릿 (FLIT)</p>
-      <CustomerNav slug={(t.event as any).slug} active="my" />
-    </Page>
+      </div>
+      <CustomerNav slug={slug} active="my" />
+    </div>
   )
 }
 

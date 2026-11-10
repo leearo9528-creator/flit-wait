@@ -68,7 +68,7 @@ export default function EventSchedule() {
         {/* 타임테이블 */}
         <section className="mb-6">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-gray-500">타임테이블</h2>
+            <h2 className="text-sm font-semibold text-gray-500">타임테이블 <span className="font-normal text-gray-400">· ☆ 를 누르면 보고 싶은 것만 모아 볼 수 있어요</span></h2>
             {fav.length > 0 && <button type="button" onClick={() => setOnlyFav(v => !v)} className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${onlyFav ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-700 ring-gray-300'}`}>★ 찜한 것만 {fav.length}</button>}
           </div>
           {days.length > 1 && (

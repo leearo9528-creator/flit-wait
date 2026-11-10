@@ -17,6 +17,9 @@ export default function MyTickets() {
   const { slug = '' } = useParams()
   const mine: Row[] = useMyTickets(slug, DEMO ? 6000 : 20000)
   const orders = useMyOrders(slug, DEMO ? 4000 : 10000)
+  // 스탬프 — 카드를 한 번이라도 연 기기만 (없는 카드를 여기서 만들지 않는다)
+  const [stamp, setStamp] = useState<{ enabled: boolean; count: number; goal: number; completed_at: string | null } | null>(null)
+  useEffect(() => { const tk = LS.get<string>(`stamp:${slug}`); if (tk) rpc<any>('stamp_status', { p_slug: slug, p_card: tk }).then(setStamp).catch(() => {}) }, [slug])
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [found, setFound] = useState<Row[] | null>(null)
@@ -68,6 +71,12 @@ export default function MyTickets() {
             </Link>
           ))}
         </div>
+      )}
+      {stamp?.enabled && (
+        <Link to={`/e/${slug}/stamp`} className="mb-4 flex items-center justify-between rounded-xl bg-white p-4 ring-1 ring-gray-200 active:bg-gray-50">
+          <span className="font-bold">스탬프 투어</span>
+          <span className={`text-sm font-bold tabular-nums ${stamp.completed_at ? 'text-blue-700' : 'text-gray-700'}`}>{stamp.completed_at ? '다 모았어요 · 경품 받기' : `${stamp.count} / ${stamp.goal}`} ›</span>
+        </Link>
       )}
       {all.length > 0 ? <List rows={all} /> : orders.length > 0 ? null : <Card><p className="text-sm text-gray-500">아직 줄 선 곳이나 주문이 없어요. 다른 폰으로 접수했다면 아래에서 찾을 수 있어요.</p></Card>}
       {LOGIN_ENABLED && cust.ready && <div className="mt-5">{cust.loggedIn ? <Account cust={cust} /> : <Card><KakaoStart cust={cust} note="이름·번호를 다시 안 적어도 되고, 폰을 바꿔도 내 것이 보여요" /></Card>}</div>}

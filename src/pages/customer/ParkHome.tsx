@@ -36,6 +36,7 @@ export default function ParkHome() {
   const [view, setView] = useState<'map' | 'list'>(() => LS.get<'map' | 'list'>(`view:${slug}`) ?? 'map')
   const [picked, setGroup] = useState<Group | null>(null)
   const nav = useNavigate()
+  const [sheet, setSheet] = useState<GuidePlace | null>(null)   // 편의시설은 화면을 넘기지 않고 지도 위 카드로 보여 준다
 
   // ── 내 위치 · 가는 길 ──
   // 내 위치: 폰 GPS 를 그림 지도 좌표로 옮긴다. 장소 2곳 이상에 실제 좌표(위도·경도)가 있어야 맞출 수 있다 (없으면 버튼을 숨긴다).
@@ -85,6 +86,7 @@ export default function ParkHome() {
   // 배치도에 없는 부스는 상세 화면이 없으니 바로 줄서기·예약으로 보낸다
   const open = (p: GuidePlace) => nav(p.id.startsWith('booth:') ? (p.booth!.mode === 'slot' ? `/r/${p.booth!.slug}` : `/q/${p.booth!.slug}`) : `/e/${slug}/p/${p.id}`)
   // 한 번에 한 종류만 보여 준다 — 처음엔 대기가 있는 체험 (없으면 첫 종류). 핀 이름표가 서로 가리지 않게 하려는 것
+  const tap = (p: GuidePlace) => (groupOf(p.kind) === 'etc' && !p.booth && !(p.menu?.length) && !p.image_url ? setSheet(p) : open(p))
   const groups = useMemo(() => GROUPS.filter(g => rows.some(r => groupOf(r.p.kind) === g.id)), [rows])
   const group = picked && groups.some(g => g.id === picked) ? picked : groups[0]?.id
   const shown = useMemo(() => rows.filter(r => groupOf(r.p.kind) === group), [rows, group])
@@ -196,7 +198,7 @@ export default function ParkHome() {
               {z.label} {z.n}곳 ›
             </button>
           ))}
-          {shown.filter(({ p }) => p.x != null && p.y != null && p.id !== target?.id).map(({ p, live }) => <Pin key={p.id} p={p} live={live} onClick={() => open(p)} />)}
+          {shown.filter(({ p }) => p.x != null && p.y != null && p.id !== target?.id).map(({ p, live }) => <Pin key={p.id} p={p} live={live} onClick={() => tap(p)} />)}
           {target && (
             <>
               <span className="pointer-events-none absolute h-10 w-10 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-blue-600/40" style={{ left: `${target.x}%`, top: `${target.y}%` }} />
@@ -253,7 +255,7 @@ export default function ParkHome() {
       <ul className={`divide-y divide-gray-100 px-4 ${mode === 'map' ? 'mt-2' : 'mt-1'} ${term || zone ? 'hidden' : ''}`}>
         {listed.map(({ p, live }) => (
           <li key={p.id}>
-            <button type="button" onClick={() => open(p)} className="flex w-full items-center gap-3 py-3.5 text-left active:bg-gray-50">
+            <button type="button" onClick={() => tap(p)} className="flex w-full items-center gap-3 py-3.5 text-left active:bg-gray-50">
               <div className="min-w-0 flex-1">
                 <div className="text-xs text-gray-500">{PLACE_KIND_LABEL[p.kind]}{p.booth?.location ? ` · ${p.booth.location}` : p.hours ? ` · ${p.hours}` : ''}{p.order_open ? <span className="font-semibold text-blue-700"> · 앱 주문</span> : null}</div>
                 <div className="truncate text-[17px] font-bold text-gray-900">{p.name}</div>
@@ -274,6 +276,24 @@ export default function ParkHome() {
 
       <p className="pt-6 text-center text-xs text-gray-400">운영 플릿 (FLIT)</p>
 
+      {sheet && (
+        <div className="fixed inset-x-0 bottom-14 z-30 mx-auto max-w-md px-3 pb-3" style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
+          <div className="rounded-2xl bg-white p-4 shadow-xl ring-1 ring-gray-200">
+            <div className="flex items-start gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="text-xs text-gray-500">{PLACE_KIND_LABEL[sheet.kind]}{sheet.hours ? ` · ${sheet.hours}` : ''}</div>
+                <div className="text-[19px] font-bold leading-tight text-gray-900">{sheet.name}</div>
+                {sheet.description && <p className="mt-1 text-[15px] leading-relaxed text-gray-600">{sheet.description}</p>}
+              </div>
+              {liveOf(sheet) && <span className={`shrink-0 text-[17px] font-bold ${TONE_TEXT[liveOf(sheet)!.tone]}`}>{liveOf(sheet)!.text}</span>}
+            </div>
+            <div className="mt-3 flex gap-2">
+              {hasMap && sheet.x != null && <button type="button" onClick={() => { goTo(sheet.id); setSheet(null) }} className="h-12 flex-1 rounded-xl bg-gray-900 text-[15px] font-bold text-white active:bg-gray-800">가는 길</button>}
+              <button type="button" onClick={() => setSheet(null)} className="h-12 flex-1 rounded-xl text-[15px] font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">닫기</button>
+            </div>
+          </div>
+        </div>
+      )}
       <CustomerNav slug={slug} active="map" />
     </div>
   )
