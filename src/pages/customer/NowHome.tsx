@@ -24,7 +24,13 @@ export default function NowHome() {
     const k = `viewed:${slug}`   // 방문 집계 — 세션당 1회
     if (!sessionStorage.getItem(k)) { sessionStorage.setItem(k, '1'); rpc('track_view', { p_slug: slug, p_page: 'home' }).catch(() => {}) }
   }, [data?.event?.id]) // eslint-disable-line
-  useEffect(() => { const iv = setInterval(() => { if (document.visibilityState === 'visible') sched.reload() }, DEMO ? 15000 : 60000); return () => clearInterval(iv) }, [slug]) // eslint-disable-line
+  // 긴급 공지가 늦게 뜨지 않게 일정·공지도 20초마다, 그리고 화면을 다시 볼 때마다 읽는다 (첫 응답은 캐시라 한 박자 늦을 수 있어 3초 뒤 한 번 더)
+  useEffect(() => {
+    const again = () => { if (document.visibilityState === 'visible') sched.reload() }
+    const first = setTimeout(again, 3000), iv = setInterval(again, DEMO ? 6000 : 20000)
+    document.addEventListener('visibilitychange', again)
+    return () => { clearTimeout(first); clearInterval(iv); document.removeEventListener('visibilitychange', again) }
+  }, [slug]) // eslint-disable-line
 
   if (loading && !data) return <Spinner />
   if (!data?.event) return <div className="p-6"><Alert kind="error">{error ?? '행사를 찾을 수 없습니다.'}</Alert></div>
