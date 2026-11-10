@@ -124,6 +124,10 @@ export default function ParkHome() {
   const meIn = !!me && me.x > -5 && me.x < 105 && me.y > -5 && me.y < 105
   const dist = target && me && fit ? mapMeters(fit, me, { x: Number(target.x), y: Number(target.y) }) : null
   const zone = group === 'food' || group === 'market'
+  const zonePins = (['food', 'market'] as const).map(id => {
+    const ps = rows.map(r => r.p).filter(p => groupOf(p.kind) === id && p.x != null && p.y != null)
+    return { id, label: id === 'food' ? '먹거리' : '마켓', n: ps.length, x: ps.reduce((a, p) => a + Number(p.x), 0) / (ps.length || 1), y: ps.reduce((a, p) => a + Number(p.y), 0) / (ps.length || 1) }
+  }).filter(z => z.n > 0)
   const ways = rows.map(r => r.p).filter(p => p.x != null && ['facility', 'info', 'medical', 'parking'].includes(p.kind))
 
   return (
@@ -226,6 +230,13 @@ export default function ParkHome() {
               <line x1={`${me.x}%`} y1={`${me.y}%`} x2={`${target.x}%`} y2={`${target.y}%`} stroke="#1d4ed8" strokeWidth="4" strokeLinecap="round" strokeDasharray="2 9" />
             </svg>
           )}
+          {/* 구역 핀 — 먹거리·마켓 자리(가게들의 한가운데)에 자동으로 뜬다. 누르면 그 구역의 가게·메뉴가 아래에 펼쳐진다 */}
+          {!target && zonePins.filter(z => z.id !== group).map(z => (
+            <button key={z.id} type="button" onClick={() => { setGroup(z.id); setTimeout(() => document.getElementById('zone')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60) }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-gray-900 px-3 py-1.5 text-[12px] font-bold text-white shadow-md ring-2 ring-white transition active:scale-95" style={{ left: `${z.x}%`, top: `${z.y}%` }}>
+              {z.label} {z.n}곳 ›
+            </button>
+          ))}
           {shown.filter(({ p }) => p.x != null && p.y != null && p.id !== target?.id).map(({ p, live }) => <Pin key={p.id} p={p} live={live} onClick={() => open(p)} />)}
           {target && (
             <>
@@ -260,7 +271,7 @@ export default function ParkHome() {
 
       {/* 먹거리 · 마켓: 그 구역의 가게와 메뉴(상품)를 한 화면에 다 편다 — 가게를 하나씩 열어 보지 않아도 뭐가 있는지 보인다 */}
       {!term && zone && (
-        <div className={`space-y-3 px-4 ${mode === 'map' ? 'mt-3' : 'mt-1'}`}>
+        <div id="zone" className={`scroll-mt-40 space-y-3 px-4 ${mode === 'map' ? 'mt-3' : 'mt-1'}`}>
           <div className="text-sm font-semibold text-gray-500">{group === 'food' ? '먹거리' : '마켓'} {listed.length}곳 · {group === 'food' ? '메뉴' : '상품'} {listed.reduce((a, r) => a + (r.p.menu?.length ?? 0), 0)}가지</div>
           {listed.map(({ p, live }) => (
             <section key={p.id} className="overflow-hidden rounded-2xl ring-1 ring-gray-200">
