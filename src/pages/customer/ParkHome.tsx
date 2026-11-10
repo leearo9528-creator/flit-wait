@@ -123,6 +123,7 @@ export default function ParkHome() {
   const mode = hasMap ? (target ? 'map' : view) : 'list'
   const meIn = !!me && me.x > -5 && me.x < 105 && me.y > -5 && me.y < 105
   const dist = target && me && fit ? mapMeters(fit, me, { x: Number(target.x), y: Number(target.y) }) : null
+  const zone = group === 'food' || group === 'market'
   const ways = rows.map(r => r.p).filter(p => p.x != null && ['facility', 'info', 'medical', 'parking'].includes(p.kind))
 
   return (
@@ -257,7 +258,38 @@ export default function ParkHome() {
       )}
       {!term && mode === 'map' && event.map_note && <p className="px-4 pt-2 text-xs text-gray-500">{event.map_note}</p>}
 
-      <ul className={`divide-y divide-gray-100 px-4 ${mode === 'map' ? 'mt-2' : 'mt-1'} ${term ? 'hidden' : ''}`}>
+      {/* 먹거리 · 마켓: 그 구역의 가게와 메뉴(상품)를 한 화면에 다 편다 — 가게를 하나씩 열어 보지 않아도 뭐가 있는지 보인다 */}
+      {!term && zone && (
+        <div className={`space-y-3 px-4 ${mode === 'map' ? 'mt-3' : 'mt-1'}`}>
+          <div className="text-sm font-semibold text-gray-500">{group === 'food' ? '먹거리' : '마켓'} {listed.length}곳 · {group === 'food' ? '메뉴' : '상품'} {listed.reduce((a, r) => a + (r.p.menu?.length ?? 0), 0)}가지</div>
+          {listed.map(({ p, live }) => (
+            <section key={p.id} className="overflow-hidden rounded-2xl ring-1 ring-gray-200">
+              <button type="button" onClick={() => open(p)} className="flex w-full items-center gap-3 bg-gray-50 px-4 py-3 text-left active:bg-gray-100">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[17px] font-bold text-gray-900">{p.name}</div>
+                  <div className="truncate text-xs text-gray-500">{[p.description, p.hours].filter(Boolean).join(' · ')}{p.order_open ? <span className="font-semibold text-blue-700">{p.description || p.hours ? ' · ' : ''}{p.order_paused ? '주문 잠시 멈춤' : '앱 주문'}</span> : null}</div>
+                </div>
+                {live && <span className={`shrink-0 text-[15px] font-bold ${TONE_TEXT[live.tone]}`}>{live.text}</span>}
+                <span className="shrink-0 text-gray-400">›</span>
+              </button>
+              {(p.menu?.length ?? 0) > 0
+                ? <ul className="divide-y divide-gray-100 px-4">
+                    {p.menu.map((m, i) => (
+                      <li key={i}>
+                        <button type="button" onClick={() => open(p)} className={`flex w-full items-center gap-3 py-2.5 text-left ${m.sold_out ? 'opacity-50' : ''}`}>
+                          {m.image_url && <img src={m.image_url} alt="" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg bg-gray-100 object-cover" />}
+                          <span className="min-w-0 flex-1"><span className="block truncate text-[15px] font-semibold text-gray-900">{m.name}</span>{m.desc && <span className="block truncate text-xs text-gray-500">{m.desc}</span>}</span>
+                          <span className="shrink-0 text-[15px] tabular-nums text-gray-700">{m.sold_out ? '품절' : m.price}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                : <p className="px-4 py-3 text-sm text-gray-400">{group === 'food' ? '메뉴' : '상품'}는 현장에서 확인해 주세요.</p>}
+            </section>
+          ))}
+        </div>
+      )}
+      <ul className={`divide-y divide-gray-100 px-4 ${mode === 'map' ? 'mt-2' : 'mt-1'} ${term || zone ? 'hidden' : ''}`}>
         {listed.map(({ p, live }) => (
           <li key={p.id}>
             <button type="button" onClick={() => open(p)} className="flex w-full items-center gap-3 py-3.5 text-left active:bg-gray-50">
