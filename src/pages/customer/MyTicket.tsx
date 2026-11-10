@@ -1,13 +1,13 @@
 import { useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { rpc, DEMO } from '../../lib/supabase'
+import { rpc } from '../../lib/supabase'
 import { useAsync, fmtTime, fmtDate, fmtDur, fmtWait, STATUS_LABEL, useTick, LS } from '../../lib/util'
 import { Ticket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import { useEffect } from 'react'
-/** 순서 미루기는 서버 변경(0044)이 들어간 뒤 VITE_DEFER=1 로 연다. 데모에서는 항상 켜져 있다 */
-const DEFER_ENABLED = DEMO || import.meta.env.VITE_DEFER === '1'
+/** 순서 미루기 — 서버 함수 defer_ticket (0044). 급히 꺼야 하면 VITE_DEFER=0. 부스별로는 설정 defer_max=0 */
+const DEFER_ENABLED = import.meta.env.VITE_DEFER !== '0'
 
 export default function MyTicket() {
   const { token = '' } = useParams()
