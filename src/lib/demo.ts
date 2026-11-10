@@ -69,7 +69,7 @@ export function makeDemoFetch(): typeof fetch {
     return { status: 'waiting', ahead: T('tickets').filter(x => x.booth_id === t.booth_id && !x.slot_id && x.ticket_date === t.ticket_date && x.status === 'waiting' && ord(x) < ord(t)).length }
   }
   const liveWait = (b: Row) => b.mode === 'slot' ? 0 : qOf(b).filter(t => t.status === 'waiting').length
-  const staffT = (t: Row) => ({ id: t.id, ticket_no: t.ticket_no, name: t.name, phone_tail: t.phone ? String(t.phone).replace(/\D/g, '').slice(-4) : null, party_size: t.party_size, status: t.status, called_at: t.called_at ?? null, created_at: t.created_at, source: t.source ?? 'online', checked_in_at: t.checked_in_at ?? null, updated_at: t.updated_at ?? t.created_at })
+  const staffT = (t: Row) => ({ id: t.id, ticket_no: t.ticket_no, name: t.name, phone_tail: t.phone ? String(t.phone).replace(/\D/g, '').slice(-4) : null, party_size: t.party_size, status: t.status, called_at: t.called_at ?? null, created_at: t.created_at, source: t.source ?? 'online', checked_in_at: t.checked_in_at ?? null, updated_at: t.updated_at ?? t.created_at, defer_count: t.defer_count ?? 0 })
   const slotsOf = (b: Row) => {
     if (b.mode === 'queue') return []
     const cap = b.slug === 'demo-kids' ? 30 : 60, h0 = new Date(); h0.setMinutes(0, 0, 0)
@@ -152,15 +152,16 @@ export function makeDemoFetch(): typeof fetch {
     join_queue: ({ p_slug, p_name, p_phone, p_party }) => { const b = T('booths').find(x => x.slug === p_slug); if (!b) throw new Error('부스를 찾을 수 없습니다.'); if (b.is_paused) throw new Error('지금은 접수를 받지 않아요.'); const no = b.next_no = (b.next_no ?? 0) + 1; const t = { id: uid(), token: uid(), booth_id: b.id, event_id: b.event_id, slot_id: null, name: p_name, phone: p_phone, party_size: p_party ?? 1, ticket_no: no, status: 'waiting', source: 'online', ticket_date: today(), created_at: now(), called_at: null }; T('tickets').push(t); persist(); return { token: t.token } },
     reserve_slot: ({ p_slot, p_name, p_phone, p_party }) => { const b = T('booths').find(x => x.id === String(p_slot).split('|')[0]); const sl = b && slotsOf(b).find(x => x.id === p_slot); if (!b || !sl) throw new Error('회차를 찾을 수 없습니다.'); if (sl.capacity - sl.reserved < (p_party ?? 1)) throw new Error('남은 자리가 부족해요.'); const t = { id: uid(), token: uid(), booth_id: b.id, slot_id: p_slot, name: p_name, phone: p_phone, party_size: p_party ?? 1, ticket_no: null, status: 'waiting', source: 'online', event_id: b.event_id, ticket_date: today(), created_at: now(), called_at: null }; T('tickets').push(t); persist(); return { token: t.token } },
     get_ticket: ({ p_token }) => { const t = T('tickets').find(x => x.token === p_token); return t ? ticketOut(t) : null },
-    defer_ticket: ({ p_token }) => {
+    defer_ticket: ({ p_token, p_teams }) => {
       const t = T('tickets').find(x => x.token === p_token); if (!t) throw new Error('대기표를 찾을 수 없습니다.')
       if (t.slot_id) throw new Error('회차 예약은 순서를 미룰 수 없어요.')
-      if (!['waiting', 'called'].includes(t.status)) throw new Error('지금은 순서를 미룰 수 없어요.')
-      const b = T('booths').find(x => x.id === t.booth_id) ?? {}, n = Math.max(1, b.settings?.defer_teams ?? 3), mx = b.settings?.defer_max ?? 2
+      if (t.status === 'called') throw new Error('이미 호출돼서 순서를 미룰 수 없어요. 부스 스태프에게 말씀해 주세요.')
+      if (t.status !== 'waiting') throw new Error('지금은 순서를 미룰 수 없어요.')
+      const b = T('booths').find(x => x.id === t.booth_id) ?? {}, mx = b.settings?.defer_max ?? 3
       if ((t.defer_count ?? 0) >= mx) throw new Error(`순서는 ${mx}번까지만 미룰 수 있어요.`)
-      const behind = qOf(b).filter(x => x.status === 'waiting' && x.id !== t.id && (t.status === 'called' || ord(x) > ord(t))).sort((x, y) => ord(x) - ord(y)).slice(0, n)
+      const behind = qOf(b).filter(x => x.status === 'waiting' && x.id !== t.id && ord(x) > ord(t)).sort((x, y) => ord(x) - ord(y)).slice(0, p_teams ?? 100000)
       if (!behind.length) throw new Error('뒤에 기다리는 팀이 없어요.')
-      t.ord = ord(behind[behind.length - 1]) + 0.5; t.status = 'waiting'; t.called_at = null; t.defer_count = (t.defer_count ?? 0) + 1; persist()
+      t.ord = ord(behind[behind.length - 1]) + 0.5; t.defer_count = (t.defer_count ?? 0) + 1; persist()
       return { ok: true, moved: behind.length, ahead: tState(t).ahead, left: mx - t.defer_count }
     },
     cancel_ticket: ({ p_token }) => { const t = T('tickets').find(x => x.token === p_token); if (t) { t.status = 'cancelled'; persist() } return true },

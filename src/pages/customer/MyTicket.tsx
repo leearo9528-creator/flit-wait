@@ -16,6 +16,7 @@ export default function MyTicket() {
   const [err, setErr] = useState<string | null>(null)
   const [note, setNote] = useState<string | null>(null)
   const [noMore, setNoMore] = useState(false)
+  const [pick, setPick] = useState(false)
   useTick(1000)
 
   // 호출되면 진동 + 소리 + 브라우저 알림 (알림톡이 늦을 때 보조)
@@ -67,17 +68,16 @@ export default function MyTicket() {
     try { await rpc('cancel_ticket', { p_token: token }); reload() } catch (e: any) { setErr(e.message) } finally { setBusy(false) }
   }
 
-  // 순서 미루기 — 대기 중이거나 호출됐을 때 몇 팀 뒤로 물러난다 (서버가 팀 수와 횟수를 정한다)
-  async function defer() {
-    if (!confirm('순서를 뒤로 미룰까요?')) return
+  // 순서 미루기 (테이블링 방식) — 호출되기 전에만, 몇 팀 뒤로 갈지 고르거나 맨 뒤로
+  async function defer(teams: number | null) {
     setBusy(true); setErr(null); setNote(null)
     try {
-      const r = await rpc<{ moved: number; left: number }>('defer_ticket', { p_token: token })
-      setNote(`${r.moved}팀 뒤로 미뤘어요.${r.left > 0 ? ` ${r.left}번 더 미룰 수 있어요.` : ' 더는 미룰 수 없어요.'}`); reload()
+      const r = await rpc<{ moved: number; left: number }>('defer_ticket', { p_token: token, p_teams: teams })
+      setNote(`${r.moved}팀 뒤로 미뤘어요.${r.left > 0 ? ` ${r.left}번 더 미룰 수 있어요.` : ' 더는 미룰 수 없어요.'}`); setPick(false); reload()
       if (r.left <= 0) setNoMore(true)
     } catch (e: any) { setErr(e.message); if (/번까지만/.test(e.message)) setNoMore(true) } finally { setBusy(false) }
   }
-  const canDefer = DEFER_ENABLED && !noMore && !isSlot && (t.status === 'waiting' || t.status === 'called')
+  const canDefer = DEFER_ENABLED && !noMore && !isSlot && t.status === 'waiting'
 
   const tone = ({ waiting: 'blue', called: 'amber', checked_in: 'green', done: 'green', no_show: 'red', cancelled: 'gray' } as const)[t.status]
 
@@ -155,7 +155,17 @@ export default function MyTicket() {
 
       {err && <div className="mb-4"><Alert kind="error">{err}</Alert></div>}
       {note && <div className="mb-4"><Alert kind="success">{note}</Alert></div>}
-      {canDefer && <div className="mb-2"><Button onClick={defer} loading={busy}>순서 미루기</Button></div>}
+      {canDefer && !pick && <div className="mb-2"><Button onClick={() => { setPick(true); setErr(null); setNote(null) }}>순서 미루기</Button></div>}
+      {canDefer && pick && (
+        <Card className="mb-3">
+          <div className="mb-3 text-[15px] font-bold text-gray-900">몇 팀 뒤로 갈까요?</div>
+          <div className="grid grid-cols-4 gap-2">
+            {[1, 2, 3, 5].map(n => <button key={n} type="button" disabled={busy} onClick={() => defer(n)} className="h-12 rounded-xl bg-white text-[15px] font-bold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50 disabled:opacity-50">{n}팀 뒤</button>)}
+          </div>
+          <button type="button" disabled={busy} onClick={() => defer(null)} className="mt-2 h-12 w-full rounded-xl bg-gray-900 text-[15px] font-bold text-white active:bg-gray-800 disabled:opacity-50">맨 뒤로</button>
+          <button type="button" onClick={() => setPick(false)} className="mt-3 block w-full text-center text-sm text-gray-500 underline">닫기</button>
+        </Card>
+      )}
       {t.can_cancel && <Button variant="secondary" onClick={cancel} loading={busy}>{isSlot ? '예약 취소' : '대기 취소'}</Button>}
       {!t.can_cancel && isSlot && t.status === 'waiting' && (
         <p className="text-center text-xs text-gray-500">

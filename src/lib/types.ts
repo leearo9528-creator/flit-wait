@@ -123,6 +123,8 @@ export interface StaffTicket {
   source: string
   checked_in_at?: string | null
   updated_at?: string | null
+  /** 손님이 순서를 미룬 횟수 (서버가 내려줄 때만) */
+  defer_count?: number
 }
 
 export interface StaffBoard {

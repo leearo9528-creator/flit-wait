@@ -175,7 +175,7 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
                   <div className="flex items-center gap-3">
                     <div className={`${big ? 'text-5xl' : 'text-4xl'} w-20 font-black tabular-nums`}>{t.ticket_no}</div>
                     <div className="flex-1 min-w-0">
-                      <div className="truncate font-semibold">{t.name}</div>
+                      <div className="truncate font-semibold">{t.name}{!!t.defer_count && <span className="ml-1.5 rounded bg-amber-100 px-1.5 py-0.5 align-middle text-[11px] font-bold text-amber-800">순서 미룸</span>}</div>
                       <div className="text-sm text-gray-500">{t.party_size}명 {t.phone_tail ? `· ${t.phone_tail}` : '· 대리접수'}</div>
                       <div className="text-xs text-gray-400">{fmtTime(t.created_at)} 접수 · {minutesSince(t.created_at)}분</div>
                     </div>
