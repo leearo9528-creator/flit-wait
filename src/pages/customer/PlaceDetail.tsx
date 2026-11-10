@@ -55,6 +55,7 @@ export default function PlaceDetail() {
         <div className="text-sm text-gray-500">{PLACE_KIND_LABEL[p.kind]}{b?.location ? ` · ${b.location}` : ''}{p.hours ? ` · ${p.hours}` : ''}</div>
         <h1 className="mt-0.5 text-2xl font-bold leading-tight text-gray-900">{p.name}</h1>
         {p.description && <p className="mt-2 text-[15px] leading-relaxed text-gray-600">{p.description}</p>}
+        {event.map_image_url && p.x != null && <Link to={`/e/${slug}?to=${p.id}`} className="mt-3 inline-flex h-10 items-center rounded-full bg-white px-4 text-sm font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">가는 길 보기</Link>}
 
         {live && (
           <div className="mt-5 flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-4 ring-1 ring-gray-200">

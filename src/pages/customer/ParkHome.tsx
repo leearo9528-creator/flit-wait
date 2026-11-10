@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { fitMap, mapMeters, fmtMeters, type Fit } from '../../lib/geo'
 import { cachedRpc, rpc, DEMO } from '../../lib/supabase'
 import { useAsync, fmtTime, LS } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
@@ -42,6 +43,41 @@ export default function ParkHome() {
   const [view, setView] = useState<'map' | 'list'>(() => LS.get<'map' | 'list'>(`view:${slug}`) ?? 'map')
   const [picked, setGroup] = useState<Group | null>(null)
   const nav = useNavigate()
+
+  // ── 내 위치 · 가는 길 ──
+  // 내 위치: 폰 GPS 를 그림 지도 좌표로 옮긴다. 장소 2곳 이상에 실제 좌표(위도·경도)가 있어야 맞출 수 있다 (없으면 버튼을 숨긴다).
+  // 가는 길: ?to=<장소 id> — 그 장소를 지도에 띄우고, 내 위치가 있으면 선과 거리를 보여 준다.
+  const [sp, setSp] = useSearchParams()
+  const toId = sp.get('to')
+  const [aspect, setAspect] = useState(0)                      // 지도 그림의 세로/가로
+  const [locOn, setLocOn] = useState(() => { try { return sessionStorage.getItem('loc:on') === '1' } catch { return false } })
+  const [pos, setPos] = useState<{ lat: number; lng: number; acc: number } | null>(null)
+  const [demoMe, setDemoMe] = useState<{ x: number; y: number } | null>(null)
+  const [locErr, setLocErr] = useState<string | null>(null)
+  const turnLoc = (on: boolean) => { setLocOn(on); setLocErr(null); if (!on) { setPos(null); setDemoMe(null) } try { sessionStorage.setItem('loc:on', on ? '1' : '0') } catch { /* 저장소 없음 */ } }
+  useEffect(() => {
+    if (!locOn) return
+    if (DEMO) {   // 데모: 입구 근처를 천천히 걷는 가짜 위치
+      const step = () => setDemoMe({ x: 47 + 4 * Math.sin(Date.now() / 9000), y: 82 + 2 * Math.cos(Date.now() / 7000) })
+      step(); const iv = setInterval(step, 1500); return () => clearInterval(iv)
+    }
+    if (!navigator.geolocation) { setLocErr('이 기기에서는 위치를 쓸 수 없어요.'); turnLoc(false); return }
+    const id = navigator.geolocation.watchPosition(
+      g => { setPos({ lat: g.coords.latitude, lng: g.coords.longitude, acc: g.coords.accuracy }); setLocErr(null) },
+      e => { turnLoc(false); setLocErr(e.code === 1 ? '위치 권한을 허용해 주세요.' : '위치를 찾지 못했어요.') },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 })
+    return () => navigator.geolocation.clearWatch(id)
+  }, [locOn]) // eslint-disable-line
+  const fit: Fit | null = useMemo(() => {
+    if (!(aspect > 0)) return null
+    if (DEMO) return { aspect, mPerUnit: 2.2, toMap: () => ({ x: 50, y: 50 }) }   // 데모 지도는 가로 220m 로 친다
+    return fitMap((data?.places ?? []).filter(p => p.x != null && p.y != null && p.lat != null && p.lng != null).map(p => ({ x: Number(p.x), y: Number(p.y), lat: Number(p.lat), lng: Number(p.lng) })), aspect)
+  }, [data?.places, aspect])
+  const me = DEMO ? demoMe : fit && pos ? fit.toMap(pos.lat, pos.lng) : null
+  // 가는 길을 열면 위치도 같이 켠다 (맞출 수 있을 때만)
+  useEffect(() => { if (toId && fit && !locOn) turnLoc(true) }, [toId, !!fit]) // eslint-disable-line
+  const clearTo = () => { sp.delete('to'); setSp(sp, { replace: true }) }
+  const goTo = (id: string) => { sp.set('to', id); setSp(sp, { replace: true }); window.scrollTo({ top: 0, behavior: 'smooth' }) }
   const pickView = (v: 'map' | 'list') => { setView(v); LS.set(`view:${slug}`, v) }
 
   const rows = useMemo(() => {
@@ -72,7 +108,11 @@ export default function ParkHome() {
   const ev2 = sched.data?.event
   const hasMap = !!event.map_image_url
   const active = mine.filter(isActive)
-  const mode = hasMap ? view : 'list'
+  const target = toId ? rows.find(r => r.p.id === toId && r.p.x != null)?.p ?? null : null
+  const mode = hasMap ? (target ? 'map' : view) : 'list'
+  const meIn = !!me && me.x > -5 && me.x < 105 && me.y > -5 && me.y < 105
+  const dist = target && me && fit ? mapMeters(fit, me, { x: Number(target.x), y: Number(target.y) }) : null
+  const ways = rows.map(r => r.p).filter(p => p.x != null && ['facility', 'info', 'medical', 'parking'].includes(p.kind))
 
   return (
     <div className="mx-auto min-h-dvh max-w-md bg-white pb-24">
@@ -108,6 +148,14 @@ export default function ParkHome() {
           </Link>
         ))}
         {active.length > 3 && <Link to={`/e/${slug}/my`} className="block text-center text-sm font-semibold text-gray-600 underline">내 대기 {active.length}건 모두 보기</Link>}
+        {target && (
+          <div className="flex items-center gap-2 rounded-xl bg-gray-900 px-3 py-3 text-white">
+            <span className="min-w-0 flex-1 truncate text-[15px] font-bold">{target.name}</span>
+            {dist != null && <span className="shrink-0 text-[15px] font-bold tabular-nums">{fmtMeters(dist)}{dist >= 15 ? ` · 걸어서 ${Math.max(1, Math.round(dist / 70))}분` : ''}</span>}
+            <button type="button" onClick={clearTo} aria-label="가는 길 닫기" className="-mr-1 shrink-0 px-2 text-lg leading-none opacity-80">✕</button>
+          </div>
+        )}
+        {locErr && <Alert kind="warn">{locErr}</Alert>}
         {event.status !== 'open' && <Alert kind="info">지금은 운영 시간이 아니에요.</Alert>}
         {event.notice && <Alert kind="warn">{event.notice}</Alert>}
         {urgent && (
@@ -126,8 +174,43 @@ export default function ParkHome() {
 
       {mode === 'map' && (
         <div className="relative mt-3">
-          <img src={event.map_image_url!} alt={`${event.name} 배치도`} className="block w-full select-none" draggable={false} />
-          {shown.filter(({ p }) => p.x != null && p.y != null).map(({ p, live }) => <Pin key={p.id} p={p} live={live} onClick={() => open(p)} />)}
+          <img src={event.map_image_url!} alt={`${event.name} 배치도`} className="block w-full select-none" draggable={false}
+            onLoad={e => { const im = e.currentTarget; if (im.naturalWidth) setAspect(im.naturalHeight / im.naturalWidth) }} />
+          {/* 내 위치 → 목적지 선 */}
+          {target && me && meIn && (
+            <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
+              <line x1={`${me.x}%`} y1={`${me.y}%`} x2={`${target.x}%`} y2={`${target.y}%`} stroke="#fff" strokeWidth="7" strokeLinecap="round" />
+              <line x1={`${me.x}%`} y1={`${me.y}%`} x2={`${target.x}%`} y2={`${target.y}%`} stroke="#1d4ed8" strokeWidth="4" strokeLinecap="round" strokeDasharray="2 9" />
+            </svg>
+          )}
+          {shown.filter(({ p }) => p.x != null && p.y != null && p.id !== target?.id).map(({ p, live }) => <Pin key={p.id} p={p} live={live} onClick={() => open(p)} />)}
+          {target && (
+            <>
+              <span className="pointer-events-none absolute h-10 w-10 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full bg-blue-600/40" style={{ left: `${target.x}%`, top: `${target.y}%` }} />
+              <Pin p={target} live={liveOf(target)} onClick={() => open(target)} />
+            </>
+          )}
+          {me && meIn && (
+            <span className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${me.x}%`, top: `${me.y}%` }} aria-label="내 위치">
+              <span className="block h-4 w-4 rounded-full bg-blue-600 shadow ring-[3px] ring-white" />
+            </span>
+          )}
+          {fit && (
+            <button type="button" onClick={() => turnLoc(!locOn)} aria-pressed={locOn} aria-label="내 위치"
+              className={`absolute bottom-3 right-3 flex h-11 w-11 items-center justify-center rounded-full shadow-md ring-1 active:scale-95 ${locOn ? 'bg-blue-700 text-white ring-blue-700' : 'bg-white text-gray-800 ring-gray-300'}`}>
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3.2" /><circle cx="12" cy="12" r="7.5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>
+            </button>
+          )}
+        </div>
+      )}
+      {mode === 'map' && me && !meIn && locOn && <p className="px-4 pt-2 text-sm text-gray-600">지금은 행사장 밖에 계세요.</p>}
+      {mode === 'map' && ways.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto px-4 pt-3 [scrollbar-width:none]">
+          <span className="shrink-0 text-sm font-semibold text-gray-500">가는 길</span>
+          {ways.map(p => (
+            <button key={p.id} type="button" onClick={() => (toId === p.id ? clearTo() : goTo(p.id))}
+              className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 ${toId === p.id ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 active:bg-gray-50'}`}>{p.name.split(' · ')[0]}</button>
+          ))}
         </div>
       )}
       {mode === 'map' && event.map_note && <p className="px-4 pt-2 text-xs text-gray-500">{event.map_note}</p>}

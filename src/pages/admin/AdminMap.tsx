@@ -178,7 +178,14 @@ function PlaceEditor({ p, booths, selected, onSelect, onSave, onRemove }: { p: P
           </Field>
           <div className="md:col-span-2"><Field label="설명 한 줄"><Input value={f.description} onChange={x => setF({ ...f, description: x.target.value })} placeholder="예: 떡볶이·어묵 · 현금 가능" /></Field></div>
           <Field label="운영 시간"><Input value={f.hours} onChange={x => setF({ ...f, hours: x.target.value })} placeholder="예: 11:00~20:00" /></Field>
-          <Field label="위도 (길찾기용, 선택)"><Input value={f.lat} onChange={x => setF({ ...f, lat: x.target.value as any })} inputMode="decimal" /></Field>
+          <div className="md:col-span-3">
+            <button type="button" className="rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-800 active:bg-gray-200"
+              onClick={() => navigator.geolocation?.getCurrentPosition(g => setF(v => ({ ...v, lat: Number(g.coords.latitude.toFixed(6)) as any, lng: Number(g.coords.longitude.toFixed(6)) as any })), () => alert('위치를 가져오지 못했어요. 위치 권한을 확인해 주세요.'), { enableHighAccuracy: true, timeout: 15000 })}>
+              지금 서 있는 곳을 이 장소 좌표로
+            </button>
+            <p className="mt-1 text-xs text-gray-500">장소 2곳 이상에 좌표가 있으면 손님 지도에 '내 위치'와 가는 길 거리가 나와요. 서로 멀리 떨어진 곳(예: 입구와 맨 안쪽)에서 찍을수록 정확해요.</p>
+          </div>
+          <Field label="위도"><Input value={f.lat} onChange={x => setF({ ...f, lat: x.target.value as any })} inputMode="decimal" /></Field>
           <Field label="경도"><Input value={f.lng} onChange={x => setF({ ...f, lng: x.target.value as any })} inputMode="decimal" /></Field>
           <Field label="정렬"><Input type="number" value={f.sort_order} onChange={x => setF({ ...f, sort_order: +x.target.value })} /></Field>
           {(f.kind === 'food' || f.kind === 'market') && (
