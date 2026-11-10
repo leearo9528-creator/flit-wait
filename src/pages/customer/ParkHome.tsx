@@ -20,8 +20,9 @@ const groupOf = (k: PlaceKind): Group => (k === 'booth' || k === 'food' || k ===
 
 type Tone = 'go' | 'mid' | 'busy' | 'time' | 'off'
 type Live = { text: string; tone: Tone; sort: number }
-const TONE_PIN: Record<Tone, string> = { go: 'bg-green-600 text-white', mid: 'bg-amber-500 text-white', busy: 'bg-red-600 text-white', time: 'bg-gray-900 text-white', off: 'bg-gray-300 text-gray-700' }
-const TONE_TEXT: Record<Tone, string> = { go: 'text-green-700', mid: 'text-amber-600', busy: 'text-red-600', time: 'text-gray-900', off: 'text-gray-400' }
+// 색은 셋만 쓴다 — 바로 입장·여유 = 코발트, 보통 = 검정, 오래 기다림·혼잡 = 빨강. (플릿 사이트와 같은 오프화이트 + 코발트 톤)
+const TONE_PIN: Record<Tone, string> = { go: 'bg-blue-700 text-white', mid: 'bg-gray-900 text-white', busy: 'bg-red-600 text-white', time: 'bg-gray-900 text-white', off: 'bg-gray-300 text-gray-600' }
+const TONE_TEXT: Record<Tone, string> = { go: 'text-blue-700', mid: 'text-gray-900', busy: 'text-red-600', time: 'text-gray-900', off: 'text-gray-400' }
 
 /** 장소 한 곳의 '지금' 한 줄. 예상 대기(분)를 서버가 주면 분으로, 없으면 팀 수로 보여 준다 */
 function liveOf(p: GuidePlace): Live | null {
@@ -119,7 +120,7 @@ export default function ParkHome() {
         )}
         {(livePg || nextPg) && (
           <Link to={`/e/${slug}/schedule`} className="flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2.5 ring-1 ring-gray-200">
-            <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${livePg ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}>{livePg ? '지금' : fmtTime(nextPg!.starts_at)}</span>
+            <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${livePg ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-700'}`}>{livePg ? '지금' : fmtTime(nextPg!.starts_at)}</span>
             <span className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">{(livePg ?? nextPg)!.title}{(livePg ?? nextPg)!.place ? <span className="font-normal text-gray-500"> · {(livePg ?? nextPg)!.place!.name}</span> : null}</span>
             <span className="shrink-0 text-xs text-gray-400">일정 ›</span>
           </Link>
@@ -169,7 +170,6 @@ export default function ParkHome() {
   )
 }
 
-const KIND_DOT: Record<PlaceKind, string> = { booth: 'bg-orange-500', food: 'bg-red-500', market: 'bg-amber-500', stage: 'bg-purple-500', facility: 'bg-sky-500', info: 'bg-gray-800', parking: 'bg-blue-700', shuttle: 'bg-teal-600', medical: 'bg-rose-600', other: 'bg-gray-500' }
 const KIND_INITIAL: Record<PlaceKind, string> = { booth: '체', food: '식', market: '마', stage: '무', facility: '편', info: '안', parking: 'P', shuttle: '셔', medical: '+', other: '·' }
 
 /** 대기가 있는 곳은 '시간 알약' 핀, 그 밖은 작은 종류 점. 고르면 이름표가 붙는다 */
@@ -182,7 +182,7 @@ function Pin({ p, live, on, dim, onClick }: { p: GuidePlace; live: Live | null; 
         {on && <span className="mb-1 whitespace-nowrap rounded-md bg-white px-2 py-0.5 text-[11px] font-semibold text-gray-900 shadow ring-1 ring-gray-200">{p.name}</span>}
         {pill
           ? <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[13px] font-bold tabular-nums shadow-md ring-2 ring-white ${TONE_PIN[live!.tone]}`}>{live!.text}</span>
-          : <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold text-white shadow ring-2 ring-white ${KIND_DOT[p.kind]}`}>{KIND_INITIAL[p.kind]}</span>}
+          : <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[11px] font-bold text-gray-700 shadow ring-1 ring-gray-300">{KIND_INITIAL[p.kind]}</span>}
         <span className="-mt-px h-0 w-0 border-x-[5px] border-t-[6px] border-x-transparent border-t-white" />
       </span>
     </button>
