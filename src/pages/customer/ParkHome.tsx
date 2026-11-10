@@ -142,9 +142,13 @@ export default function ParkHome() {
   )
 }
 
-const KIND_INITIAL: Record<PlaceKind, string> = { booth: '체', food: '식', market: '마', stage: '무', facility: '편', info: '안', parking: 'P', shuttle: '셔', medical: '+', other: '·' }
+/** 핀에 적는 이름 — ' · ' 앞부분만, 길면 8자에서 자른다 */
+function pinName(name: string) {
+  const n = name.split(' · ')[0].trim()
+  return n.length > 8 ? n.slice(0, 7) + '…' : n
+}
 
-/** 대기가 있는 곳은 '시간 알약' 핀, 그 밖은 작은 종류 점. 누르면 상세 화면으로 간다 */
+/** 핀마다 이름을 적는다. 대기가 있는 곳은 '이름 + 시간' 색 알약, 그 밖은 흰 이름표. 누르면 상세 화면으로 간다 */
 function Pin({ p, live, onClick }: { p: GuidePlace; live: Live | null; onClick: () => void }) {
   const pill = !!p.booth && !!live
   return (
@@ -152,8 +156,11 @@ function Pin({ p, live, onClick }: { p: GuidePlace; live: Live | null; onClick: 
       className="absolute -translate-x-1/2 -translate-y-full transition active:scale-95" style={{ left: `${p.x}%`, top: `${p.y}%` }}>
       <span className="flex flex-col items-center">
         {pill
-          ? <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[13px] font-bold tabular-nums shadow-md ring-2 ring-white ${TONE_PIN[live!.tone]}`}>{live!.text}</span>
-          : <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[11px] font-bold text-gray-700 shadow ring-1 ring-gray-300">{KIND_INITIAL[p.kind]}</span>}
+          ? <span className={`flex items-baseline gap-1 whitespace-nowrap rounded-full px-2.5 py-1 shadow-md ring-2 ring-white ${TONE_PIN[live!.tone]}`}>
+              <span className="text-[11px] font-medium opacity-90">{pinName(p.name)}</span>
+              <span className="text-[13px] font-bold tabular-nums">{live!.text}</span>
+            </span>
+          : <span className="whitespace-nowrap rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-gray-700 shadow ring-1 ring-gray-300">{pinName(p.name)}</span>}
         <span className="-mt-px h-0 w-0 border-x-[5px] border-t-[6px] border-x-transparent border-t-white" />
       </span>
     </button>
