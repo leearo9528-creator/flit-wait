@@ -21,7 +21,7 @@ const groupOf = (k: PlaceKind): Group => (k === 'booth' || k === 'food' || k ===
 type Tone = 'go' | 'mid' | 'busy' | 'time' | 'off'
 type Live = { text: string; tone: Tone; sort: number }
 // 색은 셋만 쓴다 — 바로 입장·여유 = 코발트, 보통 = 검정, 오래 기다림·혼잡 = 빨강. (플릿 사이트와 같은 오프화이트 + 코발트 톤)
-const TONE_PIN: Record<Tone, string> = { go: 'bg-blue-700 text-white', mid: 'bg-gray-900 text-white', busy: 'bg-red-600 text-white', time: 'bg-gray-900 text-white', off: 'bg-gray-300 text-gray-600' }
+const TONE_PIN: Record<Tone, string> = { go: 'bg-blue-700 text-white', mid: 'bg-gray-900 text-white', busy: 'bg-red-600 text-white', time: 'bg-white text-gray-900', off: 'bg-gray-200 text-gray-500' }
 const TONE_TEXT: Record<Tone, string> = { go: 'text-blue-700', mid: 'text-gray-900', busy: 'text-red-600', time: 'text-gray-900', off: 'text-gray-400' }
 
 /** 장소 한 곳의 '지금' 한 줄. 예상 대기(분)를 서버가 주면 분으로, 없으면 팀 수로 보여 준다 */

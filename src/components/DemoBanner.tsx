@@ -5,7 +5,7 @@ import { DEMO_KEY } from '../lib/demo'
 export default function DemoBanner() {
   if (!DEMO) return null
   return (
-    <div className="sticky top-0 z-40 flex items-center justify-between bg-gray-900 px-3 py-1.5 text-[11px] font-semibold text-white">
+    <div className="sticky top-0 z-40 flex items-center justify-between border-b border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-800">
       <span>데모 · 숫자는 가상이에요</span>
       <span className="flex gap-2.5">
         <a href="/e/demo" className="underline">손님 화면</a>
