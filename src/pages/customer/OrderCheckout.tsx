@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { cachedRpc, rpc } from '../../lib/supabase'
 import { useAsync, fmtPhone, me } from '../../lib/util'
 import { Alert, Button, Field, Input, Spinner } from '../../components/ui'
-import KakaoStart from '../../components/KakaoStart'
+import Who from '../../components/Who'
 import { useCustomer } from '../../lib/customer'
 import type { EventGuide } from '../../lib/types'
 import { cart, cartLines, cartTotal, cartCount, rememberOrder, won, type Cart } from '../../lib/orders'
@@ -44,7 +44,7 @@ export default function OrderCheckout() {
     setErr(null); setBusy(true)
     try {
       const r = await rpc<{ token: string }>('place_order', { p_place: p!.id, p_name: name, p_phone: phone, p_items: lines.map(l => ({ name: l.name, qty: l.qty })), p_consent: consent, p_note: note || null })
-      me.set({ ...me.get(), name: name.trim(), phone })
+      me.set({ name: name.trim(), phone, agreed: true })
       rememberOrder(r.token)
       cart.clear(p!.id)
       nav(`/o/${r.token}`, { replace: true })
@@ -84,16 +84,11 @@ export default function OrderCheckout() {
           </div>
 
           <div className="space-y-3">
-            <KakaoStart cust={cust} />
-            <Field label="받는 분 이름"><Input value={name} onChange={e => setName(e.target.value)} maxLength={20} required autoComplete="name" /></Field>
-            <Field label="휴대폰번호" hint="가게에서 주문을 확인할 때만 써요"><Input value={phone} onChange={e => setPhone(fmtPhone(e.target.value.replace(/\D/g, '')))} inputMode="numeric" placeholder="010-0000-0000" required autoComplete="tel" /></Field>
+            <Who name={name} phone={phone} setName={setName} setPhone={setPhone} consent={consent} setConsent={setConsent} cust={cust} phoneHint="가게에서 주문을 확인할 때만 써요"
+              privacy="주문 확인을 위해 이름·휴대폰번호를 수집·이용해요. 가게와 운영사(플릿)만 보고, 행사가 끝난 뒤 보존 기간이 지나면 지워요." />
             <Field label="가게에 남길 말 (선택)"><Input value={note} onChange={e => setNote(e.target.value)} maxLength={80} placeholder="예: 덜 맵게" /></Field>
           </div>
 
-          <label className="flex items-start gap-2.5 text-sm text-gray-700">
-            <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 rounded border-gray-300" />
-            <span>주문 확인을 위한 이름·휴대폰번호 수집·이용에 동의해요. 가게와 운영사(플릿)만 보고, 행사가 끝난 뒤 보존 기간이 지나면 지워요.</span>
-          </label>
           {err && <Alert kind="error">{err}</Alert>}
           <Button type="submit" size="lg" loading={busy} disabled={!consent || !p.order_open || !!p.order_paused} className="w-full">{won(total)} 주문하기</Button>
         </form>

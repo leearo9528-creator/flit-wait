@@ -6,7 +6,7 @@ import { BoothSummary } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
 import CustomerNav from '../../components/CustomerNav'
-import KakaoStart from '../../components/KakaoStart'
+import Who from '../../components/Who'
 import { useCustomer } from '../../lib/customer'
 import { queueWindowState, kstYmd } from '../../components/BoothCard'
 
@@ -58,7 +58,7 @@ export default function QueueJoin() {
     setErr(null); setBusy(true)
     try {
       const r = await rpc<{ token: string }>('join_queue', { p_slug: slug, p_name: name, p_phone: phone, p_party: party, p_consent: consent })
-      me.set({ name, phone, party })
+      me.set({ name, phone, party, agreed: true })
       if (cust.loggedIn) cust.save({ name, phone, party, marketing_ok: cust.profile?.marketing_ok ?? false }).catch(() => {})
       if (existing?.token) LS.set(`ticket:${slug}:${existing.token.slice(0, 8)}`, existing)   // 앞서 받은 표도 '내 대기'에 남긴다
       LS.set(`ticket:${slug}`, { token: r.token, slug, at: Date.now() })
@@ -102,23 +102,10 @@ export default function QueueJoin() {
       {/* 접수 시간대 밖(오픈 전·마감 후)에는 폼을 그대로 두고 반투명 회색 박스로 덮는다 */}
       {!booth.is_paused && !(hasExisting && !again) && <div className="relative"><Card>
         <form onSubmit={submit} className="space-y-4">
-          <KakaoStart cust={cust} note="다음부터 이름·번호를 안 적어도 돼요" />
-          <Field label="이름 (대표자)">
-            <Input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" required maxLength={20} autoComplete="name" />
-          </Field>
-          <Field label="휴대폰번호" hint="호출 알림을 카카오 알림톡으로 보내드립니다.">
-            <Input value={phone} onChange={e => setPhone(fmtPhone(e.target.value))} placeholder="010-0000-0000" inputMode="numeric" required autoComplete="tel" />
-          </Field>
+          <Who name={name} phone={phone} setName={setName} setPhone={setPhone} consent={consent} setConsent={setConsent} privacy={event.privacy_text} cust={cust} phoneHint="호출 알림을 카카오 알림톡으로 보내드립니다." />
           <Field label={`인원 (최대 ${maxParty}명)`}>
             <Stepper value={party} onChange={setParty} min={1} max={maxParty} />
           </Field>
-          <label className="flex items-start gap-3 rounded-xl bg-gray-50 p-3 text-sm">
-            <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 h-5 w-5 rounded" required />
-            <span className="text-gray-700">
-              <span className="font-semibold">개인정보 수집·이용 동의 (필수)</span><br />
-              <span className="text-xs text-gray-500">{event.privacy_text}</span>
-            </span>
-          </label>
           {err && <Alert kind="error">{err}</Alert>}
           <Button type="submit" size="lg" loading={busy} disabled={closed || beforeStart || booth.is_paused || windowBlocked || !consent}>
             {booth.is_paused ? (booth.settings.pause_mode === 'closed_today' ? '오늘 접수 마감' : '일시 중단') : windowBlocked ? (ws === 'before_open' ? '접수 예정' : '오늘 접수 마감') : closed ? '운영 시간이 아닙니다' : beforeStart ? '행사 시작 전' : '대기 접수하기'}

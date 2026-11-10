@@ -6,7 +6,7 @@ import { BoothSummary, SlotPublic } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Stepper, Alert, Spinner, Badge } from '../../components/ui'
 import BoothHeader from '../../components/BoothHeader'
 import CustomerNav from '../../components/CustomerNav'
-import KakaoStart from '../../components/KakaoStart'
+import Who from '../../components/Who'
 import { useMyTickets, isActive } from '../../lib/myTickets'
 import { useCustomer } from '../../lib/customer'
 import { openAtFor, kstYmd } from '../../components/BoothCard'
@@ -81,7 +81,7 @@ export default function Reserve() {
     setErr(null); setBusy(true)
     try {
       const r = await rpc<{ token: string }>('reserve_slot', { p_slot: slotId, p_name: name, p_phone: phone, p_party: party, p_consent: consent })
-      me.set({ name, phone, party })
+      me.set({ name, phone, party, agreed: true })
       if (cust.loggedIn) cust.save({ name, phone, party, marketing_ok: cust.profile?.marketing_ok ?? false }).catch(() => {})
       if (existing?.token) LS.set(`resv:${slug}:${existing.token.slice(0, 8)}`, existing)   // 앞서 받은 표도 '내 대기'에 남긴다
       LS.set(`resv:${slug}`, { token: r.token, at: Date.now() })
@@ -137,22 +137,14 @@ export default function Reserve() {
       <Card>
         <div className="mb-3 text-sm font-semibold text-gray-700">3. 예약자 정보</div>
         <form onSubmit={submit} className="space-y-4">
-          <KakaoStart cust={cust} note="다음부터 이름·번호를 안 적어도 돼요" />
           {selected && (
             <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 text-sm">
               <span>{fmtDate(selected.starts_at)} {fmtTime(selected.starts_at)} 회차</span>
               <Badge tone="green">잔여 {selected.capacity - selected.reserved}석</Badge>
             </div>
           )}
-          <Field label="이름 (대표자)"><Input value={name} onChange={e => setName(e.target.value)} placeholder="홍길동" required maxLength={20} autoComplete="name" /></Field>
-          <Field label="휴대폰번호" hint="예약 확정·리마인드 알림을 카카오 알림톡(또는 문자)으로 보내드립니다.">
-            <Input value={phone} onChange={e => setPhone(fmtPhone(e.target.value))} placeholder="010-0000-0000" inputMode="numeric" required autoComplete="tel" />
-          </Field>
+          <Who name={name} phone={phone} setName={setName} setPhone={setPhone} consent={consent} setConsent={setConsent} privacy={event.privacy_text} cust={cust} phoneHint="예약 확정·리마인드 알림을 카카오 알림톡(또는 문자)으로 보내드립니다." />
           <Field label={`인원 (최대 ${maxParty}명)`}><Stepper value={party} onChange={setParty} min={1} max={Math.min(maxParty, selected ? selected.capacity - selected.reserved : maxParty)} /></Field>
-          <label className="flex items-start gap-3 rounded-xl bg-gray-50 p-3 text-sm">
-            <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 h-5 w-5 rounded" required />
-            <span className="text-gray-700"><span className="font-semibold">개인정보 수집·이용 동의 (필수)</span><br /><span className="text-xs text-gray-500">{event.privacy_text}</span></span>
-          </label>
           <p className="text-xs text-gray-500">체험 시작 {booth.settings.noshow_after_start_min ?? 10}분이 지나도 도착하지 않으면 예약이 취소되고 현장 대기자에게 자리가 넘어갑니다. {(booth.settings.cancel_until_before_min ?? 120) > 0 ? `취소는 시작 ${fmtDur(booth.settings.cancel_until_before_min ?? 120)} 전까지 가능합니다.` : '시작 전까지 취소할 수 있어요.'}</p>
           {err && <Alert kind="error">{err}</Alert>}
           {clash && <Alert kind="warn">같은 시간에 {clash.booth} 예약이 있어요. 나눠서 이용하실 때만 예약해 주세요.</Alert>}
