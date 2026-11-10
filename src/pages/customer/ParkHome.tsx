@@ -92,7 +92,6 @@ export default function ParkHome() {
         <div className="flex items-center gap-3 px-4 pt-3">
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-[19px] font-bold leading-tight text-gray-900">{event.name}</h1>
-            <p className="text-xs text-gray-500">지금 대기 현황 · 자동으로 갱신돼요</p>
           </div>
           {hasMap && (
             <div className="flex shrink-0 rounded-full bg-gray-100 p-0.5 text-sm font-semibold">

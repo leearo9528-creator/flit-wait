@@ -145,7 +145,7 @@ export default function MyTicket() {
         </p>
       )}
 
-      <p className="mt-6 text-center text-xs text-gray-400">이 화면은 자동으로 갱신됩니다 · 운영 플릿 (FLIT)</p>
+      <p className="mt-6 text-center text-xs text-gray-400">운영 플릿 (FLIT)</p>
       <CustomerNav slug={(t.event as any).slug} active="my" />
     </Page>
   )

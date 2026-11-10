@@ -106,7 +106,7 @@ export default function EventHome() {
         </ul>
         {list.length === 0 && <p className="py-16 text-center text-sm text-gray-400">표시할 체험부스가 없어요.</p>}
 
-        <p className="pt-6 text-center text-xs text-gray-400">이 화면은 자동으로 갱신됩니다 · 운영 플릿 (FLIT)</p>
+        <p className="pt-6 text-center text-xs text-gray-400">운영 플릿 (FLIT)</p>
       </div>
       <CustomerNav slug={event.slug} active="home" />
     </div>

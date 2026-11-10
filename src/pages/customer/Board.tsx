@@ -83,7 +83,7 @@ export default function Board() {
           </div>
         ))}
       </div>
-      <footer className="mt-10 text-center text-sm text-gray-600">운영 · 플릿 (FLIT) · 자동 갱신</footer>
+      <footer className="mt-10 text-center text-sm text-gray-600">운영 · 플릿 (FLIT)</footer>
     </div>
   )
 }
