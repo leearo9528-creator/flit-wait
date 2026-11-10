@@ -59,7 +59,7 @@ export async function seedDemoEvent(eventId: string) {
   ])
   const spots = ['빙어잡이', '석고방향제', '핸드메이드 마켓', '겨울 간식 마켓', '메인 무대']
   await supabase.from('stamp_spots').insert(spots.map((n, i) => ({ event_id: eventId, place_id: placeId(n), name: n, sort_order: (i + 1) * 10 })))
-  await supabase.from('draws').insert([{ event_id: eventId, title: '윈터 럭키드로우', prize: '지역 특산물 세트 × 5명', description: '스탬프 3개 이상 모으면 응모 가능', draw_at: at(3), winners_count: 5, require_stamp: true }])
+  await supabase.from('draws').insert([{ event_id: eventId, title: '윈터 럭키드로우', prize: '지역 특산물 세트', description: '추첨은 메인 무대에서 해요', draw_at: at(3), winners_count: 5, require_stamp: true }])
   await supabase.from('surveys').upsert({ event_id: eventId, enabled: true, title: '오늘 어떠셨어요?', thanks: null, questions: [
     { id: 'q1', type: 'rating', label: '전체적으로 어떠셨어요?' },
     { id: 'q2', type: 'choice', label: '가장 좋았던 건?', options: ['눈썰매', '체험', '먹거리', '마켓', '공연'] },

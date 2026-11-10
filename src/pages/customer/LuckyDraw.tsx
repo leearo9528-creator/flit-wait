@@ -33,7 +33,7 @@ export default function LuckyDraw() {
 }
 
 function DrawCard({ d, slug, token, onChanged }: { d: DrawPublic; slug: string; token: string; onChanged: () => void }) {
-  const [f, setF] = useState({ name: LS.get<string>('draw:name') ?? me.get().name, phone: LS.get<string>('draw:phone') ?? me.get().phone })
+  const [f, setF] = useState({ name: LS.get<string>('draw:name') ?? me.get().name, phone: fmtPhone(LS.get<string>('draw:phone') ?? me.get().phone) })
   const [err, setErr] = useState<string | null>(null); const [busy, setBusy] = useState(false)
   const closed = d.status !== 'open' || (d.draw_at != null && new Date(d.draw_at).getTime() < Date.now())
   async function submit(e: React.FormEvent) {

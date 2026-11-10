@@ -67,11 +67,11 @@ export default function MyTicket() {
 
   return (
     <Page title={t.booth.name} sub={t.event.name}>
-      {(t.event as any).slug && <Link to={`/e/${(t.event as any).slug}/booths`} className="-mt-3 mb-3 inline-block text-sm font-semibold text-gray-600 underline">← 체험부스 전체</Link>}
+      {(t.event as any).slug && <Link to={`/e/${(t.event as any).slug}`} className="-mt-3 mb-3 inline-block text-sm font-semibold text-gray-600 underline">← 지도로</Link>}
       {t.event.notice && <div className="mb-4"><Alert kind="warn">{t.event.notice}</Alert></div>}
 
       <Card className="mb-4 text-center">
-        <div className="mb-2"><Badge tone={tone}>{STATUS_LABEL[t.status]}</Badge></div>
+        <div className="mb-2"><Badge tone={tone}>{isSlot && t.status === 'waiting' ? '예약 완료' : STATUS_LABEL[t.status]}</Badge></div>
 
         {(t.status === 'checked_in' || t.status === 'done') && (
           <div className="mb-4 rounded-xl bg-green-50 py-4 ring-1 ring-green-200">

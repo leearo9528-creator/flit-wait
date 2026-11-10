@@ -47,7 +47,7 @@ export default function MyTickets() {
         <Link key={r.token} to={`/t/${r.token}`} className="block rounded-xl bg-white p-4 ring-1 ring-gray-200 active:bg-gray-50">
           <div className="flex items-center justify-between">
             <div className="font-bold">{r.booth}</div>
-            <Badge tone={tone(r.status)}>{STATUS_LABEL[r.status] ?? r.status}</Badge>
+            <Badge tone={tone(r.status)}>{r.slot_at && r.status === 'waiting' ? '예약 완료' : STATUS_LABEL[r.status] ?? r.status}</Badge>
           </div>
           <div className="mt-1 text-sm text-gray-500">{r.slot_at ? `예약 ${fmtDateTime(r.slot_at)}` : `대기번호 ${r.ticket_no}번 · ${fmtDateTime(r.created_at)} 접수`}</div>
         </Link>
