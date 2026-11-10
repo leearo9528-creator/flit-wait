@@ -18,6 +18,7 @@ interface Report {
  */
 export default function AdminReport({ eventId }: { eventId: string }) {
   const { data: r, error, loading } = useAsync<Report>(async () => { const { data, error } = await supabase.rpc('admin_event_report', { p_event: eventId }); if (error) throw error; return data }, [eventId])
+  const ord = useAsync<any>(async () => { const { data } = await supabase.rpc('admin_order_report', { p_event: eventId }); return data }, [eventId])
   const extra = useAsync<any>(async () => { const { data } = await supabase.rpc('admin_event_report_extra', { p_event: eventId }); return data }, [eventId])
   if (loading) return <Spinner />
   if (error || !r) return <Alert kind="error">{error ?? '권한이 없어요.'}</Alert>
@@ -63,6 +64,24 @@ export default function AdminReport({ eventId }: { eventId: string }) {
             <Bars rows={v.by_day.map(d => ({ label: fmtDate(`${d.day}T00:00:00+09:00`), v: d.count }))} />
           </Section>
         </div>
+
+        {ord.data && ord.data.orders > 0 && (() => { const o = ord.data, won = (n: number) => `${Number(n).toLocaleString('ko-KR')}원`; return (
+          <Section title="주문 · 매출 (앱 주문, 전달 완료 기준)">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <Kpi label="앱 주문" v={o.orders} sub={`전달 ${o.picked} · 취소 ${o.cancelled} (${pct(o.cancelled, o.orders)})`} />
+              <Kpi label="앱 주문 매출" v={won(o.sales)} sub={o.picked ? `건당 ${won(Math.round(o.sales / o.picked))}` : undefined} />
+              <Kpi label="평균 준비 시간" v={o.avg_ready_min != null ? `${o.avg_ready_min}분` : '–'} sub="주문→준비 완료" />
+              <Kpi label="주문 받은 가게" v={o.by_place.length} />
+            </div>
+            <table className="mt-3 w-full text-sm">
+              <thead><tr className="border-b text-left text-xs text-gray-500"><th className="py-1.5">가게</th><th className="text-right">주문</th><th className="text-right">전달</th><th className="text-right">취소</th><th className="text-right">준비(분)</th><th className="text-right">매출</th></tr></thead>
+              <tbody>{o.by_place.map((p: any) => <tr key={p.name} className="border-b border-gray-100"><td className="py-1.5 font-medium">{p.name}</td><td className="text-right tabular-nums">{p.orders}</td><td className="text-right tabular-nums">{p.picked}</td><td className="text-right tabular-nums">{p.cancelled}</td><td className="text-right tabular-nums">{p.avg_ready_min ?? '–'}</td><td className="text-right font-semibold tabular-nums">{won(p.sales)}</td></tr>)}</tbody>
+            </table>
+            <div className="mt-4 grid gap-6 md:grid-cols-2">
+              <div><div className="mb-1.5 text-xs font-semibold text-gray-500">시간대별 주문</div><Bars rows={o.by_hour.map((h: any) => ({ label: `${h.hour}시`, v: h.orders }))} /></div>
+              <div><div className="mb-1.5 text-xs font-semibold text-gray-500">많이 팔린 메뉴 (개)</div><Bars rows={o.top_items.slice(0, 8).map((t: any) => ({ label: t.name, v: t.qty }))} /></div>
+            </div>
+          </Section>) })()}
 
         {r.event.stamp_enabled && (
           <Section title="스탬프 투어">

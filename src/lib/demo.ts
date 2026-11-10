@@ -170,6 +170,14 @@ export function makeDemoFetch(): typeof fetch {
     host_post_notice: ({ p_title, p_body, p_urgent }) => { const e = T('events').find(x => x.slug === 'demo') ?? T('events')[0]; if (String(p_title ?? '').trim().length < 2) throw new Error('공지 제목을 적어 주세요.'); T('notices').push({ id: uid(), event_id: e.id, title: String(p_title).trim(), body: p_body || null, urgent: !!p_urgent, pinned: false, publish_at: now(), expires_at: null, created_at: now() }); persist(); return { ok: true } },
     host_end_notice: ({ p_notice }) => { const n = T('notices').find(x => x.id === p_notice); if (n) { n.expires_at = now(); persist() } return { ok: true } },
     host_set_crowd: ({ p_place, p_crowd }) => { const pl = T('places').find(x => x.id === p_place); if (pl) { pl.crowd = p_crowd ?? null; pl.crowd_updated_at = p_crowd ? now() : null; persist() } return { ok: true } },
+    admin_order_report: ({ p_event }) => {
+      const ps = T('places').filter(p => p.event_id === p_event && p.kind === 'food' && (p.menu ?? []).length)
+      const by_place = ps.map((p, i) => { const orders = [214, 167, 131][i % 3], cancelled = [9, 4, 6][i % 3], picked = orders - cancelled, per = (p.menu ?? []).reduce((a: number, m: Row) => a + priceInt(m.price), 0) / Math.max(1, p.menu.length) * 1.7; return { name: p.name, orders, picked, cancelled, sales: Math.round(picked * per / 100) * 100, avg_ready_min: [6.4, 8.1, 3.2][i % 3] } })
+      const tot = (k: string) => by_place.reduce((a, x: any) => a + x[k], 0)
+      return { orders: tot('orders'), picked: tot('picked'), cancelled: tot('cancelled'), sales: tot('sales'), avg_ready_min: 6.1, by_place: by_place.sort((a, b) => b.sales - a.sales),
+        by_hour: [11, 12, 13, 14, 15, 16, 17, 18, 19].map((h, i) => ({ hour: h, orders: [22, 71, 88, 52, 41, 49, 67, 84, 38][i], sales: 0 })), by_day: [],
+        top_items: ps.flatMap(p => (p.menu ?? []).filter((m: Row) => !m.sold_out).map((m: Row, k: number) => ({ name: m.name, place: p.name, qty: 140 - k * 31 - (p.sort_order % 7) * 3, sales: 0 }))).sort((a, b) => b.qty - a.qty).slice(0, 10) }
+    },
     place_order: ({ p_place, p_name, p_phone, p_items, p_consent, p_note }) => {
       if (!p_consent) throw new Error('개인정보 수집·이용에 동의해 주세요.')
       const pl = T('places').find(p => p.id === p_place), os = pl && osOf(pl.id)

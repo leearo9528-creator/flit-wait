@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
   if (CRON_SECRET && req.headers.get('x-cron-secret') !== CRON_SECRET) return new Response('forbidden', { status: 403 })
 
   const { data: rows, error } = await sb.from('notifications')
-    .select('id, template_code, attempts, tickets!inner(id, token, name, phone, party_size, ticket_no, status, booths!inner(name, slug, location, settings), events!inner(name), slots(starts_at))')
+    .select('id, template_code, attempts, tickets(id, token, name, phone, party_size, ticket_no, status, booths!inner(name, slug, location, settings), events!inner(name), slots(starts_at)), orders(id, token, name, phone, order_no, total, items, status, cancel_reason, places!inner(name), events!inner(name))')
     .eq('status', 'pending').lte('scheduled_at', new Date().toISOString()).order('scheduled_at').limit(100)
   if (error) return Response.json({ error: error.message }, { status: 500 })
   if (!rows?.length) return Response.json({ sent: 0 })
@@ -62,22 +62,36 @@ Deno.serve(async (req) => {
 
   let sent = 0, failed = 0, skipped = 0
   for (const n of work) {
-    const t = n.tickets, tpl = tplMap[n.template_code]
-    const stale = (n.template_code === 'R02' || n.template_code === 'Q02') && t.status !== 'waiting'
+    // 대기표 알림(Q·R)과 주문 알림(O)을 같은 큐에서 보낸다 — t 는 '받는 사람과 행사' 를 담는 공통 모양
+    const o = n.orders, tpl = tplMap[n.template_code]
+    const t = n.tickets ?? (o ? { id: o.id, token: o.token, name: o.name, phone: o.phone, status: o.status, events: o.events, booths: { settings: {} } } : null)
+    const stale = n.tickets
+      ? (n.template_code === 'R02' || n.template_code === 'Q02') && t.status !== 'waiting'
+      : !!o && ((n.template_code === 'O02' && o.status !== 'ready') || (n.template_code === 'O03' && o.status !== 'cancelled'))   // 그새 되돌린 주문은 보내지 않는다
     // 010-00xx-xxxx 는 미할당 번호대 — 부하테스트(k6)·시뮬레이션 전용. 절대 실발송하지 않는다 (2026-10-18 사고 재발 방지)
     const testNumber = /^01000\d{6}$/.test(t?.phone ?? '')
     if (!t?.phone || !tpl?.enabled || stale || testNumber) { await sb.from('notifications').update({ status: 'skipped', provider_msg_id: testNumber ? 'TEST_NUMBER' : null }).eq('id', n.id); skipped++; continue }
 
-    let ahead = ''
-    if (n.template_code.startsWith('Q')) { const { data: a } = await sb.rpc('ahead_count', { p_ticket: t.id }); ahead = String(a ?? 0) }
-    const vars: Record<string, string> = {
-      '#{행사명}': t.events.name, '#{부스명}': t.booths.name, '#{이름}': t.name,
-      '#{대기번호}': String(t.ticket_no ?? ''), '#{앞대기수}': ahead,
-      '#{유효시간}': String(t.booths.settings?.call_valid_min ?? 5),
-      '#{일시}': t.slots ? fmtKST(t.slots.starts_at) : '', '#{장소}': t.booths.location ?? '',
-      '#{인원}': String(t.party_size), '#{링크}': `${BASE_URL}/t/${t.token}`, '#{token}': t.token, '#{부스slug}': t.booths.slug,
+    let vars: Record<string, string>
+    if (o) {
+      const menu = (o.items ?? []).map((l: any) => `${l.name} ${l.qty}`).join(', ')
+      vars = {
+        '#{행사명}': o.events.name, '#{가게명}': o.places.name, '#{이름}': o.name, '#{주문번호}': String(o.order_no),
+        '#{메뉴}': menu.length > 40 ? menu.slice(0, 39) + '…' : menu, '#{금액}': `${Number(o.total).toLocaleString('ko-KR')}원`,
+        '#{사유}': o.cancel_reason ?? '가게 사정', '#{링크}': `${BASE_URL}/o/${o.token}`, '#{token}': o.token,
+      }
+    } else {
+      let ahead = ''
+      if (n.template_code.startsWith('Q')) { const { data: a } = await sb.rpc('ahead_count', { p_ticket: t.id }); ahead = String(a ?? 0) }
+      vars = {
+        '#{행사명}': t.events.name, '#{부스명}': t.booths.name, '#{이름}': t.name,
+        '#{대기번호}': String(t.ticket_no ?? ''), '#{앞대기수}': ahead,
+        '#{유효시간}': String(t.booths.settings?.call_valid_min ?? 5),
+        '#{일시}': t.slots ? fmtKST(t.slots.starts_at) : '', '#{장소}': t.booths.location ?? '',
+        '#{인원}': String(t.party_size), '#{링크}': `${BASE_URL}/t/${t.token}`, '#{token}': t.token, '#{부스slug}': t.booths.slug,
+      }
     }
-    const link = fill(tpl.button_link ?? `${BASE_URL}/t/#{token}`, vars)
+    const link = fill(tpl.button_link ?? `${BASE_URL}/${o ? 'o' : 't'}/#{token}`, vars)
     vars['#{링크}'] = link
     const smsText = fill(tpl.sms_fallback_text ?? '', vars)
     const useAlimtalk = !!(tpl.ncp_template_code && tpl.alimtalk_content && AT_SVC && PF_ID)
