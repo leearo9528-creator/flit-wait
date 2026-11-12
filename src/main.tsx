@@ -1,3 +1,4 @@
+import './lib/demoBoot'   // ⚠️ 맨 위 유지 — supabase 클라이언트보다 먼저 데모 플래그를 켠다
 import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'

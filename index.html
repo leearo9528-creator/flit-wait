@@ -6,7 +6,9 @@
     <meta name="theme-color" content="#141412" />
     <title>FLIT 축제 앱</title>
     <link rel="preconnect" href="https://mqrafomyngxsixakbnzu.supabase.co" crossorigin />
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+    <!-- 글꼴 CSS 는 화면 그리기를 막지 않게 뒤에서 받는다 — CDN 이 느린 회선에서 첫 화면이 통째로 늦어졌다 (2026-11-12) -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="stylesheet" crossorigin media="print" onload="this.media='all'" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>

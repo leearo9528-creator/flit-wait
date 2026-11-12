@@ -20,6 +20,8 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // 관리자·PDF 묶음은 미리 받지 않는다 — 손님 첫 방문 때 뒤에서 1MB 가까이 받느라 화면 로딩과 회선을 나눠 썼다 (2026-11-12). 필요할 때 네트워크로 받는다
+        globIgnores: ['**/pdf*', '**/Admin*'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//, /^\/admin/, /^\/s\//],
         runtimeCaching: [

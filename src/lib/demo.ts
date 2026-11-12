@@ -366,7 +366,8 @@ const SAMPLE = {
 }
 
 /** 데모 켜기: 플래그 + 세션 + 샘플 행사. 이미 켜져 있으면 데이터는 유지 */
-export async function startDemo(reset = false) {
+/** 데모 플래그와 가짜 로그인 토큰을 심는다. 동기 함수 — demoBoot 가 supabase 클라이언트보다 먼저 부른다 */
+export function startDemo(reset = false) {
   if (reset) { localStorage.removeItem(`${DEMO_KEY}:db`) }
   localStorage.setItem(DEMO_KEY, '1')
   const ref = new URL(import.meta.env.VITE_SUPABASE_URL).host.split('.')[0]
