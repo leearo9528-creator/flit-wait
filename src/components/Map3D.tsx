@@ -15,6 +15,7 @@ const SIZE: Record<PlaceKind, [number, number, Shape]> = {
   booth: [6, 6, 'tent'], food: [4, 6.5, 'truck'], market: [8, 5, 'stall'], stage: [16, 8, 'stage'],
   facility: [5, 5, 'box'], info: [5, 5, 'box'], medical: [5, 5, 'box'], other: [5, 5, 'box'], parking: [16, 11, 'flat'], shuttle: [6, 2.6, 'shelter'],
 }
+const INDOOR: [number, number, Shape] = [6, 6, 'box']
 const TONE_HEX: Record<Tone, string> = { go: '#1d4ed8', mid: '#111827', busy: '#dc2626', time: '#64748b', off: '#cbd5e1' }
 const TONE_LABEL: Record<Tone, string> = { go: 'bg-blue-700 text-white', mid: 'bg-gray-900 text-white', busy: 'bg-red-600 text-white', time: 'bg-white text-gray-900', off: 'bg-gray-200 text-gray-500' }
 const NEUTRAL = '#94a3b8'
@@ -57,13 +58,14 @@ function createEngine(canvas: HTMLCanvasElement, labelBox: HTMLDivElement, cb: {
     const mat = ground.material as THREE.MeshBasicMaterial
     if (tex) { mat.map = tex; mat.color.set('#ffffff') } else { mat.map = null; mat.color.set('#f7fbff') }
     mat.needsUpdate = true
-    cam.r = Math.max(W, D) * 1.3; cam.tx = 0; cam.tz = D * 0.04; cam.goal = null; clampCam()
+    cam.r = Math.max(W, D) * 1.45; cam.tx = 0; cam.tz = D * 0.04; cam.goal = null; clampCam()
   }
 
-  function build(places: { id: string; kind: PlaceKind; x: number; y: number }[]) {
+  function build(places: { id: string; kind: PlaceKind; x: number; y: number }[], indoor = false) {
     clear(world); clearRoute(); labelBox.innerHTML = ''; booths = []; hits = []
     for (const p of places) {
-      const [w0, d0, shape] = SIZE[p.kind] ?? SIZE.other
+      // 실내 행사는 천막·트럭이 없다 — 체험·먹거리·마켓을 전부 조립부스(상자 + 띠)로 세운다
+      const [w0, d0, shape] = indoor && (p.kind === 'booth' || p.kind === 'food' || p.kind === 'market') ? INDOOR : SIZE[p.kind] ?? SIZE.other
       const w = w0 * k, d = d0 * k, x = (p.x - 50) / 100 * W, z = (p.y - 50) / 100 * D
       const g = new THREE.Group(); g.position.set(x, 0, z); world.add(g)
       const accentMat = lam(NEUTRAL), accent: THREE.Mesh[] = []; let h = 3 * k
@@ -316,8 +318,8 @@ function createEngine(canvas: HTMLCanvasElement, labelBox: HTMLDivElement, cb: {
   }
 }
 
-export default function Map3D({ imageUrl, mPerUnit, items, shownIds, target, me, onTap, onAspect }: {
-  imageUrl: string; mPerUnit: number; items: Item[]; shownIds: string[]; target: GuidePlace | null; me: { x: number; y: number } | null
+export default function Map3D({ imageUrl, mPerUnit, indoor = false, items, shownIds, target, me, onTap, onAspect }: {
+  imageUrl: string; mPerUnit: number; indoor?: boolean; items: Item[]; shownIds: string[]; target: GuidePlace | null; me: { x: number; y: number } | null
   onTap: (p: GuidePlace) => void; onAspect?: (a: number) => void
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null), labelRef = useRef<HTMLDivElement>(null)
@@ -359,8 +361,8 @@ export default function Map3D({ imageUrl, mPerUnit, items, shownIds, target, me,
   const geoSig = geo.map(g => `${g.id}:${g.kind}:${g.x}:${g.y}`).join('|')
   useEffect(() => {
     if (!eng.current || !ground) return
-    eng.current.setGround(ground.tex, ground.aspect, 100 * mPerUnit); eng.current.build(geo); setBuilt(n => n + 1)
-  }, [ground, geoSig, mPerUnit]) // eslint-disable-line
+    eng.current.setGround(ground.tex, ground.aspect, 100 * mPerUnit); eng.current.build(geo, indoor); setBuilt(n => n + 1)
+  }, [ground, geoSig, mPerUnit, indoor]) // eslint-disable-line
   const shownSig = shownIds.join('|')
   useEffect(() => { if (built) eng.current?.update(items, new Set(shownIds)) }, [items, shownSig, built, target?.id]) // eslint-disable-line
   const meSig = me ? `${me.x.toFixed(1)},${me.y.toFixed(1)}` : ''
