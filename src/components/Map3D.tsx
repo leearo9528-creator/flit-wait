@@ -198,20 +198,24 @@ function createEngine(canvas: HTMLCanvasElement, labelBox: HTMLDivElement, cb: {
   }
 
   // ── 카메라 · 손가락 ──
-  function clampCam() { cam.r = Math.min(Math.max(W, D) * 2.2, Math.max(14 * k, cam.r)); cam.phi = Math.min(1.36, Math.max(0.12, cam.phi)); cam.tx = Math.min(W / 2, Math.max(-W / 2, cam.tx)); cam.tz = Math.min(D / 2, Math.max(-D / 2, cam.tz)) }
-  const ptrs = new Map<number, { x: number; y: number; btn: number; shift: boolean }>(); let g0: { d: number; a: number; my: number } | null = null, tap: { x: number; y: number; t: number } | null = null
-  const down = (e: PointerEvent) => { canvas.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, btn: e.button, shift: e.shiftKey }); cam.goal = null; tap = ptrs.size === 1 ? { x: e.clientX, y: e.clientY, t: Date.now() } : null; g0 = null }
+  function clampCam() { cam.r = Math.min(Math.max(W, D) * 2.6, Math.max(5 * k, cam.r)); cam.phi = Math.min(1.5, Math.max(0.02, cam.phi)); cam.tx = Math.min(W * 0.75, Math.max(-W * 0.75, cam.tx)); cam.tz = Math.min(D * 0.75, Math.max(-D * 0.75, cam.tz)) }
+  // 조작 (2026-11-12 개편) — 한 손가락: 돌리기·기울이기 / 두 손가락: 옮기기·벌려서 확대·비틀어 돌리기 / 손을 떼면 관성으로 조금 더 간다 / 두 번 톡: 그 자리로 확대
+  // 마우스: 끌기 = 돌리기, 오른쪽 버튼·Shift 끌기 = 옮기기, 휠 = 확대
+  const vel = { th: 0, ph: 0, tx: 0, tz: 0 }; let lastTap = { x: 0, y: 0, t: 0 }
+  const panBy = (dx: number, dy: number) => { const sc = cam.r * 0.0017, ax = (-Math.cos(cam.theta) * dx - Math.sin(cam.theta) * dy) * sc, az = (Math.sin(cam.theta) * dx - Math.cos(cam.theta) * dy) * sc; cam.tx += ax; cam.tz += az; vel.tx = ax; vel.tz = az }
+  const ptrs = new Map<number, { x: number; y: number; btn: number; shift: boolean }>(); let g0: { d: number; a: number; mx: number; my: number } | null = null, tap: { x: number; y: number; t: number } | null = null
+  const down = (e: PointerEvent) => { canvas.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, btn: e.button, shift: e.shiftKey }); cam.goal = null; vel.th = vel.ph = vel.tx = vel.tz = 0; tap = ptrs.size === 1 ? { x: e.clientX, y: e.clientY, t: Date.now() } : null; g0 = null }
   const move = (e: PointerEvent) => {
     const p = ptrs.get(e.pointerId); if (!p) return; const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY
     if (tap && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) > 8) tap = null
     if (st.walk) { if (ptrs.size === 1) { walker.h += dx * 0.006; if (st.auto) { st.auto = false; emit() } } return }
     if (ptrs.size === 1) {
-      if (p.btn === 2 || p.shift) { cam.theta -= dx * 0.006; cam.phi -= dy * 0.005 }
-      else { const s = cam.r * 0.0017; cam.tx += (-Math.cos(cam.theta) * dx - Math.sin(cam.theta) * dy) * s; cam.tz += (Math.sin(cam.theta) * dx - Math.cos(cam.theta) * dy) * s }
+      if (p.btn === 2 || p.shift) panBy(dx, dy)
+      else { vel.th = -dx * 0.007; vel.ph = -dy * 0.006; cam.theta += vel.th; cam.phi += vel.ph }
     } else if (ptrs.size === 2) {
-      const a = [...ptrs.values()], d = Math.hypot(a[1].x - a[0].x, a[1].y - a[0].y), ang = Math.atan2(a[1].y - a[0].y, a[1].x - a[0].x), my = (a[0].y + a[1].y) / 2
-      if (g0) { cam.r *= g0.d / Math.max(1, d); let da = ang - g0.a; if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI; cam.theta += da; cam.phi -= (my - g0.my) * 0.005 }
-      g0 = { d, a: ang, my }
+      const a = [...ptrs.values()], d = Math.hypot(a[1].x - a[0].x, a[1].y - a[0].y), ang = Math.atan2(a[1].y - a[0].y, a[1].x - a[0].x), mx = (a[0].x + a[1].x) / 2, my = (a[0].y + a[1].y) / 2
+      if (g0) { cam.r *= g0.d / Math.max(1, d); let da = ang - g0.a; if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI; cam.theta += da; panBy(mx - g0.mx, my - g0.my) }
+      g0 = { d, a: ang, mx, my }
     }
     clampCam()
   }
@@ -220,11 +224,19 @@ function createEngine(canvas: HTMLCanvasElement, labelBox: HTMLDivElement, cb: {
     const had = ptrs.delete(e.pointerId); g0 = null
     if (had && tap && e.type === 'pointerup' && Date.now() - tap.t < 450 && !st.walk) {
       const r = canvas.getBoundingClientRect(); ndc.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera)
-      const h = ray.intersectObjects(hits, false); if (h.length) cb.onTap(h[0].object.userData.id)
+      const h = ray.intersectObjects(hits, false)
+      if (h.length) cb.onTap(h[0].object.userData.id)
+      else if (Date.now() - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) {   // 두 번 톡 — 누른 자리로 다가간다
+        const g = ray.intersectObject(ground, false)[0]
+        if (g) cam.goal = { tx: Math.min(W * 0.75, Math.max(-W * 0.75, g.point.x)), tz: Math.min(D * 0.75, Math.max(-D * 0.75, g.point.z)), r: Math.max(5 * k, cam.r * 0.5) }
+        lastTap.t = 0
+      } else lastTap = { x: e.clientX, y: e.clientY, t: Date.now() }
     }
+    if (ptrs.size > 0) vel.th = vel.ph = vel.tx = vel.tz = 0   // 손가락이 하나 남아 있으면 관성 없이 멈춘다
+    else { vel.th *= 0.5; vel.ph *= 0.5; vel.tx *= 0.5; vel.tz *= 0.5 }   // 관성은 끌던 속도의 절반에서 시작 — 너무 멀리 미끄러지지 않게
     tap = null
   }
-  const wheel = (e: WheelEvent) => { if (st.walk || !(e.ctrlKey || e.metaKey || e.shiftKey)) return; e.preventDefault(); cam.goal = null; cam.r *= Math.exp(e.deltaY * 0.0012); clampCam() }
+  const wheel = (e: WheelEvent) => { if (st.walk) return; e.preventDefault(); cam.goal = null; cam.r *= Math.exp(e.deltaY * 0.0012); clampCam() }
   const noMenu = (e: Event) => e.preventDefault()
   canvas.addEventListener('pointerdown', down); canvas.addEventListener('pointermove', move); canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up)
   canvas.addEventListener('wheel', wheel, { passive: false }); canvas.addEventListener('contextmenu', noMenu)
@@ -273,6 +285,11 @@ function createEngine(canvas: HTMLCanvasElement, labelBox: HTMLDivElement, cb: {
     const dt = Math.min(0.05, (now - last) / 1000); last = now
     if (st.walk) { stepWalk(dt); camera.position.set(walker.x, 1.7 * k, walker.z); camera.lookAt(walker.x + Math.sin(walker.h) * 10, 1.5 * k, walker.z - Math.cos(walker.h) * 10) }
     else {
+      if (ptrs.size === 0 && (vel.th || vel.ph || vel.tx || vel.tz)) {   // 관성 — 손을 뗀 뒤 조금 더 가다 멈춘다
+        cam.theta += vel.th; cam.phi += vel.ph; cam.tx += vel.tx; cam.tz += vel.tz; clampCam()
+        const f = Math.pow(0.001, dt); vel.th *= f; vel.ph *= f; vel.tx *= f; vel.tz *= f
+        if (Math.abs(vel.th) + Math.abs(vel.ph) < 0.0004 && Math.hypot(vel.tx, vel.tz) < 0.01 * k) vel.th = vel.ph = vel.tx = vel.tz = 0
+      }
       if (cam.goal) { const f = Math.min(1, dt * 5); cam.tx += (cam.goal.tx - cam.tx) * f; cam.tz += (cam.goal.tz - cam.tz) * f; cam.r += (cam.goal.r - cam.r) * f; if (Math.abs(cam.goal.r - cam.r) < 0.3 && Math.hypot(cam.goal.tx - cam.tx, cam.goal.tz - cam.tz) < 0.3) cam.goal = null }
       const sp = Math.sin(cam.phi); camera.position.set(cam.tx + cam.r * sp * Math.sin(cam.theta), cam.r * Math.cos(cam.phi), cam.tz + cam.r * sp * Math.cos(cam.theta)); camera.lookAt(cam.tx, 0, cam.tz)
     }
@@ -288,7 +305,7 @@ function createEngine(canvas: HTMLCanvasElement, labelBox: HTMLDivElement, cb: {
   return {
     setGround, build, update, setRoute, walk, toggleAuto, resize,
     key: (kk: string, on: boolean) => { keys[kk] = on; if (on && st.auto) { st.auto = false; emit() } },
-    zoom: (f: number) => { cam.goal = { tx: cam.tx, tz: cam.tz, r: Math.min(Math.max(W, D) * 2.2, Math.max(14 * k, cam.r * f)) } },
+    zoom: (f: number) => { cam.goal = { tx: cam.tx, tz: cam.tz, r: Math.min(Math.max(W, D) * 2.6, Math.max(5 * k, cam.r * f)) } },
     rotate: (a: number) => { cam.theta += a },
     dispose: () => {
       disposed = true; cancelAnimationFrame(raf); ro.disconnect()
@@ -308,6 +325,7 @@ export default function Map3D({ imageUrl, mPerUnit, items, shownIds, target, me,
   const itemsRef = useRef(items); itemsRef.current = items
   const tapRef = useRef(onTap); tapRef.current = onTap
   const [state, setState] = useState<EngineState>({ walk: false, auto: false, len: null })
+  const [hint, setHint] = useState(true)   // 조작 안내 — 처음 손을 대면 사라진다
   const [fail, setFail] = useState(false)
   const [ground, setGround] = useState<{ aspect: number; tex: THREE.Texture | null } | null>(null)
   const [built, setBuilt] = useState(0)
@@ -354,10 +372,11 @@ export default function Map3D({ imageUrl, mPerUnit, items, shownIds, target, me,
   const mins = state.len != null ? Math.max(1, Math.round(state.len / 70)) : 0
 
   return (
-    <div className="relative mt-3 h-[62dvh] min-h-[360px] w-full overflow-hidden bg-slate-100">
+    <div className="relative mt-3 h-[62dvh] min-h-[360px] w-full overflow-hidden bg-slate-100" onPointerDownCapture={() => hint && setHint(false)}>
       <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full touch-none" aria-label="3D 행사장 지도" />
       <div ref={labelRef} className="pointer-events-none absolute inset-0 overflow-hidden" />
       {fail && <p className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-gray-500">이 기기에서는 3D 지도를 열 수 없어요. 위의 '지도'로 봐 주세요.</p>}
+      {!fail && !state.walk && hint && <p className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 whitespace-nowrap rounded-full bg-gray-900/80 px-3 py-1.5 text-xs font-semibold text-white">한 손가락 돌리기 · 두 손가락 이동·확대</p>}
       {!fail && !state.walk && (
         <>
           <div className="absolute right-3 top-3 flex flex-col gap-2">
