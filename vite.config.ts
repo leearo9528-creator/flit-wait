@@ -20,8 +20,10 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // 관리자·PDF 묶음은 미리 받지 않는다 — 손님 첫 방문 때 뒤에서 1MB 가까이 받느라 화면 로딩과 회선을 나눠 썼다 (2026-11-12). 필요할 때 네트워크로 받는다
-        globIgnores: ['**/pdf*', '**/Admin*'],
+        // 미리 받지 않는 묶음 — 필요할 때 네트워크로 받는다.
+        // 관리자·PDF: 손님 첫 방문 때 뒤에서 1MB 가까이 받느라 화면 로딩과 회선을 나눠 썼다 (2026-11-12)
+        // 3D 지도(three): 누른 사람만 받는다 — 프리캐시에 넣으면 모든 손님이 0.5MB 를 더 받는다
+        globIgnores: ['**/pdf*', '**/Admin*', '**/Map3D-*.js'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//, /^\/admin/, /^\/s\//],
         runtimeCaching: [

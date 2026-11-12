@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { fitMap, mapMeters, fmtMeters, type Fit } from '../../lib/geo'
 import { cachedRpc, rpc, DEMO } from '../../lib/supabase'
@@ -9,6 +9,9 @@ import DemoBanner from '../../components/DemoBanner'
 import { PLACE_KIND_LABEL, type EventGuide, type EventSchedule, type GuidePlace, type PlaceKind } from '../../lib/types'
 import MyStrips from '../../components/MyStrips'
 import { liveOf, TONE_PIN, TONE_TEXT, type Live } from '../../lib/live'
+// 3D 지도는 three(약 150KB gzip)를 끌고 오므로 '3D' 를 눌렀을 때만 받는다
+const Map3D = lazy(() => import('../../components/Map3D'))
+type View = 'map' | '3d' | 'list'
 
 /**
  * 행사 홈 — 지도가 곧 첫 화면이고, 핀마다 지금 대기가 붙는다 (2026-11-10, 테마파크 앱 구조).
@@ -33,7 +36,7 @@ export default function ParkHome() {
     return () => { clearInterval(iv); document.removeEventListener('visibilitychange', onVis) }
   }, [slug]) // eslint-disable-line
 
-  const [view, setView] = useState<'map' | 'list'>(() => LS.get<'map' | 'list'>(`view:${slug}`) ?? 'map')
+  const [view, setView] = useState<View>(() => LS.get<View>(`view:${slug}`) ?? 'map')
   const [picked, setGroup] = useState<Group | null>(null)
   const nav = useNavigate()
   const [sheet, setSheet] = useState<GuidePlace | null>(null)   // 편의시설은 화면을 넘기지 않고 지도 위 카드로 보여 준다
@@ -73,7 +76,7 @@ export default function ParkHome() {
   useEffect(() => { if (toId && fit && !locOn) turnLoc(true) }, [toId, !!fit]) // eslint-disable-line
   const clearTo = () => { sp.delete('to'); setSp(sp, { replace: true }) }
   const goTo = (id: string) => { sp.set('to', id); setSp(sp, { replace: true }); window.scrollTo({ top: 0, behavior: 'smooth' }) }
-  const pickView = (v: 'map' | 'list') => { setView(v); LS.set(`view:${slug}`, v) }
+  const pickView = (v: View) => { setView(v); LS.set(`view:${slug}`, v) }
 
   const rows = useMemo(() => {
     const places = data?.places ?? [], onMap = new Set(places.map(p => p.booth?.id).filter(Boolean))
@@ -106,7 +109,7 @@ export default function ParkHome() {
   const { event } = data
   const hasMap = !!event.map_image_url
   const target = toId ? rows.find(r => r.p.id === toId && r.p.x != null)?.p ?? null : null
-  const mode = hasMap ? (target ? 'map' : view) : 'list'
+  const mode: View = hasMap ? (target && view === 'list' ? 'map' : view) : 'list'   // 가는 길은 지도(2D·3D)에서만 보인다
   const meIn = !!me && me.x > -5 && me.x < 105 && me.y > -5 && me.y < 105
   const dist = target && me && fit ? mapMeters(fit, me, { x: Number(target.x), y: Number(target.y) }) : null
   const zone = group === 'food' || group === 'market'
@@ -129,8 +132,8 @@ export default function ParkHome() {
           </button>
           {hasMap && (
             <div className="flex shrink-0 rounded-full bg-gray-100 p-0.5 text-sm font-semibold">
-              {(['map', 'list'] as const).map(v => (
-                <button key={v} type="button" onClick={() => pickView(v)} className={`rounded-full px-3.5 py-1.5 ${mode === v ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>{v === 'map' ? '지도' : '목록'}</button>
+              {(['map', '3d', 'list'] as const).map(v => (
+                <button key={v} type="button" onClick={() => pickView(v)} aria-pressed={mode === v} className={`rounded-full px-3 py-1.5 ${mode === v ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>{v === 'map' ? '지도' : v === '3d' ? '3D' : '목록'}</button>
               ))}
             </div>
           )}
@@ -218,12 +221,17 @@ export default function ParkHome() {
           )}
         </div>
       )}
+      {!term && mode === '3d' && (
+        <Suspense fallback={<div className="mt-3 flex h-[62dvh] min-h-[360px] items-center justify-center bg-slate-100"><Spinner /></div>}>
+          <Map3D imageUrl={event.map_image_url!} mPerUnit={fit?.mPerUnit ?? 2} items={rows} shownIds={shown.map(r => r.p.id)} target={target} me={me && meIn ? me : null} onTap={tap} onAspect={setAspect} />
+        </Suspense>
+      )}
       {!term && mode === 'map' && me && !meIn && locOn && <p className="px-4 pt-2 text-sm text-gray-600">지금은 행사장 밖에 계세요.</p>}
-      {!term && mode === 'map' && event.map_note && <p className="px-4 pt-2 text-xs text-gray-500">{event.map_note}</p>}
+      {!term && mode !== 'list' && event.map_note && <p className="px-4 pt-2 text-xs text-gray-500">{event.map_note}</p>}
 
       {/* 먹거리 · 마켓: 그 구역의 가게와 메뉴(상품)를 한 화면에 다 편다 — 가게를 하나씩 열어 보지 않아도 뭐가 있는지 보인다 */}
       {!term && zone && (
-        <div id="zone" className={`scroll-mt-40 space-y-3 px-4 ${mode === 'map' ? 'mt-3' : 'mt-1'}`}>
+        <div id="zone" className={`scroll-mt-40 space-y-3 px-4 ${mode !== 'list' ? 'mt-3' : 'mt-1'}`}>
           <div className="text-sm font-semibold text-gray-500">{group === 'food' ? '먹거리' : '마켓'} {listed.length}곳 · {group === 'food' ? '메뉴' : '상품'} {listed.reduce((a, r) => a + (r.p.menu?.length ?? 0), 0)}가지</div>
           {listed.map(({ p, live }) => (
             <section key={p.id} className="overflow-hidden rounded-2xl ring-1 ring-gray-200">
@@ -252,7 +260,7 @@ export default function ParkHome() {
           ))}
         </div>
       )}
-      <ul className={`divide-y divide-gray-100 px-4 ${mode === 'map' ? 'mt-2' : 'mt-1'} ${term || zone ? 'hidden' : ''}`}>
+      <ul className={`divide-y divide-gray-100 px-4 ${mode !== 'list' ? 'mt-2' : 'mt-1'} ${term || zone ? 'hidden' : ''}`}>
         {listed.map(({ p, live }) => (
           <li key={p.id}>
             <button type="button" onClick={() => tap(p)} className="flex w-full items-center gap-3 py-3.5 text-left active:bg-gray-50">
