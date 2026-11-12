@@ -3,6 +3,14 @@
 // 데이터는 localStorage 에 두고, '데모 초기화' 로 다시 깐다. 프로덕션 DB 는 전혀 안 건드린다.
 // ⚠️ 기획자 흐름(e2e)에서 쓰는 /home/claude/fakesb.js 와 같은 논리 — 테이블 CRUD + RPC 스텁. 리포트 숫자는 샘플(가상).
 export const DEMO_KEY = 'flit:demo'
+/** 데모 샘플의 판 번호 — demoSeed 나 가짜 서버가 기대하는 데이터 모양이 바뀌면 올린다.
+ *  예전 판으로 데모를 써 본 기기(팀 폰·영업 때 보여 준 폰)에 옛 샘플이 남아 있으면 '행사를 찾을 수 없습니다' 가 뜨거나 로딩에서 멈췄다 (2026-11-12).
+ *  판이 다르면 demoBoot 가 옛 샘플을 지우고 새로 깐다. */
+export const DEMO_VER = '2026-11-12'
+/** 이 기기에 남은 데모 샘플이 지금 판과 다른가 (샘플이 없으면 false) */
+export function demoStale(): boolean {
+  try { return !!localStorage.getItem(`${DEMO_KEY}:db`) && localStorage.getItem(`${DEMO_KEY}:v`) !== DEMO_VER } catch { return false }
+}
 /** 데모를 켜 둔 기기에서 실제 행사 QR 을 찍으면 데모의 가짜 서버가 응답해 '행사를 찾을 수 없습니다' 가 뜬다.
  *  주소가 가리키는 행사·부스·표가 데모 저장소에 없으면 실제 주소로 보고 데모를 끈다 (데모 내용은 남겨 둔다). */
 function pathIsReal(): boolean {
@@ -368,7 +376,8 @@ const SAMPLE = {
 /** 데모 켜기: 플래그 + 세션 + 샘플 행사. 이미 켜져 있으면 데이터는 유지 */
 /** 데모 플래그와 가짜 로그인 토큰을 심는다. 동기 함수 — demoBoot 가 supabase 클라이언트보다 먼저 부른다 */
 export function startDemo(reset = false) {
-  if (reset) { localStorage.removeItem(`${DEMO_KEY}:db`) }
+  if (reset || demoStale()) { localStorage.removeItem(`${DEMO_KEY}:db`) }
+  localStorage.setItem(`${DEMO_KEY}:v`, DEMO_VER)
   localStorage.setItem(DEMO_KEY, '1')
   const ref = new URL(import.meta.env.VITE_SUPABASE_URL).host.split('.')[0]
   localStorage.setItem(`sb-${ref}-auth-token`, JSON.stringify({ access_token: 'demo', refresh_token: 'demo', expires_in: 999999, expires_at: Math.floor(Date.now() / 1000) + 999999, token_type: 'bearer', user: DEMO_USER }))
