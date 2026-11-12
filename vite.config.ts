@@ -20,6 +20,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        globIgnores: ['**/Map3D-*.js'],   // 3D 지도(three)는 누른 사람만 받는다 — 프리캐시에 넣으면 모든 손님이 0.5MB 를 더 받는다
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//, /^\/admin/, /^\/s\//],
         runtimeCaching: [
