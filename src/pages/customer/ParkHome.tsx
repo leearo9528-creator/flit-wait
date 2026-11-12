@@ -68,9 +68,9 @@ export default function ParkHome() {
   }, [locOn]) // eslint-disable-line
   const fit: Fit | null = useMemo(() => {
     if (!(aspect > 0)) return null
-    if (DEMO) return { aspect, mPerUnit: 2.2, toMap: () => ({ x: 50, y: 50 }) }   // 데모 지도는 가로 220m 로 친다
+    if (DEMO) return { aspect, mPerUnit: (Number((data?.event as any)?.map_width_m) || 220) / 100, toMap: () => ({ x: 50, y: 50 }) }   // 데모 지도는 가로 220m 로 친다 (실내 페어는 100m — demoEvents.ts)
     return fitMap((data?.places ?? []).filter(p => p.x != null && p.y != null && p.lat != null && p.lng != null).map(p => ({ x: Number(p.x), y: Number(p.y), lat: Number(p.lat), lng: Number(p.lng) })), aspect)
-  }, [data?.places, aspect])
+  }, [data?.places, data?.event, aspect])
   const me = DEMO ? demoMe : fit && pos ? fit.toMap(pos.lat, pos.lng) : null
   // 가는 길을 열면 위치도 같이 켠다 (맞출 수 있을 때만)
   useEffect(() => { if (toId && fit && !locOn) turnLoc(true) }, [toId, !!fit]) // eslint-disable-line
@@ -223,7 +223,7 @@ export default function ParkHome() {
       )}
       {!term && mode === '3d' && (
         <Suspense fallback={<div className="mt-3 flex h-[62dvh] min-h-[360px] items-center justify-center bg-slate-100"><Spinner /></div>}>
-          <Map3D imageUrl={event.map_image_url!} mPerUnit={fit?.mPerUnit ?? 2} items={rows} shownIds={shown.map(r => r.p.id)} target={target} me={me && meIn ? me : null} onTap={tap} onAspect={setAspect} />
+          <Map3D imageUrl={event.map_image_url!} mPerUnit={fit?.mPerUnit ?? 2} indoor={(event as any).venue === 'indoor'} items={rows} shownIds={shown.map(r => r.p.id)} target={target} me={me && meIn ? me : null} onTap={tap} onAspect={setAspect} />
         </Suspense>
       )}
       {!term && mode === 'map' && me && !meIn && locOn && <p className="px-4 pt-2 text-sm text-gray-600">지금은 행사장 밖에 계세요.</p>}

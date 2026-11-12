@@ -14,7 +14,7 @@ function pathIsReal(): boolean {
   if (m[1] === 'v') return !has('events', 'vendor_token')
   if (m[1] === 'o') return !has('orders', 'token')
   if (m[1] === 'vo') return !key.startsWith('demo-vo-')
-  if (m[1] === 'h') return key !== 'demo-host'
+  if (m[1] === 'h') return !key.startsWith('demo-host')
   return !key.startsWith('demo-') && !has('booths', 'slug')
 }
 /** 데모가 심어 둔 가짜 로그인 토큰을 지운다 — 남아 있으면 실제 서버가 요청을 거절한다 */
@@ -31,12 +31,36 @@ export const isDemo = () => {
 }
 
 type Row = Record<string, any>
+/** 주소(행사 slug · 부스 slug)가 어느 데모 행사 것인지 — 데모가 아닌 기기에서 데모 주소를 열었을 때 그 행사로 보내려고 쓴다 */
+export function demoKeyOf(slug: string): 'winter' | 'beer' | 'fair' | 'univ' | 'corp' | null {
+  if (slug === 'demo') return 'winter'
+  const m = /^demo-([a-z]+)/.exec(slug); if (!m) return null
+  return (['beer', 'fair', 'univ', 'corp'] as const).find(k => k === m[1]) ?? 'winter'   // demo-fish 같은 예전 부스 주소는 겨울 축제
+}
+
+const hostToken = (slug: string) => slug === 'demo' ? 'demo-host' : slug.startsWith('demo-') ? `demo-host-${slug.slice(5)}` : `demo-host-${slug}`
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`)
 const now = () => new Date().toISOString()
 export const DEMO_USER = { id: '11111111-1111-1111-1111-111111111111', email: 'demo@flitunion.com', aud: 'authenticated', role: 'authenticated', user_metadata: { name: '데모 기획자' }, app_metadata: {}, created_at: '2026-01-01T00:00:00Z' }
 
 function load(): Record<string, Row[]> { try { return JSON.parse(localStorage.getItem(`${DEMO_KEY}:db`) || '{}') } catch { return {} } }
 function save(db: Record<string, Row[]>) { try { localStorage.setItem(`${DEMO_KEY}:db`, JSON.stringify(db)) } catch {} }
+
+/** 데모 띠의 '손님·스태프·사장님·주최' 링크 — 지금 보고 있는 데모 행사 기준. 행사는 주소에서 읽고, 못 읽으면 마지막으로 고른 행사 */
+export function demoLinks(): { guest: string; staff: string | null; vendor: string | null; host: string } {
+  const db = load(), evs = db.events ?? []
+  const m = /^\/(?:e|board)\/([^/]+)/.exec(location.pathname)
+  let slug = m ? decodeURIComponent(m[1]) : null
+  if (!slug) { const b = /^\/(?:q|r|s)\/([^/]+)/.exec(location.pathname); const booth = b && (db.booths ?? []).find(x => x.slug === decodeURIComponent(b[1])); slug = booth ? evs.find(e => e.id === booth.event_id)?.slug ?? null : null }
+  try { if (slug && evs.some(e => e.slug === slug)) localStorage.setItem(`${DEMO_KEY}:ev`, slug); else slug = localStorage.getItem(`${DEMO_KEY}:ev`) } catch { /* 저장소 없음 */ }
+  const e = evs.find(x => x.slug === slug) ?? evs.find(x => x.slug === 'demo') ?? evs[0]
+  if (!e) return { guest: '/demo', staff: null, vendor: null, host: '/h/demo-host' }
+  const staff = (db.booths ?? []).filter(b => b.event_id === e.id && b.mode !== 'slot').sort((a, b) => a.sort_order - b.sort_order)[0]
+  // 사장님 화면 토큰은 '메뉴가 있는 먹거리' 순서대로 demo-vo-1,2,… 가 붙는다 (tickOrders). 이미 붙은 게 있으면 그걸 쓴다
+  const foods = (db.places ?? []).filter(p => p.kind === 'food' && (p.menu ?? []).length), mine = foods.find(p => p.event_id === e.id)
+  const os = mine && (db.order_settings ?? []).find(o => o.place_id === mine.id)
+  return { guest: `/e/${e.slug}`, staff: staff ? `/s/${staff.slug}` : null, vendor: mine ? `/vo/${os?.token ?? `demo-vo-${foods.indexOf(mine) + 1}`}` : null, host: `/h/${hostToken(e.slug)}` }
+}
 
 export function makeDemoFetch(): typeof fetch {
   const db = load()
@@ -156,18 +180,21 @@ export function makeDemoFetch(): typeof fetch {
   }
   const vendorPlace = (token: string) => { const os = T('order_settings').find(o => o.token === token); const pl = os && T('places').find(p => p.id === os.place_id); if (!os || !pl) throw new Error('주문 화면 주소가 맞지 않아요. 플릿에 문의해 주세요.'); return { os, pl } }
 
+  // 주최 화면 주소 — 행사마다 하나: 겨울 축제(slug demo)는 demo-host, 나머지는 demo-host-<이름> (slug demo-beer → demo-host-beer)
+  const hostEvent = (token: unknown) => T('events').find(x => hostToken(x.slug) === token) ?? T('events').find(x => x.slug === 'demo') ?? T('events')[0]
+
   const rpc: Record<string, (a: Row) => unknown> = {
     // 주최 화면 (0047) — 데모 링크는 /h/demo-host
-    admin_host_link: () => 'demo-host',
-    host_board: () => {
-      const e = T('events').find(x => x.slug === 'demo') ?? T('events')[0]; if (!e) throw new Error('주최 화면 주소가 맞지 않아요. 플릿에 문의해 주세요.')
+    admin_host_link: ({ p_event }) => hostToken(T('events').find(x => x.id === p_event)?.slug ?? 'demo'),
+    host_board: ({ p_token }) => {
+      const e = hostEvent(p_token); if (!e) throw new Error('주최 화면 주소가 맞지 않아요. 플릿에 문의해 주세요.')
       const ts = T('tickets').filter(t => t.event_id === e.id && t.ticket_date === today()), os = T('orders').filter(o => o.event_id === e.id && o.order_date === today())
       return { event: { name: e.name, slug: e.slug, status: e.status },
         stats: { waiting: ts.filter(t => !t.slot_id && (t.status === 'waiting' || t.status === 'called')).length, served: ts.filter(t => t.status === 'done' || t.status === 'checked_in').length, visits: 1842 + Math.floor((Date.now() / 60000) % 60), orders: 37 + os.filter(o => o.status !== 'cancelled').length, sales: 412000 + os.filter(o => o.status === 'picked_up').reduce((a, o) => a + o.total, 0) },
         notices: T('notices').filter(n => n.event_id === e.id && (!n.expires_at || new Date(n.expires_at).getTime() > Date.now())).sort((a, b) => String(b.publish_at).localeCompare(String(a.publish_at))).map(n => ({ id: n.id, title: n.title, body: n.body ?? null, urgent: !!n.urgent, publish_at: n.publish_at })),
         places: T('places').filter(p => p.event_id === e.id && !p.booth_id && ['parking', 'food', 'market', 'stage', 'facility', 'shuttle'].includes(p.kind)).sort((a, b) => a.sort_order - b.sort_order).map(p => ({ id: p.id, name: p.name, kind: p.kind, crowd: p.crowd ?? null, crowd_updated_at: p.crowd_updated_at ?? null })) }
     },
-    host_post_notice: ({ p_title, p_body, p_urgent }) => { const e = T('events').find(x => x.slug === 'demo') ?? T('events')[0]; if (String(p_title ?? '').trim().length < 2) throw new Error('공지 제목을 적어 주세요.'); T('notices').push({ id: uid(), event_id: e.id, title: String(p_title).trim(), body: p_body || null, urgent: !!p_urgent, pinned: false, publish_at: now(), expires_at: null, created_at: now() }); persist(); return { ok: true } },
+    host_post_notice: ({ p_token, p_title, p_body, p_urgent }) => { const e = hostEvent(p_token); if (String(p_title ?? '').trim().length < 2) throw new Error('공지 제목을 적어 주세요.'); T('notices').push({ id: uid(), event_id: e.id, title: String(p_title).trim(), body: p_body || null, urgent: !!p_urgent, pinned: false, publish_at: now(), expires_at: null, created_at: now() }); persist(); return { ok: true } },
     host_end_notice: ({ p_notice }) => { const n = T('notices').find(x => x.id === p_notice); if (n) { n.expires_at = now(); persist() } return { ok: true } },
     host_set_crowd: ({ p_place, p_crowd }) => { const pl = T('places').find(x => x.id === p_place); if (pl) { pl.crowd = p_crowd ?? null; pl.crowd_updated_at = p_crowd ? now() : null; persist() } return { ok: true } },
     admin_order_report: ({ p_event }) => {
