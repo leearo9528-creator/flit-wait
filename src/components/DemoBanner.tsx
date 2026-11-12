@@ -8,7 +8,7 @@ export default function DemoBanner() {
   return (
     <div className="sticky top-0 z-40 flex items-center justify-between gap-3 whitespace-nowrap border-b border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-800">
       <span className="shrink-0">데모</span>
-      <span className="flex gap-2.5 overflow-x-auto [scrollbar-width:none]">
+      <span className="flex min-w-0 flex-1 gap-2.5 overflow-x-auto [scrollbar-width:none]">
         {!demoOnly() && <a href="/demo" className="underline">행사 바꾸기</a>}
         <a href={l.guest} className="underline">손님</a>
         {l.staff && <a href={l.staff} className="underline">스태프</a>}
@@ -18,6 +18,8 @@ export default function DemoBanner() {
         <a href="/demo?reset=1" className="underline">초기화</a>
         <button type="button" className="underline" onClick={() => { leaveDemo(); localStorage.removeItem(`${DEMO_KEY}:db`); location.href = '/' }}>끝내기</button>
       </span>
+      {/* 데모를 본 사람이 문의할 곳 — 없으면 '끝내기' 뒤에 갈 데가 없다 (2026-11-12 클라이언트 시뮬레이션) */}
+      <a href="https://flitunion.com/#contact" className="shrink-0 rounded-full bg-blue-700 px-2.5 py-1 text-[11px] font-bold text-white active:bg-blue-800">견적 문의</a>
     </div>
   )
 }
