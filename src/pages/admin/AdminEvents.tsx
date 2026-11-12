@@ -59,7 +59,7 @@ function NewEvent({ onDone }: { onDone: () => void }) {
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setErr(null)
     // 'demo' 는 데모 전용 주소 — /e/demo 는 데모 화면으로 넘어가서 실제 행사가 안 열린다 (서버 create_my_event 도 같은 검사, 0042)
-    if (f.slug === 'demo') { setErr("'demo' 는 데모 전용 주소라 쓸 수 없어요. 다른 주소를 골라 주세요."); return }
+    if (f.slug === 'demo' || /^demo-(beer|fair|univ|corp)$/.test(f.slug)) { setErr("'demo' 는 데모 전용 주소라 쓸 수 없어요. 다른 주소를 골라 주세요."); return }
     setBusy(true)
     // 셀프 개설 RPC — 만든 사람이 자동으로 그 행사의 담당자가 된다 (owner 불필요)
     const { data: id, error } = await supabase.rpc('create_my_event', { p_name: f.name, p_slug: f.slug, p_starts_at: new Date(f.starts_at).toISOString(), p_ends_at: new Date(f.ends_at).toISOString() })

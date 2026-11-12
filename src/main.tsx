@@ -3,7 +3,7 @@ import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import './index.css'
-import { isDemo } from './lib/demo'
+import { isDemo, demoKeyOf, demoOnly } from './lib/demo'
 import QueueJoin from './pages/customer/QueueJoin'
 import Reserve from './pages/customer/Reserve'
 import MyTicket from './pages/customer/MyTicket'
@@ -74,8 +74,12 @@ const router = createBrowserRouter([
 
 // 데모 주소(/e/demo 등)를 데모 모드가 아닌 기기에서 바로 열면 실제 DB 에는 그 행사가 없어 '행사를 찾을 수 없습니다' 가 뜬다.
 // 영업 링크로 /e/demo 가 그대로 공유돼도 열리도록, 데모 주소는 /demo 로 보내 데모를 먼저 켠다. (행사 slug 'demo' 는 데모 전용 — 0042 에서 생성을 막는다. 부스는 데모가 쓰는 slug 6개만 해당)
-const demoPath = /^\/(e|board)\/demo(\/|$)/.test(location.pathname) || /^\/(q|r)\/demo-(slope|kids|fish|sled|candle|keyring)$/.test(location.pathname)
-if (demoPath && !isDemo()) location.replace('/demo')
+// 데모 행사가 여러 벌이라(demo · demo-beer · demo-fair · demo-univ · demo-corp) 주소에서 어느 행사인지 읽어 그 행사로 바로 보낸다
+const dm = /^\/(?:e|board)\/(demo(?:-(?:beer|fair|univ|corp))?)(?:\/|$)/.exec(location.pathname) ?? /^\/(?:q|r)\/(demo-[a-z-]+)$/.exec(location.pathname)
+const dk = dm ? demoKeyOf(dm[1]) ?? 'winter' : null, only = demoOnly()
+// 행사 하나로 잠긴 기기에서 다른 데모 행사 주소를 열면 받은 행사로 돌려보낸다 (auto=1 — 잠금은 그대로)
+if (dk && only && dk !== only) location.replace(`/demo?ev=${only}&auto=1`)
+else if (dm && !isDemo()) location.replace(`/demo?ev=${only ?? dk}&auto=1`)
 else ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Suspense fallback={<Spinner />}>
