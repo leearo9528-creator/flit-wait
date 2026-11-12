@@ -3,6 +3,12 @@
 // 데이터는 localStorage 에 두고, '데모 초기화' 로 다시 깐다. 프로덕션 DB 는 전혀 안 건드린다.
 // ⚠️ 기획자 흐름(e2e)에서 쓰는 /home/claude/fakesb.js 와 같은 논리 — 테이블 CRUD + RPC 스텁. 리포트 숫자는 샘플(가상).
 export const DEMO_KEY = 'flit:demo'
+/** 행사 잠금 (2026-11-12) — 데모 주소를 `/demo?ev=fair` 처럼 행사 하나로 받은 기기는 그 행사만 본다.
+ *  고르는 화면·'행사 바꾸기'가 안 나오고, 다른 데모 행사 주소로 가면 받은 행사로 돌아온다. `/demo?ev=all` 이 잠금을 푼다(내부 시연용).
+ *  ⚠️ 브라우저 안에서만 거는 잠금이다 — 주소의 ev 값을 직접 바꾸면 넘어갈 수 있다. 진짜로 막으려면 서버가 서명한 토큰이 필요하다 */
+const ONLY_KEY = 'flit:demo:only'
+export const demoOnly = (): string | null => { try { return localStorage.getItem(ONLY_KEY) } catch { return null } }
+export const setDemoOnly = (key: string | null) => { try { if (key) localStorage.setItem(ONLY_KEY, key); else localStorage.removeItem(ONLY_KEY) } catch { /* 저장소 없음 */ } }
 /** 데모를 켜 둔 기기에서 실제 행사 QR 을 찍으면 데모의 가짜 서버가 응답해 '행사를 찾을 수 없습니다' 가 뜬다.
  *  주소가 가리키는 행사·부스·표가 데모 저장소에 없으면 실제 주소로 보고 데모를 끈다 (데모 내용은 남겨 둔다). */
 function pathIsReal(): boolean {

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
-import { startDemo } from '../lib/demo'
+import { DEMO_KEY, demoOnly, setDemoOnly, startDemo } from '../lib/demo'
 import { DEMO_EVENTS } from '../lib/demoEvents'
 import { Spinner, Alert } from '../components/ui'
 import DemoBanner from '../components/DemoBanner'
 
 /**
  * /demo — 데모 모드를 켜고 샘플 행사 다섯 벌(실외 축제 2 · 실내 페어 · 대학 축제 · 기업 행사)을 깐 뒤, 어떤 행사로 볼지 고르게 한다.
- * ?ev=fair 처럼 행사를 주면 고르는 화면 없이 그 행사 손님 홈으로, ?to=admin 이면 관리자로 보낸다. ?reset=1 이면 데이터를 새로 깐다.
+ * ?ev=fair 처럼 행사를 주면 **그 행사로 잠근다** — 그 행사만 깔고 손님 홈으로 보내며, 이 기기에서는 다른 데모 행사가 안 열린다 (?ev=all 이 잠금을 푼다).
+ * ?to=admin 이면 관리자로 보낸다. ?reset=1 이면 데이터를 새로 깐다. auto=1 은 앱이 스스로 돌려보낸 표시 — 이미 잠긴 기기의 잠금을 바꾸지 않는다.
  */
 export default function Demo() {
   const [err, setErr] = useState<string | null>(null)
@@ -15,17 +16,22 @@ export default function Demo() {
     (async () => {
       try {
         const sp = new URLSearchParams(location.search)
-        const reset = sp.has('reset'), seed = sp.has('seed'), toAdmin = sp.get('to') === 'admin'
-        const ev = DEMO_EVENTS.find(d => d.key === sp.get('ev'))
+        let reset = sp.has('reset'); const seed = sp.has('seed'), toAdmin = sp.get('to') === 'admin'
+        const asked = sp.get('ev'), locked = demoOnly()
+        if (asked === 'all') setDemoOnly(null)
+        else if (DEMO_EVENTS.some(d => d.key === asked) && !(sp.has('auto') && locked) && asked !== locked) {
+          setDemoOnly(asked); if (!seed && localStorage.getItem(`${DEMO_KEY}:db`)) reset = true   // 다른 행사가 깔려 있던 기기 — 받은 행사만 남게 새로 깐다
+        }
+        const ev = DEMO_EVENTS.find(d => d.key === demoOnly())
         const on = localStorage.getItem('flit:demo') === '1' && !!localStorage.getItem('flit:demo:db')
         if (!seed && (!on || reset)) {
           // 1단계: 플래그만 켜고 새로 로드 — supabase 클라이언트는 모듈 로드 시점에 만들어져서, 플래그가 켜진 채로 다시 떠야 가짜 fetch 를 쓴다
           await startDemo(reset)
-          location.replace(`/demo?seed=1${ev ? `&ev=${ev.key}` : ''}${toAdmin ? '&to=admin' : ''}`); return
+          location.replace(`/demo?seed=1${toAdmin ? '&to=admin' : ''}`); return
         }
         if ((window as any).__demoSeeding) return; (window as any).__demoSeeding = true   // StrictMode 이중 실행 방지
         const { seedMissingDemoEvents } = await import('../lib/demoEvents')
-        await seedMissingDemoEvents()
+        await seedMissingDemoEvents(ev?.key)
         if (toAdmin) { location.replace('/admin'); return }
         if (ev) { location.replace(`/e/${ev.slug}`); return }
         if (seed) history.replaceState(null, '', '/demo')

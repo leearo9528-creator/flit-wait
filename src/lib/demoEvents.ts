@@ -191,12 +191,12 @@ async function seedSpec(eventId: string, d: (typeof DEMO_EVENTS)[number], s: Spe
   ] } as any)
 }
 
-/** 아직 없는 데모 행사만 깐다 — 예전 데모(겨울 축제만 있던 기기)도 다시 열면 나머지가 채워진다 */
-export async function seedMissingDemoEvents() {
+/** 아직 없는 데모 행사만 깐다 (only 를 주면 그 행사 하나만) — 예전 데모(겨울 축제만 있던 기기)도 다시 열면 나머지가 채워진다 */
+export async function seedMissingDemoEvents(only?: DemoKey | null) {
   const { data: ex } = await supabase.from('events').select('slug')
   const have = new Set(((ex as any[]) ?? []).map(e => e.slug))
   for (const d of DEMO_EVENTS) {
-    if (have.has(d.slug)) continue
+    if (have.has(d.slug) || (only && d.key !== only)) continue   // 행사 잠금이면 그 행사만 깐다 — 관리자 화면에도 그 행사만 보인다
     const { data: id, error } = await supabase.rpc('create_my_event', { p_name: `${d.name} (데모)`, p_slug: d.slug, p_starts_at: new Date().toISOString(), p_ends_at: new Date(Date.now() + 86400_000).toISOString() })
     if (error) throw error
     if (d.key === 'winter') await seedDemoEvent(id); else await seedSpec(id, d, SPEC[d.key])
