@@ -246,12 +246,15 @@ export function makeDemoFetch(): typeof fetch {
       const { pl } = vendorPlace(p_token), o = T('orders').find(x => x.id === p_order && x.place_id === pl.id); if (!o) throw new Error('주문을 찾을 수 없습니다.')
       const s = o.status
       if (p_action === 'accept' && s === 'placed') { o.status = 'accepted'; o.accepted_at = now() }
-      else if (p_action === 'ready' && (s === 'placed' || s === 'accepted')) { o.status = 'ready'; o.ready_at = now() }
+      else if (p_action === 'ready' && (s === 'placed' || s === 'accepted')) { o.status = 'ready'; o.accepted_at = o.accepted_at ?? now(); o.ready_at = now() }
       else if (p_action === 'picked' && (s === 'ready' || s === 'accepted')) { o.status = 'picked_up'; o.picked_at = now() }
       else if (p_action === 'cancel' && s !== 'picked_up' && s !== 'cancelled') { o.status = 'cancelled'; o.cancel_reason = p_reason || '가게 사정' }
       else if (p_action === 'back' && s === 'ready') { o.status = 'accepted'; o.ready_at = null }
       else if (p_action === 'back' && s === 'picked_up') { o.status = 'ready'; o.picked_at = null }
-      else if (p_action === 'back' && s === 'cancelled') { o.status = 'placed'; o.cancel_reason = null }
+      else if (p_action === 'back' && s === 'cancelled') {
+        if (o.cancel_reason === '손님 취소') throw new Error('손님이 취소한 주문은 되돌릴 수 없어요.')
+        o.status = o.accepted_at ? 'accepted' : 'placed'; o.ready_at = null; o.cancel_reason = null
+      }
       else throw new Error('이미 처리된 주문이에요. 화면을 새로 고쳐 주세요.')
       persist(); return { ok: true }
     },

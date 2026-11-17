@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { rpc } from './supabase'
 import { LS } from './util'
-import type { MenuItem, OrderPublic } from './types'
+import type { MenuItem, OrderPublic, OrderStatus } from './types'
 
 /** '5,000원' → 5000 (서버 price_int 와 같은 규칙) */
 export const priceOf = (m: Pick<MenuItem, 'price'>) => Number(String(m.price ?? '').replace(/\D/g, '')) || 0
@@ -36,7 +36,32 @@ export function deviceOrders(): string[] {
 }
 
 export type MyOrder = OrderPublic & { token: string }
+/**
+ * 주문 상태 머신 — 화면이 같이 쓰는 사본. 정본은 DB 함수 place_order · cancel_order · vendor_update_order (0046, 0049).
+ *
+ *   placed ──접수──▶ accepted ──준비 완료(손님 호출)──▶ ready ──전달 완료──▶ picked_up
+ *     │──취소(손님, 접수 전까지만)──▶ cancelled('손님 취소')
+ *   placed · accepted · ready ──취소(가게, 이유 선택)──▶ cancelled
+ *   되돌리기(가게): ready → accepted · picked_up → ready · cancelled → accepted(접수했던 주문) | placed
+ *     ※ 손님이 취소한 주문은 되돌릴 수 없다 — 손님은 취소된 줄 알고 자리를 떴다
+ *   건너뛰기: placed → ready, accepted → picked_up 도 된다 (바쁠 때 한 번에)
+ */
 export const orderActive = (o: { status: string }) => o.status === 'placed' || o.status === 'accepted' || o.status === 'ready'
+/** cancel_order 가 남기는 취소 사유 (서버와 같은 글자) */
+export const CUSTOMER_CANCEL_REASON = '손님 취소'
+export const cancelledByCustomer = (o: { status: string; cancel_reason?: string | null }) => o.status === 'cancelled' && o.cancel_reason === CUSTOMER_CANCEL_REASON
+
+/** 사장님 화면에서 이 주문에 지금 할 수 있는 일 — vendor_update_order 의 p_action 과 같은 이름·같은 조건 */
+export type VendorAction = 'accept' | 'ready' | 'picked' | 'cancel' | 'back'
+export function vendorActions(o: { status: OrderStatus; cancel_reason?: string | null }): VendorAction[] {
+  switch (o.status) {
+    case 'placed': return ['accept', 'ready', 'cancel']
+    case 'accepted': return ['ready', 'picked', 'cancel']
+    case 'ready': return ['picked', 'cancel', 'back']
+    case 'picked_up': return ['back']
+    case 'cancelled': return cancelledByCustomer(o) ? [] : ['back']
+  }
+}
 const rank = (o: MyOrder) => o.status === 'ready' ? 0 : orderActive(o) ? 1 : 2
 export async function fetchMyOrders(eventSlug: string): Promise<MyOrder[]> {
   const rs = await Promise.all(deviceOrders().map(tk => rpc<OrderPublic | null>('get_order', { p_token: tk }).then(o => o ? { ...o, token: tk } : null).catch(() => null)))
@@ -57,4 +82,4 @@ export function useMyOrders(eventSlug: string, everyMs = 0) {
   return rows
 }
 
-export const ORDER_LABEL: Record<string, string> = { placed: '주문 확인 중', accepted: '준비 중', ready: '준비 완료', picked_up: '받았어요', cancelled: '취소됨' }
+export const ORDER_LABEL: Record<OrderStatus, string> = { placed: '주문 확인 중', accepted: '준비 중', ready: '준비 완료', picked_up: '받았어요', cancelled: '취소됨' }

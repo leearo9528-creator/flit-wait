@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { rpc } from './supabase'
 import { LS } from './util'
+import { ticketActive } from './ticketState'
 
 /** 이 기기에서 접수한 대기·예약 한 건 (get_ticket 결과에서 화면에 쓰는 것만) */
 export type MyRow = {
@@ -49,4 +50,4 @@ export function useMyTickets(eventSlug: string, everyMs = 0) {
   }, [eventSlug, everyMs])
   return rows
 }
-export const isActive = (r: MyRow) => r.status === 'waiting' || r.status === 'called'
+export const isActive = (r: MyRow) => ticketActive(r.status)

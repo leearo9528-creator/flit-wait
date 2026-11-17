@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { supabase } from './supabase'
+import { TICKET_LABEL } from './ticketState'
 
 export const fmtTime = (iso: string) =>
   new Date(iso).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' })
@@ -18,14 +19,8 @@ export const fmtPhone = (digits: string) => {
 
 export const minutesSince = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
 
-export const STATUS_LABEL: Record<string, string> = {
-  waiting: '대기 중',
-  called: '호출됨',
-  checked_in: '입장 완료',
-  done: '완료',
-  no_show: '노쇼',
-  cancelled: '취소',
-}
+/** 대기표 상태 글자 — 정본은 lib/ticketState.ts */
+export const STATUS_LABEL: Record<string, string> = TICKET_LABEL
 
 /** 부스 version 변경 구독 + 폴링 fallback → 콜백 재실행 */
 export function useBoothLive(boothId: string | undefined, reload: () => void, pollMs = 8000, realtime = true) {

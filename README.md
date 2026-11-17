@@ -3,7 +3,7 @@
 행사 체험부스의 **현장 대기표(queue)** 와 **사전 시간 예약(slot)** 을 한 시스템으로 처리하고, 카카오 알림톡(실패 시 SMS)으로 손님에게 순서·예약을 알리는 모바일 웹.
 첫 적용: 2026 성남테크아트페스티벌 탄천마켓 (10/23~25). 이후 행사 주최 측 납품용.
 
-**문서**: 전체 안내 `docs/시스템_매뉴얼.md` · 서버 운영 `OPERATIONS.md` · 현장 장애 `docs/장애대응_런북.md` · 스태프 `docs/staff-manual-seongnam-2026.html`
+**문서**: 상태 머신 지도 `docs/state-machines.md` (대기표·주문·부스 접수 상태와 전이 — 상태 조건을 고치기 전에 읽을 것) · 전체 안내 `docs/시스템_매뉴얼.md` · 서버 운영 `OPERATIONS.md` · 현장 장애 `docs/장애대응_런북.md` · 스태프 `docs/staff-manual-seongnam-2026.html`
 
 - 프론트: React + Vite + Tailwind + **PWA**(vite-plugin-pwa: 앱 셸 프리캐시, /api/public 네트워크 우선·오프라인 폴백, 이미지 캐시) → Vercel (`wait.flitunion.com`)
 - 백엔드: Supabase 프로젝트 `flit-wait` (`mqrafomyngxsixakbnzu`, 서울) — Postgres RPC + RLS + Realtime + Edge Function + pg_cron

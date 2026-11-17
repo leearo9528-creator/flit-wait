@@ -6,6 +6,7 @@ import { Card, Button, Field, Input, Alert, Badge } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import KakaoStart from '../../components/KakaoStart'
 import { useMyTickets } from '../../lib/myTickets'
+import { TICKET_TONE } from '../../lib/ticketState'
 import { useMyOrders, orderActive, ORDER_LABEL, won } from '../../lib/orders'
 import { fmtTime } from '../../lib/util'
 import { useCustomer, LOGIN_ENABLED, type Customer } from '../../lib/customer'
@@ -40,7 +41,7 @@ export default function MyTickets() {
     catch (e: any) { setErr(e.message) } finally { setBusy(false) }
   }
 
-  const tone = (s: string) => (({ waiting: 'blue', called: 'red', checked_in: 'green', done: 'green', no_show: 'red', cancelled: 'gray' } as any)[s] ?? 'gray')
+  const tone = (s: string) => (TICKET_TONE as Record<string, 'blue' | 'red' | 'green' | 'gray'>)[s] ?? 'gray'
   const List = ({ rows }: { rows: Row[] }) => (
     <div className="space-y-2">
       {rows.map(r => (

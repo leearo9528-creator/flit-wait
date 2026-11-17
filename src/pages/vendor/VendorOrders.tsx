@@ -5,7 +5,7 @@ import { useAsync, fmtTime, minutesSince, useTick } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
 import DemoBanner from '../../components/DemoBanner'
 import type { VendorBoard, VendorOrder } from '../../lib/types'
-import { won } from '../../lib/orders'
+import { won, orderActive, vendorActions, type VendorAction } from '../../lib/orders'
 
 /**
  * 사장님 주문 화면 — 가게마다 비밀 링크 하나(/vo/<token>). 로그인 없이 본인 폰으로 쓴다.
@@ -58,7 +58,7 @@ export default function VendorOrders() {
     } catch { /* 소리를 못 쓰는 기기 — 진동만 */ setSound(true) }
   }
 
-  async function act(o: VendorOrder, action: string, reason?: string) {
+  async function act(o: VendorOrder, action: VendorAction, reason?: string) {
     setErr(null); setBusyId(o.id)
     try { await rpc('vendor_update_order', { p_token: token, p_order: o.id, p_action: action, p_reason: reason ?? null }); setCancelId(null) }
     catch (e: any) { setErr(e.message) } finally { setBusyId(null); reload() }
@@ -67,9 +67,9 @@ export default function VendorOrders() {
 
   if (loading && !data) return <Spinner />
   if (!data) return <div className="p-6"><Alert kind="error">{error ?? '주문 화면을 열 수 없어요.'}</Alert></div>
-  const active = data.orders.filter(o => o.status === 'placed' || o.status === 'accepted' || o.status === 'ready')
+  const active = data.orders.filter(orderActive)
   const fresh = active.filter(o => o.status === 'placed'), making = active.filter(o => o.status === 'accepted'), waiting = active.filter(o => o.status === 'ready')
-  const past = data.orders.filter(o => o.status === 'picked_up' || o.status === 'cancelled').reverse()
+  const past = data.orders.filter(o => !orderActive(o)).reverse()
   const menu = data.place.menu ?? []
 
   const card = (o: VendorOrder) => (
@@ -157,7 +157,8 @@ export default function VendorOrders() {
                   <div className="truncate text-[15px] text-gray-900">{o.items.map(l => `${l.name} ${l.qty}`).join(', ')}</div>
                   <div className="text-xs text-gray-500">{o.name} · {fmtTime(o.created_at)} · {o.status === 'cancelled' ? `취소 (${o.cancel_reason ?? ''})` : won(o.total)}</div>
                 </div>
-                <button type="button" onClick={() => act(o, 'back')} className="shrink-0 text-sm font-semibold text-gray-500 underline">되돌리기</button>
+                {/* 손님이 취소한 주문은 되돌리지 않는다 (lib/orders.ts vendorActions) */}
+                {vendorActions(o).includes('back') && <button type="button" onClick={() => act(o, 'back')} className="shrink-0 text-sm font-semibold text-gray-500 underline">되돌리기</button>}
               </li>
             ))}
             {past.length === 0 && <li className="py-16 text-center text-sm text-gray-400">아직 끝난 주문이 없어요.</li>}

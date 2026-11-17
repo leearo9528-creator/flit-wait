@@ -6,6 +6,7 @@ import { Ticket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import { useEffect } from 'react'
+import { ticketActive, ticketFinal } from '../../lib/ticketState'
 /** 순서 미루기 — 서버 함수 defer_ticket (0044). 급히 꺼야 하면 VITE_DEFER=0. 부스별로는 설정 defer_max=0 */
 const DEFER_ENABLED = import.meta.env.VITE_DEFER !== '0'
 
@@ -41,7 +42,7 @@ export default function MyTicket() {
       if (document.visibilityState === 'visible') reload()
       // 순서가 멀수록 느리게: 호출됨/앞 2팀 이하 6s · 앞 10팀 이하 15s · 그 외 30s · 끝난 티켓 60s
       const ahead = t?.ahead ?? 0
-      const final = t && ['checked_in', 'done', 'no_show', 'cancelled'].includes(t.status)
+      const final = t && ticketFinal(t.status)
       const base = final ? 60000
         : t?.status === 'called' ? 6000
         : t?.slot ? 30000                       // 사전 예약은 호출 개념이 없어 느리게
@@ -131,7 +132,7 @@ export default function MyTicket() {
 
       {err && <div className="mb-4"><Alert kind="error">{err}</Alert></div>}
       {note && <div className="mb-4"><Alert kind="success">{note}</Alert></div>}
-      {slug && (t.status === 'waiting' || t.status === 'called') && <Link to={`/e/${slug}/b/${t.booth.slug}`} className="mb-2 flex h-12 items-center justify-center rounded-xl text-[15px] font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">위치 보기 · 가는 길</Link>}
+      {slug && ticketActive(t.status) && <Link to={`/e/${slug}/b/${t.booth.slug}`} className="mb-2 flex h-12 items-center justify-center rounded-xl text-[15px] font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">위치 보기 · 가는 길</Link>}
       {canDefer && !pick && <div className="mb-2"><Button variant="secondary" onClick={() => { setPick(true); setErr(null); setNote(null) }}>순서 미루기</Button></div>}
       {canDefer && pick && (
         <Card className="mb-3">

@@ -4,6 +4,7 @@ import { supabase, PUBLIC_BASE_URL } from '../../lib/supabase'
 import { useAsync, fmtDateTime, STATUS_LABEL } from '../../lib/util'
 import { EventRow, Booth } from '../../lib/types'
 import { Page, Card, Button, Field, Input, Alert, Spinner, Badge, Empty } from '../../components/ui'
+import { ticketHoldsSeat, ticketEntered } from '../../lib/ticketState'
 import AdminStats from './AdminStats'
 import ImageUpload from '../../components/ImageUpload'
 import AdminMap from './AdminMap'
@@ -39,10 +40,10 @@ export default function AdminEvent() {
     const m = new Map<string, Stats>()
     for (const t of data) {
       const s = m.get(t.booth_id) ?? { booth_id: t.booth_id, waiting: 0, called: 0, done: 0, no_show: 0, reserved: 0 }
-      if (t.slot_id) { if (['waiting', 'called', 'checked_in', 'done'].includes(t.status)) s.reserved += t.party_size }
+      if (t.slot_id) { if (ticketHoldsSeat(t.status)) s.reserved += t.party_size }
       else if (t.status === 'waiting') s.waiting++
       else if (t.status === 'called') s.called++
-      else if (t.status === 'checked_in' || t.status === 'done') s.done++
+      else if (ticketEntered(t.status)) s.done++
       else if (t.status === 'no_show') s.no_show++
       m.set(t.booth_id, s)
     }

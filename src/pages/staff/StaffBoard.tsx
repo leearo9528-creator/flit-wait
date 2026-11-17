@@ -5,6 +5,7 @@ import { LS, useAsync, useBoothLive, useTick, fmtTime, fmtDate, minutesSince } f
 import { StaffBoard, StaffSession, StaffTicket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge, Empty, Input, Stepper } from '../../components/ui'
 import { queueWindowState, openAtFor, kstYmd } from '../../components/BoothCard'
+import { ticketHoldsSeat, ticketEntered } from '../../lib/ticketState'
 
 export default function StaffBoardPage() {
   const { slug = '' } = useParams()
@@ -215,9 +216,9 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
 function SlotCard({ s, act, busyId, big, sess, onWalkin }: { s: StaffBoard['slots'][number]; act: (id: string, a: string) => void; busyId: string | null; big: boolean; sess: StaffSession; onWalkin: () => void }) {
   const [open, setOpen] = useState(() => Math.abs(Date.now() - new Date(s.starts_at).getTime()) < 90 * 60000)
   const [walkin, setWalkin] = useState(false)
-  const live = s.tickets.filter(t => ['waiting', 'called', 'checked_in', 'done'].includes(t.status))
+  const live = s.tickets.filter(t => ticketHoldsSeat(t.status))
   const seats = live.reduce((a, t) => a + t.party_size, 0)
-  const checked = s.tickets.filter(t => t.status === 'checked_in' || t.status === 'done').reduce((a, t) => a + t.party_size, 0)
+  const checked = s.tickets.filter(t => ticketEntered(t.status)).reduce((a, t) => a + t.party_size, 0)
   const started = Date.now() > new Date(s.starts_at).getTime()
   return (
     <Card className="!p-4">
