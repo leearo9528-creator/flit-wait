@@ -96,4 +96,30 @@ const corp = svg('#f6fbff', [
   tag(92, 70, '화장실'),
 ])
 
-for (const [k, s] of Object.entries({ beer, fair, univ, corp })) { writeFileSync(new URL(`../public/demo-map-${k}.svg`, import.meta.url), s); console.log(k, s.length) }
+// ── 남동 메이커스 페스티벌 (실외 · 남동근린공원 실제 지형) ──
+// 트랙과 그 안의 축구장, 역 쪽 원형 광장, 동·남측 수림대는 위성 기준. 부스 배치는 가상.
+const track = (cx, cy, rx, ry) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#f2ead6" stroke="#c0684f" stroke-width="22"/><ellipse cx="${cx}" cy="${cy}" rx="${rx - 26}" ry="${ry - 26}" fill="#8fc47c"/><rect x="${cx - rx + 52}" y="${cy - ry + 46}" width="${(rx - 52) * 2}" height="${(ry - 46) * 2}" fill="none" stroke="#fff" stroke-width="3"/><line x1="${cx - rx + 52}" y1="${cy}" x2="${cx + rx - 52}" y2="${cy}" stroke="#fff" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="34" fill="none" stroke="#fff" stroke-width="3"/>`
+const namdong = svg('#eef5e6', [
+  `<path d="M70 70 Q400 24 742 108 L768 560 Q700 900 400 960 Q120 930 48 640 Z" fill="#dcebcf"/>`,
+  `<g fill="#bcd9ab" opacity=".85"><ellipse cx="700" cy="470" rx="110" ry="190"/><ellipse cx="640" cy="760" rx="150" ry="110"/><ellipse cx="120" cy="300" rx="80" ry="150"/></g>`,
+  road('M400 1000 V880 M400 880 H110 V660 M400 880 H700 V660 M110 660 H700 M400 660 V560 M110 420 H700', 44, '#e5e2d2', '#fffdf6'),
+  track(400, 220, 215, 155),
+  stage(50, 13, C.vio, 150),
+  zone(50, 420, 390, 200, '#fff1cc', '#ffd980'),
+  tent(10, 46, C.yel), tent(18, 46, C.red), tent(26, 46, C.blue), tent(34, 46, C.green), tent(42, 46, C.vio),
+  tent(10, 56, C.red), tent(18, 56, C.green), tent(26, 56, C.yel), tent(34, 56, C.blue), tent(42, 56, C.red),
+  zone(455, 420, 300, 200, '#eaf6ff', '#bfe0ff'),
+  tent(62, 46, C.vio), tent(74, 46, C.green), tent(86, 46, C.blue), tent(62, 56, C.red), tent(74, 56, C.yel), tent(86, 56, C.vio),
+  `<g fill="#efe6cd" stroke="#ded2b2" stroke-width="2"><circle cx="190" cy="760" r="78"/><circle cx="400" cy="788" r="66"/><circle cx="592" cy="762" r="72"/></g>`,
+  zone(100, 660, 620, 230, 'none', '#cdbf9d', 28),
+  stall(22, 70, C.red), stall(38, 70, C.yel), stall(54, 70, C.blue), stall(70, 70, C.green),
+  stall(30, 80, C.vio), stall(46, 80, C.red), stall(62, 80, C.yel),
+  house(50, 90, C.blue), house(12, 32, C.gray), house(88, 64, C.gray), house(12, 88, C.gray),
+  zone(600, 860, 180, 110, '#eef2f7', '#dbe3ee', 22), car(80, 90, C.blue), car(86, 90, C.gray), car(92, 90, C.red),
+  trees([[5, 26, 1.1], [7, 44, 1], [4, 58, 1.1], [95, 24, 1], [96, 40, 1.15], [94, 52, 1], [93, 76, 1.1], [86, 84, .9], [20, 95, .9], [34, 94, .8], [66, 93, .9], [76, 88, .8], [8, 14, 1], [90, 12, 1], [26, 10, .85], [74, 9, .9], [50, 36, .8], [14, 70, .85], [78, 70, .9]]),
+  gate(C.blue, '남동인더스파크역'),
+  label(400, 300, '축구장 · 메인 무대'), label(140, 408, '푸드존 10팀'), label(545, 408, '체험존 6부스'), label(240, 648, '마켓존 40팀 · 원형 광장'), label(690, 850, '주차장'),
+  tag(12, 35.5, '화장실'), tag(88, 67.5, '화장실'), tag(12, 91.5, '화장실'),
+])
+
+for (const [k, s] of Object.entries({ beer, fair, univ, corp, namdong })) { writeFileSync(new URL(`../public/demo-map-${k}.svg`, import.meta.url), s); console.log(k, s.length) }

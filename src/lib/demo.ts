@@ -15,7 +15,7 @@ export function demoStale(): boolean {
  *  고르는 화면·'행사 바꾸기'가 안 나오고, 다른 데모 행사 주소로 가면 받은 행사로 돌아온다. `/demo?ev=all` 이 잠금을 푼다(내부 시연용).
  *  ⚠️ 브라우저 안에서만 거는 잠금이다 — 주소의 ev 값을 직접 바꾸면 넘어갈 수 있다. 진짜로 막으려면 서버가 서명한 토큰이 필요하다 */
 const ONLY_KEY = 'flit:demo:only'
-export const DEMO_KEYS = ['winter', 'beer', 'fair', 'univ', 'corp']
+export const DEMO_KEYS = ['winter', 'beer', 'fair', 'univ', 'corp', 'namdong']
 export const demoOnly = (): string | null => { try { return localStorage.getItem(ONLY_KEY) } catch { return null } }
 export const setDemoOnly = (key: string | null) => { try { if (key) localStorage.setItem(ONLY_KEY, key); else localStorage.removeItem(ONLY_KEY) } catch { /* 저장소 없음 */ } }
 /** 데모를 켜 둔 기기에서 실제 행사 QR 을 찍으면 데모의 가짜 서버가 응답해 '행사를 찾을 수 없습니다' 가 뜬다.
@@ -47,10 +47,10 @@ export const isDemo = () => {
 
 type Row = Record<string, any>
 /** 주소(행사 slug · 부스 slug)가 어느 데모 행사 것인지 — 데모가 아닌 기기에서 데모 주소를 열었을 때 그 행사로 보내려고 쓴다 */
-export function demoKeyOf(slug: string): 'winter' | 'beer' | 'fair' | 'univ' | 'corp' | null {
+export function demoKeyOf(slug: string): 'winter' | 'beer' | 'fair' | 'univ' | 'corp' | 'namdong' | null {
   if (slug === 'demo') return 'winter'
   const m = /^demo-([a-z]+)/.exec(slug); if (!m) return null
-  return (['beer', 'fair', 'univ', 'corp'] as const).find(k => k === m[1]) ?? 'winter'   // demo-fish 같은 예전 부스 주소는 겨울 축제
+  return (['beer', 'fair', 'univ', 'corp', 'namdong'] as const).find(k => k === m[1]) ?? 'winter'   // demo-fish 같은 예전 부스 주소는 겨울 축제
 }
 
 const hostToken = (slug: string) => slug === 'demo' ? 'demo-host' : slug.startsWith('demo-') ? `demo-host-${slug.slice(5)}` : `demo-host-${slug}`
