@@ -7,13 +7,14 @@ import { seedDemoEvent } from './demoSeed'
  * 겨울 축제는 예전 그대로 demoSeed.ts, 나머지는 아래 SPEC 을 seedSpec 이 깐다. 대기 팀 수·메뉴·셀러 이름은 전부 가상이다.
  * 좌표(x,y %)는 scripts/demo-maps.mjs 가 그리는 배치도와 같은 값 — 한쪽을 옮기면 다른 쪽도 옮길 것.
  */
-export type DemoKey = 'winter' | 'beer' | 'fair' | 'univ' | 'corp'
+export type DemoKey = 'winter' | 'beer' | 'fair' | 'univ' | 'corp' | 'namdong'
 export const DEMO_EVENTS: { key: DemoKey; slug: string; name: string; type: string; map: string; points: string }[] = [
   { key: 'winter', slug: 'demo', name: '플릿 윈터 페스티벌', type: '실외 · 겨울 축제', map: '/demo-map.svg', points: '눈썰매 회차 예약 · 체험 원격 대기 · 먹거리 주문' },
   { key: 'beer', slug: 'demo-beer', name: '플릿 비어 페스타', type: '실외 · 맥주축제', map: '/demo-map-beer.svg', points: '성인 인증 줄서기 · 브루어리·푸드트럭 주문 · 혼잡도' },
   { key: 'fair', slug: 'demo-fair', name: '플릿 리빙 페어', type: '실내 · 페어', map: '/demo-map-fair.svg', points: '셀러 부스 지도 · 원데이 클래스 예약 · 스탬프 투어' },
   { key: 'univ', slug: 'demo-univ', name: '플릿대학교 대동제', type: '대학 축제', map: '/demo-map-univ.svg', points: '재학생존 입장 줄서기 · 학과 부스·푸드트럭 주문 · 공연 일정' },
   { key: 'corp', slug: 'demo-corp', name: '플릿전자 패밀리데이', type: '기업 행사', map: '/demo-map-corp.svg', points: '등록 데스크 대기 · 키즈존 회차 예약 · 경품 추첨' },
+  { key: 'namdong', slug: 'demo-namdong', name: '남동 메이커스 페스티벌', type: '실외 · 산업단지 문화축제', map: '/demo-map-namdong.svg', points: '마켓·푸드존 QR 주문 · 체험 회차 예약 · 공연 일정' },
 ]
 type Menu = { name: string; price?: string; desc?: string; sold_out?: boolean }[]
 type Spec = {
@@ -154,6 +155,59 @@ const SPEC: Record<Exclude<DemoKey, 'winter'>, Spec> = {
     draw: { title: '패밀리데이 경품 추첨', prize: '가족 여행 상품권 외 20명', description: '추첨은 메인 무대에서 해요', require_stamp: false },
     survey: { title: '오늘 패밀리데이 어떠셨어요?', best: ['키즈 존', '체험', '식사', '레크리에이션', '경품'] },
   },
+  namdong: {
+    accent: '#2457d6', widthM: 340, closeH: 21,
+    info: '운영 11:00~21:00 (금 15:00 개장)\n마켓 40팀 · 먹거리 부스 10팀 · 체험 6부스\n먹거리는 앱으로 주문하고 알림이 오면 받아 가세요',
+    directions: '수인분당선 남동인더스파크역에서 걸어서 3분\n공원 지하주차장 이용 (행사 기간 혼잡)',
+    stampReward: '안내소에서 다회용 컵을 드려요',
+    booths: [
+      { slug: 'demo-nd-shrink', name: '야광 슈링클스 키링', mode: 'queue', group: '체험', category: '체험존 A', desc: '직접 그려 구우면 줄어드는 키링 · 1팀 8분', location: '체험존 A', wait: 5, svc: 8, x: 62, y: 46 },
+      { slug: 'demo-nd-plaster', name: '야광 석고방향제', mode: 'slot', group: '체험', category: '체험존 A', desc: '회차당 30분 · 향을 골라 만드는 석고 방향제', location: '체험존 A', wait: 0, svc: 30, x: 74, y: 46 },
+      { slug: 'demo-nd-face', name: '야광 페이스페인팅', mode: 'queue', group: '체험', category: '체험존 B', desc: '1명 5분 · 어두워지면 빛나요', location: '체험존 B', wait: 3, svc: 5, x: 86, y: 46 },
+      { slug: 'demo-nd-keycap', name: '커스텀 키캡 키링', mode: 'queue', group: '체험', category: '체험존 B', desc: '키보드 키캡에 이름을 새긴 키링 · 1팀 8분', location: '체험존 B', wait: 2, svc: 8, x: 62, y: 56 },
+      { slug: 'demo-nd-herb', name: '허바리움 볼펜', mode: 'slot', group: '체험', category: '체험존 C', desc: '회차당 30분 · 꽃을 담은 볼펜 만들기', location: '체험존 C', wait: 0, svc: 30, x: 74, y: 56 },
+      { slug: 'demo-nd-pot', name: '프리저브드 빛화분', mode: 'slot', group: '체험', category: '체험존 C', desc: '회차당 30분 · 밤에 빛나는 미니 화분', location: '체험존 C', wait: 0, svc: 30, x: 86, y: 56 },
+    ],
+    places: [
+      { kind: 'food', name: '남동 수제버거', description: '푸드존', x: 10, y: 46, crowd: 'high', menu: [{ name: '수제버거', price: '8,000원' }, { name: '치즈버거', price: '9,000원' }, { name: '감자튀김', price: '4,000원' }] },
+      { kind: 'food', name: '닭꼬치 · 소떡소떡', description: '푸드존', x: 18, y: 46, crowd: 'mid', menu: [{ name: '닭꼬치', price: '4,000원', desc: '소금 / 양념' }, { name: '소떡소떡', price: '4,000원' }, { name: '회오리 감자', price: '4,000원' }] },
+      { kind: 'food', name: '타코야끼 · 야끼소바', description: '푸드존', x: 26, y: 46, crowd: 'mid', menu: [{ name: '타코야끼 (6구)', price: '5,000원' }, { name: '야끼소바', price: '7,000원' }] },
+      { kind: 'food', name: '떡볶이 · 순대', description: '푸드존', x: 34, y: 46, crowd: 'high', menu: [{ name: '떡볶이', price: '5,000원' }, { name: '순대', price: '5,000원' }, { name: '튀김 모둠', price: '5,000원', sold_out: true }] },
+      { kind: 'food', name: '닭강정', description: '푸드존', x: 42, y: 46, crowd: 'mid', menu: [{ name: '닭강정 (중)', price: '12,000원' }, { name: '닭강정 (소)', price: '8,000원' }] },
+      { kind: 'food', name: '국수 · 만두', description: '푸드존', x: 10, y: 56, crowd: 'low', menu: [{ name: '잔치국수', price: '6,000원' }, { name: '손만두 (6개)', price: '6,000원' }] },
+      { kind: 'food', name: '화덕피자', description: '푸드존', x: 18, y: 56, crowd: 'mid', menu: [{ name: '마르게리타', price: '13,000원' }, { name: '페퍼로니', price: '14,000원' }] },
+      { kind: 'food', name: '커피 · 에이드', description: '푸드존', x: 26, y: 56, crowd: 'low', menu: [{ name: '아메리카노', price: '3,500원' }, { name: '자몽 에이드', price: '5,000원' }, { name: '생수', price: '1,000원' }] },
+      { kind: 'food', name: '츄러스 · 아이스크림', description: '푸드존', x: 34, y: 56, crowd: 'low', menu: [{ name: '수제 츄러스', price: '4,500원' }, { name: '아이스크림', price: '3,500원' }] },
+      { kind: 'food', name: '과일주스 · 디저트', description: '푸드존', x: 42, y: 56, crowd: 'low', menu: [{ name: '생과일주스', price: '5,500원' }, { name: '약과 (3개)', price: '4,000원' }] },
+      { kind: 'market', name: '마켓존 A · 핸드메이드', description: '액세서리 · 가죽 · 도자', x: 22, y: 70, menu: [{ name: '가죽 키링', price: '12,000원' }, { name: '은 귀걸이', price: '18,000원' }, { name: '도자 컵', price: '22,000원' }] },
+      { kind: 'market', name: '마켓존 B · 소품 · 문구', description: '엽서 · 스티커 · 조명', x: 38, y: 70, menu: [{ name: '엽서 세트', price: '5,000원' }, { name: '무드등', price: '29,000원' }] },
+      { kind: 'market', name: '마켓존 C · 디저트', description: '구움과자 · 수제청', x: 54, y: 70, menu: [{ name: '휘낭시에 (2개)', price: '5,000원' }, { name: '수제 레몬청', price: '14,000원' }] },
+      { kind: 'market', name: '마켓존 D · 반려동물', description: '간식 · 옷 · 장난감', x: 70, y: 70, menu: [{ name: '수제 간식', price: '8,000원' }, { name: '스카프', price: '12,000원' }] },
+      { kind: 'market', name: '마켓존 E · 플라워', description: '드라이플라워 · 화분', x: 30, y: 80, menu: [{ name: '드라이 부케', price: '15,000원' }, { name: '미니 화분', price: '9,000원' }] },
+      { kind: 'market', name: '마켓존 F · 의류 · 패브릭', description: '티셔츠 · 에코백', x: 46, y: 80, menu: [{ name: '에코백', price: '14,000원' }, { name: '티셔츠', price: '19,000원' }] },
+      { kind: 'market', name: '마켓존 G · 생활잡화', description: '비누 · 캔들 · 디퓨저', x: 62, y: 80, menu: [{ name: '수제 비누', price: '7,000원' }, { name: '소이 캔들', price: '14,000원' }] },
+      { kind: 'stage', name: '메인 무대', description: '축구장 잔디 · 공연 · 버스킹', x: 50, y: 13 },
+      { kind: 'info', name: '안내소 · 분실물', description: '다회용기 반납 · 스탬프 경품 · 수유실', x: 50, y: 90 },
+      { kind: 'facility', name: '이동식 화장실 (북)', description: '남 · 여 · 장애인', x: 12, y: 32, crowd: 'low' },
+      { kind: 'facility', name: '이동식 화장실 (중)', description: '남 · 여 · 장애인', x: 88, y: 64, crowd: 'mid' },
+      { kind: 'facility', name: '이동식 화장실 (남)', description: '남 · 여 · 장애인', x: 12, y: 88, crowd: 'high' },
+      { kind: 'parking', name: '공원 지하주차장', description: '행사 기간 혼잡 · 대중교통 권장', x: 84, y: 90, crowd: 'high' },
+    ],
+    programs: [
+      { title: '키다리 삐에로 순회 공연', kind: 'stage', from: -0.4, to: 0.6, place: '메인 무대', description: '행사장 전역을 돌아요' },
+      { title: '버블쇼', kind: 'stage', from: 1, to: 1.6, place: '메인 무대' },
+      { title: '마술 공연', kind: 'stage', from: 2.5, to: 3.1, place: '메인 무대' },
+      { title: '경품 추첨', kind: 'event', from: 4, to: 4.3, place: '메인 무대', description: '스탬프 완주자 대상' },
+    ],
+    notices: [
+      { title: '먹거리는 앱으로 주문하세요', body: '줄을 서지 않아도 돼요. 준비되면 알림톡으로 알려 드려요.', pinned: true },
+      { title: '다회용기를 써요', body: '보증금 1,000원을 받고, 안내소에 반납하면 돌려드려요.' },
+      { title: '주차장이 혼잡해요', body: '평일에는 산단 근로자 차량이 많아요. 남동인더스파크역에서 걸어서 3분이에요.' },
+    ],
+    stamps: ['마켓존 A · 핸드메이드', '남동 수제버거', '야광 슈링클스 키링', '마켓존 E · 플라워', '메인 무대'],
+    draw: { title: '메이커스 럭키드로우', prize: '남동 마켓 셀러 상품 세트', description: '추첨은 메인 무대에서 해요', require_stamp: true },
+    survey: { title: '오늘 메이커스 페스티벌 어떠셨어요?', best: ['마켓', '먹거리', '체험', '공연', '분위기'] },
+  },
 }
 
 const settings = (service_min: number) => ({ max_party_size: 4, allow_duplicate_phone: false, queue_close_before_min: 0, notify_ahead_teams: 3, call_valid_min: 10, reserve_open_at: null, reserve_close_before_min: 0, reminders: [], noshow_after_start_min: 10, transfer_noshow_to_queue: false, cancel_until_before_min: 0, sms_fallback: false, service_min })
@@ -165,7 +219,7 @@ async function seedSpec(eventId: string, d: (typeof DEMO_EVENTS)[number], s: Spe
   await supabase.from('events').update({
     status: 'open', starts_at: day.toISOString(), ends_at: new Date(day.getTime() + 2 * 86400_000).toISOString(),
     map_image_url: d.map, accent_color: s.accent, template: 'demo', venue: s.venue ?? 'outdoor', map_width_m: s.widthM ?? 220,
-    stamp_enabled: true, stamp_goal: null, stamp_reward_text: s.stampReward, info_text: s.info, contact_text: '운영본부 010-2244-3585', directions_text: s.directions,
+    stamp_enabled: true, stamp_goal: null, stamp_reward_text: s.stampReward, info_text: s.info, contact_text: '운영본부 010-8018-8492', directions_text: s.directions,
   } as any).eq('id', eventId)
   const { data: bs } = await supabase.from('booths').insert(s.booths.map((b, i) => ({ slug: b.slug, name: b.name, mode: b.mode, group_name: b.group, category: b.category, description: b.desc, location: b.location, demo_wait: b.wait, settings: settings(b.svc), event_id: eventId, is_paused: false, sort_order: (i + 1) * 10, image_url: null, icon_url: null })) as any).select()
   const boothId = (slug: string) => (bs as any[])?.find(b => b.slug === slug)?.id ?? null
