@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { demoOnly } from '../lib/demo'
 import { DEMO_EVENTS, seedMissingDemoEvents } from '../lib/demoEvents'
-import { Spinner, Alert } from '../components/ui'
+import { Building, Alert } from '../components/ui'
 import DemoBanner from '../components/DemoBanner'
 
 /**
@@ -31,7 +31,7 @@ export default function Demo() {
     })()
   }, []) // eslint-disable-line
   if (err) return <div className="p-6"><Alert kind="error">{err}</Alert></div>
-  if (!ready) return <div className="p-6"><Spinner /><p className="mt-3 text-center text-sm text-gray-500">데모 준비 중…</p></div>
+  if (!ready) return <Building />
   return (
     <div className="mx-auto min-h-dvh max-w-md bg-white pb-10">
       <DemoBanner />

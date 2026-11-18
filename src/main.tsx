@@ -23,7 +23,7 @@ import OrderCheckout from './pages/customer/OrderCheckout'
 import OrderStatus from './pages/customer/OrderStatus'
 import VendorOrders from './pages/vendor/VendorOrders'
 import HostBoard from './pages/host/HostBoard'
-import { Spinner } from './components/ui'
+import { Spinner, Building } from './components/ui'
 // 스태프·현황판은 그 주소로 바로 들어오므로 지연 로딩이 왕복만 늘린다 → 메인 번들에 포함 (합쳐서 ~16KB)
 import StaffLogin from './pages/staff/StaffLogin'
 import StaffBoardPage from './pages/staff/StaffBoard'
@@ -82,7 +82,7 @@ if (dk && only && dk !== only) location.replace(`/demo?ev=${only}&auto=1`)
 else if (dm && !isDemo()) location.replace(`/demo?ev=${only ?? dk}&auto=1`)
 else ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Suspense fallback={<Spinner />}>
+    <Suspense fallback={location.pathname.startsWith('/demo') ? <Building /> : <Spinner />}>
       <RouterProvider router={router} />
     </Suspense>
   </React.StrictMode>,
