@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { rpc, supabase } from '../../lib/supabase'
+import { rpc, supabase, DEMO } from '../../lib/supabase'
 import { useAsync, fmtTime, useTick, fmtWait } from '../../lib/util'
 
 interface B { id: string; name: string; mode: string; is_paused: boolean; pause_mode?: string | null; window_state?: 'open' | 'before_open' | 'after_close'; queue_open_daily_time?: string | null; queue_close_daily_time?: string | null; waiting_teams: number; called: number[]; last_in: number | null; avg_service_min: number | null; next_slot: { starts_at: string; left: number } | null; current_slot?: { starts_at: string; ends_at: string } | null }
@@ -13,9 +13,9 @@ export default function Board() {
   const { data, reload } = useAsync<Data>(() => rpc<Data>('event_board', { p_slug: slug }), [slug])
   useTick(1000)
   useEffect(() => {
-    const ch = supabase.channel(`board-${slug}`).on('postgres_changes', { event: '*', schema: 'public', table: 'booth_versions' }, () => reload()).subscribe()
+    const ch = DEMO ? null : supabase.channel(`board-${slug}`).on('postgres_changes', { event: '*', schema: 'public', table: 'booth_versions' }, () => reload()).subscribe()   // 데모는 실제 서버에 붙지 않는다
     const iv = setInterval(() => { if (document.visibilityState === 'visible') reload() }, 3000)
-    return () => { supabase.removeChannel(ch); clearInterval(iv) }
+    return () => { if (ch) supabase.removeChannel(ch); clearInterval(iv) }
   }, [slug]) // eslint-disable-line
 
   if (!data) return <div className="min-h-dvh bg-gray-950" />

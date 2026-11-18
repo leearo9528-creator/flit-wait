@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { supabase } from './supabase'
+import { supabase, DEMO } from './supabase'
 import { TICKET_LABEL } from './ticketState'
 
 export const fmtTime = (iso: string) =>
@@ -28,7 +28,8 @@ export function useBoothLive(boothId: string | undefined, reload: () => void, po
   reloadRef.current = reload
   useEffect(() => {
     if (!boothId) return
-    const ch = realtime ? supabase
+    // 데모는 가짜 DB 라 실제 서버의 실시간 채널이 필요 없다 — 붙이면 프로덕션 서버로 웹소켓이 나간다 (폴링만으로 갱신)
+    const ch = realtime && !DEMO ? supabase
       .channel(`booth-${boothId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'booth_versions', filter: `booth_id=eq.${boothId}` }, () => reloadRef.current())
       .subscribe() : null
