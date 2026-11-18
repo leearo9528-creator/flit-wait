@@ -4,6 +4,7 @@ import { cachedRpc, DEMO, rpc } from '../../lib/supabase'
 import { useAsync, fmtTime, fmtPhone, LS, me } from '../../lib/util'
 import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
+import { thirdTab } from '../../lib/guide'
 import { PLACE_KIND_LABEL, type EventGuide } from '../../lib/types'
 import { liveOf, TONE_PIN, TONE_TEXT } from '../../lib/live'
 import { cart, cartLines, cartTotal, cartCount, priceOf, won, type Cart } from '../../lib/orders'
@@ -167,7 +168,8 @@ export default function PlaceDetail() {
           </Link>
         </div>
       )}
-      <CustomerNav slug={slug} active="hub" />
+      {/* 하단 바 — 먹거리·마켓 가게면 '먹거리' 칸을, 먹거리 없는 행사의 체험부스면 '체험' 칸을 켠다. 전에는 어디서 들어와도 '지도' 가 켜졌다 */}
+      <CustomerNav slug={slug} active={(thirdTab(slug) === 'food' ? p.kind === 'food' || p.kind === 'market' : p.kind === 'booth') ? 'food' : 'hub'} />
     </div>
   )
 }

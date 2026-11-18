@@ -222,7 +222,7 @@ export default function ParkHome() {
         </div>
       )}
       {!term && mode === '3d' && (
-        <Suspense fallback={<div className="mt-3 flex h-[62dvh] min-h-[360px] items-center justify-center bg-slate-100"><Spinner /></div>}>
+        <Suspense fallback={<div className="relative mt-3 h-[62dvh] min-h-[360px] bg-slate-100"><div className="absolute inset-0 flex flex-col items-center justify-center gap-3"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" /><p className="text-sm font-semibold text-gray-600">행사장을 3D 로 세우는 중…</p></div></div>}>
           <Map3D imageUrl={event.map_image_url!} mPerUnit={fit?.mPerUnit ?? 2} indoor={(event as any).venue === 'indoor'} items={rows} shownIds={shown.map(r => r.p.id)} target={target} me={me && meIn ? me : null} onTap={tap} onAspect={setAspect} />
         </Suspense>
       )}
