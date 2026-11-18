@@ -6,7 +6,8 @@ import { Ticket } from '../../lib/types'
 import { Page, Card, Button, Alert, Spinner, Badge } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import { useEffect } from 'react'
-import { ticketActive, ticketFinal } from '../../lib/ticketState'
+import { ticketActive, ticketFinal, ticketEntered } from '../../lib/ticketState'
+import { useStampClaim } from '../../lib/stamp'
 /** 순서 미루기 — 서버 함수 defer_ticket (0044). 급히 꺼야 하면 VITE_DEFER=0. 부스별로는 설정 defer_max=0 */
 const DEFER_ENABLED = import.meta.env.VITE_DEFER !== '0'
 
@@ -54,6 +55,9 @@ export default function MyTicket() {
     document.addEventListener('visibilitychange', onVis)
     return () => { clearTimeout(timer); document.removeEventListener('visibilitychange', onVis) }
   }, [token, t?.status, t?.ahead]) // eslint-disable-line
+
+  // 입장 처리되면 이 부스가 스탬프 지점일 때 스탬프가 찍힌다 (0050)
+  const stamp = useStampClaim(t?.event?.slug, !!t && ticketEntered(t.status), { ticket: token })
 
   if (loading) return <Spinner />
   if (!t) return <Page><Alert kind="error">{error ?? '티켓을 찾을 수 없습니다.'}</Alert></Page>  // 폴링 실패 시 마지막 정상 화면 유지
@@ -115,6 +119,7 @@ export default function MyTicket() {
 
       <div className="px-5 pt-5">
       {t.event.notice && <div className="mb-4"><Alert kind="warn">{t.event.notice}</Alert></div>}
+      {stamp && <Link to={`/e/${t.event.slug}/stamp`} className="mb-4 block"><Alert kind="success">{stamp.added.join(' · ')} 스탬프가 찍혔어요. ({stamp.count}/{stamp.goal}) 스탬프 카드 보기 ›</Alert></Link>}
       <dl className="mb-5 divide-y divide-gray-100 text-[15px]">
         <div className="flex justify-between py-2.5"><dt className="text-gray-500">이름 · 인원</dt><dd className="font-semibold text-gray-900">{t.name} · {t.party_size}명</dd></div>
         {t.phone_tail && <div className="flex justify-between py-2.5"><dt className="text-gray-500">연락처</dt><dd className="font-semibold tabular-nums text-gray-900">010-****-{t.phone_tail}</dd></div>}
