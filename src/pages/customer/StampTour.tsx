@@ -1,18 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { rpc, DEMO } from '../../lib/supabase'
-import { useAsync, LS } from '../../lib/util'
+import { useAsync } from '../../lib/util'
+import { cardToken, claimStamps } from '../../lib/stamp'
 import { Alert, Spinner, Button } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import type { StampStatus } from '../../lib/types'
-
-/** 손님 기기마다 카드 하나 — localStorage 토큰. 지우면 새 카드가 된다 (행사 하루이틀이라 충분) */
-function cardToken(slug: string) {
-  const k = `stamp:${slug}`
-  let t = LS.get<string>(k)
-  if (!t) { t = crypto.randomUUID().replace(/-/g, ''); LS.set(k, t) }
-  return t
-}
 
 /**
  * 스탬프 투어 — /e/:slug/stamp 는 내 카드, /e/:slug/stamp/:code 는 부스 QR 진입(적립 후 카드로)
@@ -38,6 +31,12 @@ export default function StampTour() {
       reload()
     })()
   }, [code]) // eslint-disable-line
+
+  // 자동 적립 — 입장 처리된 체험·받은 주문이 스탬프 지점이면 여기서 찍힌다 (QR 로 들어온 경우는 위에서 안내하므로 건너뛴다)
+  useEffect(() => {
+    if (code) return
+    claimStamps(slug).then(r => { if (r?.added.length) { setToast({ kind: 'success', text: `${r.added.join(' · ')} 스탬프가 찍혔어요. (${r.count}/${r.goal})` }); reload() } })
+  }, [slug]) // eslint-disable-line
 
   if (loading && !data) return <Spinner />
   if (error && !data) return <div className="p-6"><Alert kind="error">{error}</Alert></div>
@@ -79,7 +78,7 @@ export default function StampTour() {
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-center text-sm text-gray-500">부스에 붙어 있는 스탬프 QR 을 카메라로 찍으면 자동으로 적립돼요.</p>
+            <p className="mt-4 text-center text-sm text-gray-500">체험에 입장하거나 주문한 음식을 받으면 스탬프가 자동으로 찍혀요.<br />스탬프 QR 이 붙어 있는 곳은 카메라로 찍어 주세요.</p>
             <div className="mt-3"><Link to={`/e/${slug}/map`}><Button variant="secondary">지도에서 부스 찾기</Button></Link></div>
           </>
         )}

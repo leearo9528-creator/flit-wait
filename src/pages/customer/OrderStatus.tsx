@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { rpc, DEMO } from '../../lib/supabase'
 import { useAsync, fmtTime } from '../../lib/util'
 import { Alert, Button, Spinner } from '../../components/ui'
+import { useStampClaim } from '../../lib/stamp'
 import CustomerNav from '../../components/CustomerNav'
 import DemoBanner from '../../components/DemoBanner'
 import type { OrderPublic } from '../../lib/types'
@@ -34,6 +35,9 @@ export default function OrderStatus() {
     if (o?.status === 'ready' && prev.current && prev.current !== 'ready') { try { navigator.vibrate?.([300, 150, 300]) } catch { /* 진동 없는 기기 */ } }
     if (o) prev.current = o.status
   }, [o?.status]) // eslint-disable-line
+
+  // 받으면 이 가게가 스탬프 지점일 때 스탬프가 찍힌다 (0050)
+  const stamp = useStampClaim(o?.event.slug, o?.status === 'picked_up', { order: token })
 
   if (loading && !o) return <Spinner />
   if (!o) return <div className="p-6"><Alert kind="error">{error ?? '주문을 찾을 수 없습니다.'}</Alert></div>
@@ -89,6 +93,7 @@ export default function OrderStatus() {
         {!cancelled && <p className="mt-2 text-sm text-gray-600">{o.pay_status === 'paid' ? '결제 완료' : '결제는 받을 때 가게에서 해요.'}</p>}
 
         {err && <div className="mt-4"><Alert kind="error">{err}</Alert></div>}
+        {stamp && <Link to={`/e/${slug}/stamp`} className="mt-4 block"><Alert kind="success">{stamp.added.join(' · ')} 스탬프가 찍혔어요. ({stamp.count}/{stamp.goal}) 스탬프 카드 보기 ›</Alert></Link>}
         <div className="mt-6 space-y-2">
           {!cancelled && !done && <Link to={`/e/${slug}/map?to=${o.place.id}`} className="flex h-12 items-center justify-center rounded-xl text-[15px] font-semibold text-gray-900 ring-1 ring-gray-300 active:bg-gray-50">가게 가는 길 보기</Link>}
           {o.can_cancel && !ask && <button type="button" onClick={() => setAsk(true)} className="block w-full py-3 text-center text-sm font-semibold text-gray-500 underline">주문 취소</button>}
