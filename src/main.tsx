@@ -35,6 +35,20 @@ const AdminEvent = lazy(() => import('./pages/admin/AdminEvent'))
 const AdminBooth = lazy(() => import('./pages/admin/AdminBooth'))
 
 
+// 배포 직후, 예전 앱 셸(서비스 워커 캐시)로 떠 있는 기기가 3D 지도·데모·관리자 묶음을 받으려 하면 그 파일 이름은 이미 없어 실패한다 —
+// 3D 지도가 안 열리던 원인 (2026-11-18). 새 서비스 워커를 받아 한 번만 새로 로드한다 (30초 안에 또 실패하면 반복하지 않는다)
+window.addEventListener('vite:preloadError', e => {
+  const KEY = 'flit:chunk-reload'
+  try {
+    if (Date.now() - Number(sessionStorage.getItem(KEY) || 0) < 30000) return
+    sessionStorage.setItem(KEY, String(Date.now()))
+  } catch { return }   // 저장소를 못 쓰면 반복을 막을 수 없으니 새로 로드하지 않는다
+  e.preventDefault()
+  const go = () => location.reload()
+  if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(r => r?.update()).catch(() => {}).finally(go)
+  else go()
+})
+
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/demo', element: <Demo /> },

@@ -1,13 +1,20 @@
 import { createClient } from '@supabase/supabase-js'
-import { isDemo, makeDemoFetch } from './demo'
+import { isDemo } from './demo'
 
 // 데모 모드(/demo)면 네트워크 대신 브라우저 안 가짜 DB 로 — 프로덕션에는 요청이 한 건도 안 나간다
 export const DEMO = isDemo()
 export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY,
-  DEMO ? { global: { fetch: makeDemoFetch() } } : undefined,
+  DEMO ? { global: { fetch: demoFetch } } : undefined,
 )
+
+// 가짜 서버는 데모일 때만, 첫 요청 때 내려받는다 — 실제 손님 번들에서 뺐다. 한 번 만든 서버를 계속 쓴다 (만들 때 샘플을 읽어 두므로 여러 벌 만들면 안 된다)
+let demoServer: Promise<typeof fetch> | null = null
+function demoFetch(...a: Parameters<typeof fetch>): ReturnType<typeof fetch> {
+  demoServer ??= import('./demoServer').then(m => m.makeDemoFetch())
+  return demoServer.then(f => f(...a))
+}
 
 export const PUBLIC_BASE_URL: string =
   import.meta.env.VITE_PUBLIC_BASE_URL || window.location.origin
