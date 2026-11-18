@@ -77,6 +77,17 @@ export function Badge({ children, tone = 'gray' }: { children: ReactNode; tone?:
   return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${c}`}>{children}</span>
 }
 
+/** 첫 진입·데모 준비처럼 몇 초 걸리는 대기 화면. index.html 의 #splash 와 같은 모양·문구 — 번들이 뜨기 전 화면에서 그대로 이어지게 (클래스는 index.html 의 <style> 것을 쓴다) */
+export function Building() {
+  return (
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-[18px] text-gray-900">
+      <div className="sp-ring" />
+      <div className="sp-lines"><span>행사장 짓는 중…</span><span>부스 세우는 중…</span><span>푸드트럭 자리 잡는 중…</span><span>지도 펼치는 중…</span></div>
+      <p className="text-[13px] text-gray-500">잠시만 기다려 주세요</p>
+    </div>
+  )
+}
+
 export function Spinner() {
   return <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" /></div>
 }
