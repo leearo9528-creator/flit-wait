@@ -318,6 +318,16 @@ function createEngine(canvas: HTMLCanvasElement, labelBox: HTMLDivElement, cb: {
   }
 }
 
+/** 3D 지도가 뜨기 전 화면 — 묶음을 받는 동안(ParkHome) 과 바닥을 세우는 동안(Map3D) 둘 다 쓴다 */
+export function Map3DLoading() {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-100">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
+      <p className="text-sm font-semibold text-gray-600">행사장을 3D 로 세우는 중…</p>
+    </div>
+  )
+}
+
 export default function Map3D({ imageUrl, mPerUnit, indoor = false, items, shownIds, target, me, onTap, onAspect }: {
   imageUrl: string; mPerUnit: number; indoor?: boolean; items: Item[]; shownIds: string[]; target: GuidePlace | null; me: { x: number; y: number } | null
   onTap: (p: GuidePlace) => void; onAspect?: (a: number) => void
@@ -378,7 +388,9 @@ export default function Map3D({ imageUrl, mPerUnit, indoor = false, items, shown
       <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full touch-none" aria-label="3D 행사장 지도" />
       <div ref={labelRef} className="pointer-events-none absolute inset-0 overflow-hidden" />
       {fail && <p className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-gray-500">이 기기에서는 3D 지도를 열 수 없어요. 위의 '지도'로 봐 주세요.</p>}
-      {!fail && !state.walk && hint && <p className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 whitespace-nowrap rounded-full bg-gray-900/80 px-3 py-1.5 text-xs font-semibold text-white">한 손가락 돌리기 · 두 손가락 이동·확대</p>}
+      {/* 배치도 그림을 받아 바닥·부스를 세우는 동안 — 전에는 빈 회색 화면이라 고장처럼 보였다. ParkHome 의 Suspense fallback 과 같은 모양 */}
+      {!fail && !built && <Map3DLoading />}
+      {!fail && !!built && !state.walk && hint && <p className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 whitespace-nowrap rounded-full bg-gray-900/80 px-3 py-1.5 text-xs font-semibold text-white">한 손가락 돌리기 · 두 손가락 이동·확대</p>}
       {!fail && !state.walk && (
         <>
           <div className="absolute right-3 top-3 flex flex-col gap-2">
