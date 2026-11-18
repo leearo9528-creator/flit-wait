@@ -225,7 +225,7 @@ export function makeDemoFetch(): typeof fetch {
         const fake = Array.from({ length: fakeN }, (_, k) => ({ id: `fake|${sl.id}|${k}`, ticket_no: null, name: `${FAM[(k * 5 + 3) % FAM.length]}○○`, phone_tail: String(1000 + (k * 811) % 9000), party_size: 2, status: (past && k % 4 !== 3 ? 'checked_in' : 'waiting'), called_at: null, created_at: sl.starts_at, source: 'online', checked_in_at: past ? sl.starts_at : null, updated_at: sl.starts_at }))
         return { id: sl.id, starts_at: sl.starts_at, ends_at: sl.ends_at, capacity: sl.capacity, status: sl.status, tickets: [...real, ...fake] }
       })
-      return { booth: b, date: today(), dates: [today()], queue: q.filter(t => t.status === 'waiting' || t.status === 'called').sort((x, y) => ord(x) - ord(y)).map(staffT), history: q.filter(t => !['waiting', 'called'].includes(t.status)).sort((x, y) => y.ticket_no - x.ticket_no).slice(0, 30).map(staffT), done_today: q.filter(t => t.status === 'done' || t.status === 'checked_in').length, noshow_today: q.filter(t => t.status === 'no_show').length, slots }
+      return { booth: b, date: today(), dates: [today()], queue: q.filter(t => t.status === 'waiting' || t.status === 'called').sort((x, y) => ord(x) - ord(y)).map(staffT), history: q.filter(t => !['waiting', 'called'].includes(t.status)).sort((x, y) => y.ticket_no - x.ticket_no).slice(0, 300).map(staffT), done_today: q.filter(t => t.status === 'done' || t.status === 'checked_in').length, noshow_today: q.filter(t => t.status === 'no_show').length, slots }
     },
     staff_update_ticket: ({ p_booth, p_ticket, p_action }) => {
       const b = T('booths').find(x => x.id === p_booth); if (!b) throw new Error('부스를 찾을 수 없습니다.')

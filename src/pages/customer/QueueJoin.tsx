@@ -77,7 +77,7 @@ export default function QueueJoin() {
             <div className="mt-1 text-sm text-gray-600">오늘은 더 이상 접수를 받지 않아요.<br />내일 운영 시간에 다시 만나요.</div>
           </div>
         : <div className="mb-4 rounded-2xl bg-red-50 p-5 text-center ring-1 ring-red-200">
-            <div className="text-lg font-bold text-red-800">대기 인원이 많아 접수가 일시 중단 되었습니다.</div>
+            <div className="text-lg font-bold text-red-800">대기 인원이 많아 접수가 일시 중단되었습니다.</div>
             <div className="mt-1 text-sm text-red-700">원활한 운영을 위해 최선을 다하겠습니다.</div>
           </div>
       )}
@@ -94,7 +94,8 @@ export default function QueueJoin() {
           <Alert kind="info">
             이미 접수한 대기표가 있어요. <Link to={`/t/${existing.token}`} className="font-semibold underline">내 대기 현황 보기</Link>
           </Alert>
-          {!again && <button type="button" onClick={() => setAgain(true)} className="mt-3 text-sm text-gray-500 underline">다른 사람 이름으로 한 번 더 접수</button>}
+          {/* 접수를 받지 않는 동안에는 숨긴다 — 눌러도 폼이 안 열려 아무 일도 없는 링크였다 */}
+          {!again && !booth.is_paused && !closed && !windowBlocked && <button type="button" onClick={() => setAgain(true)} className="mt-3 text-sm text-gray-500 underline">다른 사람 이름으로 한 번 더 접수</button>}
         </div>
       )}
 
