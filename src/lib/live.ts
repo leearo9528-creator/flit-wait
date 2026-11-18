@@ -23,7 +23,8 @@ export function liveOf(p: GuidePlace): Live | null {
     if (b.today_left <= 0) return { text: '예약 마감', tone: 'off', sort: 9998 }
     return b.next_slot_at ? { text: `${fmtTime(b.next_slot_at)} 회차`, tone: 'time', sort: 20 } : { text: `잔여 ${b.today_left}석`, tone: 'time', sort: 20 }
   }
-  if (p.crowd) return { text: CROWD_LABEL[p.crowd], tone: p.crowd === 'low' ? 'go' : p.crowd === 'mid' ? 'mid' : 'busy', sort: p.crowd === 'low' ? 100 : p.crowd === 'mid' ? 200 : 300 }
+  // 주차장은 '혼잡' 대신 '만차' — 주최 화면에서 누르는 단추 글자와 같게
+  if (p.crowd) return { text: p.kind === 'parking' && p.crowd === 'high' ? '만차' : CROWD_LABEL[p.crowd], tone: p.crowd === 'low' ? 'go' : p.crowd === 'mid' ? 'mid' : 'busy', sort: p.crowd === 'low' ? 100 : p.crowd === 'mid' ? 200 : 300 }
   return null
 }
 

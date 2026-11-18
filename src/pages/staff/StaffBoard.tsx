@@ -190,7 +190,7 @@ function Board({ sess, slug }: { sess: StaffSession; slug: string }) {
             </div>
           </section>
 
-          <History items={data.history ?? []} act={act} busyId={busyId} big={big} />
+          <History items={data.history ?? []} act={act} busyId={busyId} big={big} doneToday={data.done_today} noshowToday={data.noshow_today} />
         </div>
       )}
 
@@ -264,19 +264,20 @@ function SlotCard({ s, act, busyId, big, sess, onWalkin }: { s: StaffBoard['slot
 }
 
 /** 오늘 처리 내역 — 늦게 온 손님 입장, 실수 복구 (복구하면 원래 접수 시각 기준으로 대기 맨 앞에 선다) */
-function History({ items, act, busyId, big }: { items: StaffTicket[]; act: (id: string, a: string) => void; busyId: string | null; big: boolean }) {
+function History({ items, act, busyId, big, doneToday, noshowToday }: { items: StaffTicket[]; act: (id: string, a: string) => void; busyId: string | null; big: boolean; doneToday?: number; noshowToday?: number }) {
   const [open, setOpen] = useState(false)
   const [filter, setFilter] = useState<'all' | 'checked_in' | 'no_show' | 'cancelled'>('all')
   const [q, setQ] = useState('')
   const norm = (t: StaffTicket) => t.status === 'done' ? 'checked_in' : t.status
   const shown = items.filter(t => (filter === 'all' || norm(t) === filter) && (!q || t.name.includes(q) || String(t.ticket_no ?? '').includes(q) || (t.phone_tail ?? '').includes(q)))
+  // 머리 숫자는 화면 위쪽과 같은 '오늘 전체' — 목록은 최근 것만 내려오므로(서버 300건) 목록에서 세면 위쪽 숫자와 어긋났다
   const counts = { checked_in: items.filter(t => norm(t) === 'checked_in').length, no_show: items.filter(t => t.status === 'no_show').length, cancelled: items.filter(t => t.status === 'cancelled').length }
   const label: Record<string, string> = { checked_in: '입장 완료', done: '입장 완료', no_show: '노쇼', cancelled: '취소' }
   const tone: Record<string, 'green' | 'red' | 'gray'> = { checked_in: 'green', done: 'green', no_show: 'red', cancelled: 'gray' }
   return (
     <section className="mt-6">
       <button onClick={() => setOpen(o => !o)} className="flex w-full items-center justify-between rounded-xl bg-white px-4 py-3 text-left ring-1 ring-gray-200">
-        <span className="text-sm font-semibold text-gray-700">오늘 처리 내역 <span className="font-normal text-gray-500">입장 {counts.checked_in} · 노쇼 {counts.no_show} · 취소 {counts.cancelled}</span></span>
+        <span className="text-sm font-semibold text-gray-700">오늘 처리 내역 <span className="font-normal text-gray-500">입장 {Math.max(counts.checked_in, doneToday ?? 0)} · 노쇼 {Math.max(counts.no_show, noshowToday ?? 0)} · 취소 {counts.cancelled}</span></span>
         <span className="text-gray-400">{open ? '▲' : '▼'}</span>
       </button>
       {open && (

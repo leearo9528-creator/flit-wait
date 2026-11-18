@@ -60,16 +60,16 @@ export default function HostBoard() {
 
       <section className="px-4 pt-7">
         <h2 className="text-[17px] font-bold text-gray-900">공지 올리기</h2>
-        <p className="text-xs text-gray-500">올리는 즉시 방문객 화면 맨 위에 떠요.</p>
+        <p className="text-xs text-gray-500">올리는 즉시 방문객 화면 맨 위에 떠요. 아래 문구를 누르면 제목에 들어가고, <b>공지 올리기</b>를 눌러야 올라가요.</p>
         <div className="mt-2 flex flex-wrap gap-2">
-          {QUICK.map(q => <button key={q} type="button" onClick={() => setTitle(q)} className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-800 ring-1 ring-gray-300 active:bg-gray-50">{q}</button>)}
+          {QUICK.map(q => <button key={q} type="button" onClick={() => setTitle(q)} aria-pressed={title === q} className={`rounded-full px-3 py-1.5 text-sm font-semibold ring-1 ${title === q ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 active:bg-gray-50'}`}>{q}</button>)}
         </div>
         <form onSubmit={post} className="mt-3 space-y-2">
           <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="제목 (예: 주차장이 만차예요)" maxLength={60} required />
           <Input value={body} onChange={e => setBody(e.target.value)} placeholder="덧붙일 말 (선택)" maxLength={300} />
           <label className="flex items-center gap-2.5 text-sm text-gray-700"><input type="checkbox" checked={urgent} onChange={e => setUrgent(e.target.checked)} className="h-5 w-5 rounded" />긴급으로 올리기 (빨간 띠로 맨 위에)</label>
           {err && <Alert kind="error">{err}</Alert>}
-          <Button type="submit" loading={busy} disabled={title.trim().length < 2}>{sent ? '올렸어요' : '공지 올리기'}</Button>
+          <Button type="submit" loading={busy} disabled={title.trim().length < 2}>{sent ? '올렸어요' : title.trim().length >= 2 ? `‘${title.trim()}’ 공지 올리기` : '공지 올리기'}</Button>
         </form>
 
         {data.notices.length > 0 && (
