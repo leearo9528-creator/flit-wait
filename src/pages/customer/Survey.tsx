@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { rpc } from '../../lib/supabase'
 import { useAsync, LS } from '../../lib/util'
@@ -18,6 +18,12 @@ export default function Survey() {
   const token = cardToken(slug)
   const { data, error, loading, reload } = useAsync<SurveyPublic>(() => rpc('survey_get', { p_slug: slug, p_card: token }), [slug])
   const [a, setA] = useState<Record<string, string>>({})
+  // 필수 문항(별점·선택)을 다 채우면 '보내기'를 화면 가운데로 올린다.
+  // 큰 화면에서는 마지막 문항 바로 아래의 버튼이 하단 내비에 걸쳐 보여, 스크롤하지 않고 누르면 내비 탭이 눌렸다 (2026-11-21 QA)
+  const sendRef = useRef<HTMLDivElement>(null)
+  const missing = (data?.questions ?? []).filter(q => q.type !== 'text' && !a[q.id]).length
+  const total = (data?.questions ?? []).filter(q => q.type !== 'text').length
+  useEffect(() => { if (total > 0 && missing === 0) sendRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }) }, [missing, total])
   const [err, setErr] = useState<string | null>(null); const [busy, setBusy] = useState(false); const [sent, setSent] = useState(false)
   if (loading && !data) return <Spinner />
   if (error && !data) return <div className="p-6"><Alert kind="error">{error}</Alert></div>
@@ -27,7 +33,7 @@ export default function Survey() {
     try { await rpc('survey_submit', { p_slug: slug, p_card: token, p_answers: a }); setSent(true); reload() } catch (e: any) { setErr(e.message) } finally { setBusy(false) }
   }
   return (
-    <div className="mx-auto min-h-dvh max-w-md bg-white pb-24">
+    <div className="mx-auto min-h-dvh max-w-md bg-white pb-32">
       <header className="sticky top-0 z-10 bg-white/95 backdrop-blur"><div className="flex h-14 items-center px-4"><h1 className="text-xl font-bold">{s.title ?? '만족도 설문'}</h1></div></header>
       <div className="px-4">
         {!s.enabled ? <Alert kind="info">지금은 설문을 받지 않아요.</Alert>
@@ -53,7 +59,10 @@ export default function Survey() {
               </div>
             ))}
             {err && <Alert kind="error">{err}</Alert>}
-            <Button type="submit" loading={busy} disabled={s.questions.some(q => q.type !== 'text' && !a[q.id])}>보내기</Button>
+            <div ref={sendRef} className="scroll-mb-28">
+              <Button type="submit" loading={busy} disabled={missing > 0}>보내기</Button>
+              {missing > 0 && <p className="pt-2 text-center text-sm text-gray-500">아직 고르지 않은 문항이 {missing}개 있어요</p>}
+            </div>
           </form>
         )}
         <p className="pt-6 text-center text-xs text-gray-400">익명으로 집계돼요 · 운영 플릿 (FLIT)</p>
