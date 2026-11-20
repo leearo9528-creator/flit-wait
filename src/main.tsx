@@ -23,6 +23,7 @@ import OrderCheckout from './pages/customer/OrderCheckout'
 import OrderStatus from './pages/customer/OrderStatus'
 import VendorOrders from './pages/vendor/VendorOrders'
 import HostBoard from './pages/host/HostBoard'
+import HostReport from './pages/host/HostReport'
 import { Spinner, Building } from './components/ui'
 // 스태프·현황판은 그 주소로 바로 들어오므로 지연 로딩이 왕복만 늘린다 → 메인 번들에 포함 (합쳐서 ~16KB)
 import StaffLogin from './pages/staff/StaffLogin'
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
   { path: '/o/:token', element: <OrderStatus /> },
   { path: '/vo/:token', element: <VendorOrders /> },
   { path: '/h/:token', element: <HostBoard /> },
+  { path: '/h/:token/report', element: <HostReport /> },
   { path: '/e/:slug/booths', element: <Browse tab="booth" /> },
   { path: '/e/:slug/b/:boothSlug', element: <PlaceDetail /> },
   { path: '/e/:slug/schedule', element: <EventSchedule /> },

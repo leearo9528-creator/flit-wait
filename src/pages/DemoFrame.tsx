@@ -31,7 +31,7 @@ export default function DemoFrame() {
       </div>
       <aside className="w-[340px] shrink-0">
         <div className="text-sm font-semibold text-blue-700">플릿 웨이팅 데모 · 가상 데이터</div>
-        <h1 className="mt-1 text-[26px] font-bold leading-tight text-gray-900">방문객 폰에 뜨는 화면 그대로예요</h1>
+        <h1 className="mt-1 break-keep text-[24px] font-bold leading-tight text-gray-900">방문객 폰에 뜨는 화면 그대로예요</h1>
         <ol className="mt-5 space-y-3">
           {STEPS.map((s, i) => (
             <li key={s} className="flex gap-3 text-[16px] leading-snug text-gray-800">

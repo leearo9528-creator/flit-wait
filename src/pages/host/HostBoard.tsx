@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { rpc, DEMO, PUBLIC_BASE_URL } from '../../lib/supabase'
 import { useAsync, fmtTime } from '../../lib/util'
 import { Alert, Button, Input, Spinner } from '../../components/ui'
@@ -57,6 +57,12 @@ export default function HostBoard() {
         <Stat label="오늘 주문" value={`${s.orders}건`} sub={s.sales ? won(s.sales) : undefined} />
       </div>
       <p className="px-4 pt-1 text-xs text-gray-500">오늘 체험 이용 {s.served}팀 · 15초마다 새로 읽어요</p>
+      <div className="px-4 pt-3">
+        <Link to={`/h/${token}/report`} className="flex items-center justify-between rounded-2xl px-4 py-3.5 ring-1 ring-gray-300 active:bg-gray-50">
+          <span><span className="block text-[16px] font-bold text-gray-900">결과보고서 PDF</span><span className="block text-xs text-gray-500">지금까지의 방문·대기·주문 숫자를 한 장으로</span></span>
+          <span aria-hidden className="text-lg text-gray-400">›</span>
+        </Link>
+      </div>
 
       <section className="px-4 pt-7">
         <h2 className="text-[17px] font-bold text-gray-900">공지 올리기</h2>
