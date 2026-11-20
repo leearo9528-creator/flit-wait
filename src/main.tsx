@@ -3,7 +3,7 @@ import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import './index.css'
-import { isDemo, demoKeyOf, demoOnly } from './lib/demo'
+import { isDemo, demoKeyOf, demoOnly, wantPcFrame, pcFrameUrl } from './lib/demo'
 import QueueJoin from './pages/customer/QueueJoin'
 import Reserve from './pages/customer/Reserve'
 import MyTicket from './pages/customer/MyTicket'
@@ -30,6 +30,7 @@ import StaffBoardPage from './pages/staff/StaffBoard'
 // 관리자는 손님 번들을 키우지 않도록 지연 로딩 유지. 레이아웃(로그인 화면)은 즉시, 하위 화면은 레이아웃이 뜨면 미리 받아둔다 (AdminLayout 참고)
 import AdminLayout from './pages/admin/AdminLayout'
 const Demo = lazy(() => import('./pages/Demo'))
+const DemoFrame = lazy(() => import('./pages/DemoFrame'))
 const AdminEvents = lazy(() => import('./pages/admin/AdminEvents'))
 const AdminEvent = lazy(() => import('./pages/admin/AdminEvent'))
 const AdminBooth = lazy(() => import('./pages/admin/AdminBooth'))
@@ -52,6 +53,7 @@ window.addEventListener('vite:preloadError', e => {
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/demo', element: <Demo /> },
+  { path: '/demo/pc', element: <DemoFrame /> },
   { path: '/e/:slug', element: <NowHome /> },
   { path: '/e/:slug/map', element: <ParkHome /> },
   { path: '/e/:slug/food', element: <Browse tab="food" /> },
@@ -94,6 +96,8 @@ const dk = dm ? demoKeyOf(dm[1]) ?? 'winter' : null, only = demoOnly()
 // 행사 하나로 잠긴 기기에서 다른 데모 행사 주소를 열면 받은 행사로 돌려보낸다 (auto=1 — 잠금은 그대로)
 if (dk && only && dk !== only) location.replace(`/demo?ev=${only}&auto=1`)
 else if (dm && !isDemo()) location.replace(`/demo?ev=${only ?? dk}&auto=1`)
+// 데모 손님 홈(/e/demo…)을 PC 에서 바로 열면 폰 목업 틀로 감싼다 (공유된 링크·새로고침). 실제 행사 주소는 건드리지 않는다
+else if (dm && isDemo() && /^\/e\/[^/]+\/?$/.test(location.pathname) && wantPcFrame()) location.replace(pcFrameUrl(location.pathname))
 else ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Suspense fallback={location.pathname.startsWith('/demo') ? <Building /> : <Spinner />}>

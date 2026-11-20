@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { demoOnly } from '../lib/demo'
+import { demoOnly, wantPcFrame, pcFrameUrl } from '../lib/demo'
 import { DEMO_EVENTS, seedMissingDemoEvents } from '../lib/demoEvents'
 import { Building, Alert } from '../components/ui'
 import DemoBanner from '../components/DemoBanner'
@@ -25,7 +25,7 @@ export default function Demo() {
         const ev = DEMO_EVENTS.find(d => d.key === demoOnly())
         await seedMissingDemoEvents(ev?.key)
         if (toAdmin) nav('/admin', { replace: true })
-        else if (ev) nav(`/e/${ev.slug}`, { replace: true })
+        else if (ev) nav(wantPcFrame() ? pcFrameUrl(`/e/${ev.slug}`) : `/e/${ev.slug}`, { replace: true })   // PC 는 폰 목업 틀로
         else { nav('/demo', { replace: true }); setReady(true) }
       } catch (e: any) { setErr(e.message ?? String(e)) }
     })()
@@ -42,7 +42,7 @@ export default function Demo() {
       <ul className="space-y-3 px-4 pt-2">
         {DEMO_EVENTS.map(d => (
           <li key={d.key}>
-            <Link to={`/e/${d.slug}`} className="flex items-stretch gap-3 overflow-hidden rounded-2xl ring-1 ring-gray-200 active:bg-gray-50">
+            <Link to={wantPcFrame() ? pcFrameUrl(`/e/${d.slug}`) : `/e/${d.slug}`} className="flex items-stretch gap-3 overflow-hidden rounded-2xl ring-1 ring-gray-200 active:bg-gray-50">
               <img src={d.map} alt="" loading="lazy" className="h-28 w-24 shrink-0 bg-gray-100 object-cover object-top" />
               <span className="flex min-w-0 flex-1 flex-col justify-center py-3 pr-3">
                 <span className="text-xs font-semibold text-blue-700">{d.type}</span>

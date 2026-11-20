@@ -1,9 +1,10 @@
 import { DEMO } from '../lib/supabase'
-import { DEMO_KEY, demoLinks, demoOnly, leaveDemo } from '../lib/demo'
+import { DEMO_KEY, demoLinks, demoOnly, leaveDemo, inFrame } from '../lib/demo'
 
 /** 데모 모드 띠 — 어느 화면에서든 "이건 가짜 데이터" 를 알린다. 링크는 지금 보고 있는 데모 행사 기준 (행사는 '행사 바꾸기'에서 고른다) */
 export default function DemoBanner() {
   if (!DEMO) return null
+  if (inFrame()) return null   // PC 데모 틀(/demo/pc)의 폰 목업 안 — 역할 링크는 틀의 오른쪽 패널이 맡는다
   const l = demoLinks()
   return (
     <div className="sticky top-0 z-40 flex items-center justify-between gap-3 whitespace-nowrap border-b border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-800">
