@@ -3,6 +3,15 @@
 // 데이터는 localStorage 에 두고, '데모 초기화' 로 다시 깐다. 프로덕션 DB 는 전혀 안 건드린다.
 // ⚠️ 기획자 흐름(e2e)에서 쓰는 /home/claude/fakesb.js 와 같은 논리 — 테이블 CRUD + RPC 스텁. 리포트 숫자는 샘플(가상).
 export const DEMO_KEY = 'flit:demo'
+/** PC 데모 틀(/demo/pc) — 넓은 화면에서 손님 화면을 폰 목업 안에 띄운다. '전체 화면으로 보기'를 누른 탭은 이 값으로 틀을 건너뛴다 */
+export const PC_OFF_KEY = 'flit:demo:pc-off'
+/** 다른 창 안(폰 목업 iframe)에서 뜬 화면인가 */
+export const inFrame = (): boolean => { try { return window.self !== window.top } catch { return true } }
+/** 이 주소를 PC 데모 틀로 감싸야 하나 — 넓은 화면 + 틀 밖 + 이 탭에서 끄지 않았을 때 */
+export function wantPcFrame(): boolean {
+  try { return window.innerWidth >= 1024 && !inFrame() && sessionStorage.getItem(PC_OFF_KEY) !== '1' } catch { return false }
+}
+export const pcFrameUrl = (path: string) => `/demo/pc?to=${encodeURIComponent(path)}`
 /** 데모 샘플의 판 번호 — demoSeed 나 가짜 서버가 기대하는 데이터 모양이 바뀌면 올린다.
  *  예전 판으로 데모를 써 본 기기(팀 폰·영업 때 보여 준 폰)에 옛 샘플이 남아 있으면 '행사를 찾을 수 없습니다' 가 뜨거나 로딩에서 멈췄다 (2026-11-12).
  *  판이 다르면 demoBoot 가 옛 샘플을 지우고 새로 깐다. */

@@ -134,6 +134,15 @@ export function makeDemoFetch(): typeof fetch {
         notices: T('notices').filter(n => n.event_id === e.id && (!n.expires_at || new Date(n.expires_at).getTime() > Date.now())).sort((a, b) => String(b.publish_at).localeCompare(String(a.publish_at))).map(n => ({ id: n.id, title: n.title, body: n.body ?? null, urgent: !!n.urgent, publish_at: n.publish_at })),
         places: T('places').filter(p => p.event_id === e.id && !p.booth_id && ['parking', 'food', 'market', 'stage', 'facility', 'shuttle'].includes(p.kind)).sort((a, b) => a.sort_order - b.sort_order).map(p => ({ id: p.id, name: p.name, kind: p.kind, crowd: p.crowd ?? null, crowd_updated_at: p.crowd_updated_at ?? null })) }
     },
+    // 주최 결과보고서 (0051) — 관리자 리포트 예시 숫자의 요약판. 가게별 매출은 싣지 않는다
+    host_report: ({ p_token }) => {
+      const e = hostEvent(p_token); if (!e) throw new Error('주최 화면 주소가 맞지 않아요. 플릿에 문의해 주세요.')
+      const r: any = SAMPLE.report(e.id, T), o: any = rpc.admin_order_report({ p_event: e.id })
+      return { event: { name: e.name, slug: e.slug, starts_at: e.starts_at, ends_at: e.ends_at, stamp_enabled: true },
+        views: { total: r.views.total, by_day: r.views.by_day }, tickets: r.tickets,
+        orders: { orders: o.orders, picked: o.picked, cancelled: o.cancelled, sales: o.sales, avg_ready_min: o.avg_ready_min, by_place: o.by_place.map((p: any) => ({ name: p.name, orders: p.orders, picked: p.picked, cancelled: p.cancelled })).sort((a: any, b: any) => b.orders - a.orders), by_hour: o.by_hour.map((h: any) => ({ hour: h.hour, orders: h.orders })) },
+        stamps: { cards: r.stamps.cards, completed: r.stamps.completed, redeemed: r.stamps.redeemed }, notices: { total: r.content.notices, urgent: r.content.urgent_notices } }
+    },
     host_post_notice: ({ p_token, p_title, p_body, p_urgent }) => { const e = hostEvent(p_token); if (String(p_title ?? '').trim().length < 2) throw new Error('공지 제목을 적어 주세요.'); T('notices').push({ id: uid(), event_id: e.id, title: String(p_title).trim(), body: p_body || null, urgent: !!p_urgent, pinned: false, publish_at: now(), expires_at: null, created_at: now() }); persist(); return { ok: true } },
     host_end_notice: ({ p_notice }) => { const n = T('notices').find(x => x.id === p_notice); if (n) { n.expires_at = now(); persist() } return { ok: true } },
     host_set_crowd: ({ p_place, p_crowd }) => { const pl = T('places').find(x => x.id === p_place); if (pl) { pl.crowd = p_crowd ?? null; pl.crowd_updated_at = p_crowd ? now() : null; persist() } return { ok: true } },
