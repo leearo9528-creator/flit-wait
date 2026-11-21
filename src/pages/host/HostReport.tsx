@@ -28,7 +28,9 @@ export default function HostReport() {
   if (loading && !r) return <Spinner />
   if (!r) return <div className="p-6"><Alert kind="error">{error ?? '결과보고서를 열 수 없어요.'}</Alert></div>
   const t = r.tickets, o = r.orders, s = r.stamps
-  const days = Math.max(1, Math.round((new Date(r.event.ends_at).getTime() - new Date(r.event.starts_at).getTime()) / 86400_000))
+  // 날짜 수로 센다 (시작일·종료일 포함) — 시간 차를 반올림하면 20일 10시~21일 18시 행사가 '1일', 21~23일 행사가 '2일'로 나왔다
+  const kstDay = (iso: string) => Date.parse(`${new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' })}T00:00:00Z`)
+  const days = Math.max(1, Math.round((kstDay(r.event.ends_at) - kstDay(r.event.starts_at)) / 86400_000) + 1)
 
   return (
     <div className="mx-auto min-h-dvh max-w-3xl bg-white pb-16">

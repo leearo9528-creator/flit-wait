@@ -24,7 +24,9 @@ export default function AdminReport({ eventId }: { eventId: string }) {
   if (error || !r) return <Alert kind="error">{error ?? '권한이 없어요.'}</Alert>
   const t = r.tickets, v = r.views, s = r.stamps
   const pct = (a: number, b: number) => b > 0 ? `${Math.round((a / b) * 100)}%` : '–'
-  const days = Math.max(1, Math.round((new Date(r.event.ends_at).getTime() - new Date(r.event.starts_at).getTime()) / 86400_000))
+  // 날짜 수로 센다 (시작일·종료일 포함) — 주최 결과보고서(HostReport)와 같은 셈
+  const kstDay = (iso: string) => Date.parse(`${new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' })}T00:00:00Z`)
+  const days = Math.max(1, Math.round((kstDay(r.event.ends_at) - kstDay(r.event.starts_at)) / 86400_000) + 1)
   const sent = r.notifications?.sent ?? 0, failed = r.notifications?.failed ?? 0
 
   return (
