@@ -72,7 +72,7 @@ export default async function handler(req: Request) {
 
   // 1) 이 토큰이 그 행사 관리자인지 — Supabase RPC 를 사용자 토큰으로 호출하면 RLS·auth 그대로 적용된다
   const base = process.env.VITE_SUPABASE_URL!, anon = process.env.VITE_SUPABASE_ANON_KEY!
-  const sr = await fetch(`${base}/rest/v1/rpc/my_admin_scope`, { method: 'POST', headers: { apikey: anon, Authorization: auth, 'Content-Type': 'application/json' }, body: '{}' })
+  const sr = await fetch(`${base}/rest/v1/rpc/my_admin_scope`, { method: 'POST', headers: { apikey: anon, Authorization: auth, 'Content-Type': 'application/json', 'Content-Profile': 'wait' }, body: '{}' })
   if (!sr.ok) return json({ error: '로그인이 만료됐어요. 다시 로그인해 주세요.' }, 401)
   const scope = await sr.json() as { owner?: boolean; event_ids?: string[] }
   if (!scope?.owner && !(scope?.event_ids ?? []).includes(event_id)) return json({ error: '이 행사에 대한 권한이 없어요.' }, 403)

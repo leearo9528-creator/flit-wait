@@ -3,7 +3,7 @@ export const config = { runtime: 'edge' }
 export default async function handler(req: Request) {
   const base = process.env.VITE_SUPABASE_URL!, key = process.env.VITE_SUPABASE_ANON_KEY!
   const r = await fetch(`${base}/rest/v1/rpc/event_summary`, {
-    method: 'POST', headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    method: 'POST', headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', 'Content-Profile': 'wait' },
     body: JSON.stringify({ p_slug: 'test' }),
   })
   return new Response(JSON.stringify({ ok: r.ok, status: r.status, at: new Date().toISOString() }), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } })

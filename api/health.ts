@@ -8,7 +8,7 @@ export default async function handler(_req: Request) {
   let body: any
   try {
     const r = await fetch(`${base}/rest/v1/rpc/health_summary`, {
-      method: 'POST', headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: '{}',
+      method: 'POST', headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', 'Content-Profile': 'wait' }, body: '{}',
     })
     body = r.ok ? await r.json() : { ok: false, problems: [`DB 응답 ${r.status}`] }
   } catch (e) {

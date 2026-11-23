@@ -3,10 +3,14 @@ import { isDemo } from './demo'
 
 // 데모 모드(/demo)면 네트워크 대신 브라우저 안 가짜 DB 로 — 프로덕션에는 요청이 한 건도 안 나간다
 export const DEMO = isDemo()
+// 웨이팅의 테이블·RPC 는 플릿 Supabase 프로젝트의 wait 스키마에 있다 (2026-11-23 별도 프로젝트에서 이사).
+// 같은 프로젝트의 public(회원)·app(셀러 앱)·home(홈 문의)과 섞이지 않게 기본 스키마를 wait 으로 잡는다.
+// Realtime 구독의 schema 값도 이 상수를 쓴다. api/*.ts 는 같은 값을 Content-Profile 헤더로 보낸다.
+export const DB_SCHEMA = 'wait'
 export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY,
-  DEMO ? { global: { fetch: demoFetch } } : undefined,
+  { db: { schema: DB_SCHEMA }, ...(DEMO ? { global: { fetch: demoFetch } } : {}) },
 )
 
 // 가짜 서버는 데모일 때만, 첫 요청 때 내려받는다 — 실제 손님 번들에서 뺐다. 한 번 만든 서버를 계속 쓴다 (만들 때 샘플을 읽어 두므로 여러 벌 만들면 안 된다)

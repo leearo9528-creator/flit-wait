@@ -17,7 +17,7 @@ export default async function handler(req: Request) {
   const key = process.env.VITE_SUPABASE_ANON_KEY!
   const r = await fetch(`${base}/rest/v1/rpc/${fn}`, {
     method: 'POST',
-    headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', 'Content-Profile': 'wait' },
     body: JSON.stringify({ [argName]: slug }),
   })
   const body = await r.text()

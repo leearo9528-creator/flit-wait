@@ -10,7 +10,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const env = (k: string, d = '') => Deno.env.get(k) ?? d
-const sb = createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'))
+const sb = createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), { db: { schema: 'wait' } })
 const ACCESS = env('NCP_ACCESS_KEY'), SECRET = env('NCP_SECRET_KEY')
 const AT_SVC = env('NCP_ALIMTALK_SERVICE_ID'), PF_ID = env('NCP_PLUS_FRIEND_ID')
 const SMS_SVC = env('NCP_SMS_SERVICE_ID'), SMS_FROM = env('NCP_SMS_FROM')
