@@ -5,6 +5,11 @@
 export const DEMO_KEY = 'flit:demo'
 /** PC 데모 틀(/demo/pc) — 넓은 화면에서 손님 화면을 폰 목업 안에 띄운다. '전체 화면으로 보기'를 누른 탭은 이 값으로 틀을 건너뛴다 */
 export const PC_OFF_KEY = 'flit:demo:pc-off'
+/** 운영자 화면 잠금 (2026-11-23) — 데모의 주최·스태프·사장님·관리자 화면은 이름·기관명·이메일을 적은 기기에서만 열린다 (components/DemoRoleGate).
+ *  ⚠️ 브라우저 안에서만 거는 잠금이다 — 이 값을 직접 넣으면 넘어간다. 데모 초기화·끝내기로는 지워지지 않는다(다시 묻지 않게) */
+const ROLES_KEY = 'flit:demo:roles'
+export const rolesUnlocked = (): boolean => { try { return localStorage.getItem(ROLES_KEY) === '1' } catch { return false } }
+export const unlockRoles = () => { try { localStorage.setItem(ROLES_KEY, '1') } catch { /* 저장소 없음 — 이 화면만 열린다 */ } }
 /** 다른 창 안(폰 목업 iframe)에서 뜬 화면인가 */
 export const inFrame = (): boolean => { try { return window.self !== window.top } catch { return true } }
 /** 이 주소를 PC 데모 틀로 감싸야 하나 — 넓은 화면 + 틀 밖 + 이 탭에서 끄지 않았을 때 */

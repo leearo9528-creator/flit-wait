@@ -25,6 +25,7 @@ import VendorOrders from './pages/vendor/VendorOrders'
 import HostBoard from './pages/host/HostBoard'
 import HostReport from './pages/host/HostReport'
 import { Spinner, Building } from './components/ui'
+import DemoRoleGate from './components/DemoRoleGate'   // 데모의 운영자 화면 잠금 — 실제 행사 주소에서는 그대로 통과
 // 스태프·현황판은 그 주소로 바로 들어오므로 지연 로딩이 왕복만 늘린다 → 메인 번들에 포함 (합쳐서 ~16KB)
 import StaffLogin from './pages/staff/StaffLogin'
 import StaffBoardPage from './pages/staff/StaffBoard'
@@ -61,9 +62,9 @@ const router = createBrowserRouter([
   { path: '/e/:slug/p/:placeId', element: <PlaceDetail /> },
   { path: '/e/:slug/p/:placeId/order', element: <OrderCheckout /> },
   { path: '/o/:token', element: <OrderStatus /> },
-  { path: '/vo/:token', element: <VendorOrders /> },
-  { path: '/h/:token', element: <HostBoard /> },
-  { path: '/h/:token/report', element: <HostReport /> },
+  { path: '/vo/:token', element: <DemoRoleGate role="vendor"><VendorOrders /></DemoRoleGate> },
+  { path: '/h/:token', element: <DemoRoleGate role="host"><HostBoard /></DemoRoleGate> },
+  { path: '/h/:token/report', element: <DemoRoleGate role="host"><HostReport /></DemoRoleGate> },
   { path: '/e/:slug/booths', element: <Browse tab="booth" /> },
   { path: '/e/:slug/b/:boothSlug', element: <PlaceDetail /> },
   { path: '/e/:slug/schedule', element: <EventSchedule /> },
@@ -77,10 +78,10 @@ const router = createBrowserRouter([
   { path: '/q/:slug', element: <QueueJoin /> },
   { path: '/r/:slug', element: <Reserve /> },
   { path: '/t/:token', element: <MyTicket /> },
-  { path: '/s/:slug', element: <StaffLogin /> },
-  { path: '/s/:slug/board', element: <StaffBoardPage /> },
+  { path: '/s/:slug', element: <DemoRoleGate role="staff"><StaffLogin /></DemoRoleGate> },
+  { path: '/s/:slug/board', element: <DemoRoleGate role="staff"><StaffBoardPage /></DemoRoleGate> },
   {
-    path: '/admin', element: <AdminLayout />,
+    path: '/admin', element: <DemoRoleGate role="admin"><AdminLayout /></DemoRoleGate>,
     children: [
       { index: true, element: <AdminEvents /> },
       { path: 'events/:eventId', element: <AdminEvent /> },
