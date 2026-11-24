@@ -3,7 +3,7 @@ import React, { lazy, Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import './index.css'
-import { isDemo, demoKeyOf, demoOnly, wantPcFrame, pcFrameUrl } from './lib/demo'
+import { isDemo, demoKeyOf, demoOnly, wantPcFrame, pcFrameUrl, demoLinks, inFrame } from './lib/demo'
 import QueueJoin from './pages/customer/QueueJoin'
 import Reserve from './pages/customer/Reserve'
 import MyTicket from './pages/customer/MyTicket'
@@ -94,11 +94,19 @@ const router = createBrowserRouter([
 // 데모 주소(/e/demo 등)를 데모 모드가 아닌 기기에서 바로 열면 실제 DB 에는 그 행사가 없어 '행사를 찾을 수 없습니다' 가 뜬다.
 // 영업 링크로 /e/demo 가 그대로 공유돼도 열리도록, 데모 주소는 /demo 로 보내 데모를 먼저 켠다. (행사 slug 'demo' 는 데모 전용 — 0042 에서 생성을 막는다. 부스는 데모가 쓰는 slug 6개만 해당)
 // 데모 행사가 여러 벌이라(demo · demo-beer · demo-fair · demo-univ · demo-corp) 주소에서 어느 행사인지 읽어 그 행사로 바로 보낸다
-const dm = /^\/(?:e|board)\/(demo(?:-(?:beer|fair|univ|corp))?)(?:\/|$)/.exec(location.pathname) ?? /^\/(?:q|r)\/(demo-[a-z-]+)$/.exec(location.pathname)
+// PC 데모 틀 주소(/demo/pc?to=/e/demo)가 PC 주소창에서 복사돼 그대로 공유되기도 한다 — 틀 안에 띄울 주소(to)를 '열려는 주소'로 보고 아래 규칙을 똑같이 적용한다 (2026-11-24)
+const onPc = location.pathname === '/demo/pc'
+const pcTo = (() => { const t = onPc ? new URLSearchParams(location.search).get('to') : null; return t && /^\/(?!\/)/.test(t) && !t.startsWith('/demo/pc') ? t : null })()
+const path = pcTo ?? location.pathname
+const dm = /^\/(?:e|board)\/(demo(?:-(?:beer|fair|univ|corp))?)(?:\/|$)/.exec(path) ?? /^\/(?:q|r)\/(demo-[a-z-]+)$/.exec(path)
 const dk = dm ? demoKeyOf(dm[1]) ?? 'winter' : null, only = demoOnly()
 // 행사 하나로 잠긴 기기에서 다른 데모 행사 주소를 열면 받은 행사로 돌려보낸다 (auto=1 — 잠금은 그대로)
 if (dk && only && dk !== only) location.replace(`/demo?ev=${only}&auto=1`)
 else if (dm && !isDemo()) location.replace(`/demo?ev=${only ?? dk}&auto=1`)
+// 틀 주소를 데모가 꺼진 기기에서 열었는데 to 가 데모 행사 주소가 아니면(주최·스태프 화면 등) 행사 고르기부터 — 화면 전환(Navigate)으로 보내면 데모가 안 켜진 채라 오류가 뜬다
+else if (onPc && !isDemo()) location.replace('/demo')
+// 틀 주소를 폰·좁은 창에서 열면 틀 없이 그 화면을 바로 띄운다 — 폰 안에 폰 목업을 또 그리면 화면이 잘린다
+else if (onPc && !inFrame() && window.innerWidth < 1024) location.replace(pcTo ?? demoLinks().guest)
 // 데모 손님 홈(/e/demo…)을 PC 에서 바로 열면 폰 목업 틀로 감싼다 (공유된 링크·새로고침). 실제 행사 주소는 건드리지 않는다
 else if (dm && isDemo() && /^\/e\/[^/]+\/?$/.test(location.pathname) && wantPcFrame()) location.replace(pcFrameUrl(location.pathname))
 else ReactDOM.createRoot(document.getElementById('root')!).render(

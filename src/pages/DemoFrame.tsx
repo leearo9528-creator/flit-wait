@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { DEMO } from '../lib/supabase'
 import { demoLinks, demoOnly, PC_OFF_KEY } from '../lib/demo'
@@ -7,7 +7,7 @@ import { demoLinks, demoOnly, PC_OFF_KEY } from '../lib/demo'
  * /demo/pc — PC 에서 데모를 볼 때의 틀 (2026-11-21, WAIT 업그레이드 설계서 축 ③).
  * 손님 화면은 폰 폭으로 만든 화면이라 PC 브라우저에서 그냥 열면 넓은 창 가운데 좁은 띠로 떠서 허전했다.
  * 가운데 폰 목업(같은 출처 iframe — 데모 저장소를 그대로 쓴다) + 오른쪽에 뭘 눌러 볼지 3줄 + 역할 바꾸기.
- * 폰(1024px 미만)과 실제 행사 주소에는 쓰지 않는다. '전체 화면으로 보기'를 누르면 이 탭에서는 다시 틀을 씌우지 않는다.
+ * 폰(1024px 미만)과 실제 행사 주소에는 쓰지 않는다 — 이 주소가 폰으로 공유되면 main.tsx 가 틀 없이 그 화면으로 보낸다. PC 창을 줄이거나 태블릿을 세우면 여기서 틀을 벗긴다. '전체 화면으로 보기'를 누르면 이 탭에서는 다시 틀을 씌우지 않는다.
  * ⚠️ 폰 안 화면에서는 DemoBanner 를 숨긴다(components/DemoBanner) — 역할 링크는 이 틀의 오른쪽 패널이 맡는다.
  */
 const STEPS = ['먹거리 혼잡도 확인하고 주문해 보기', '체험 부스 줄서기 · 스탬프 투어 눌러 보기', '주최 화면에서 공지 올리고 결과보고서 뽑아 보기']
@@ -18,6 +18,12 @@ export default function DemoFrame() {
   // 같은 출처의 앱 경로만 받는다 (//외부주소 같은 값은 무시)
   const first = to && /^\/(?!\/)/.test(to) ? to : l.guest
   const [src, setSrc] = useState(first)
+  // 띄운 뒤 창이 좁아지면(PC 창 줄이기 · 태블릿 세로) 틀을 벗기고 보던 화면으로 간다 — 폰 목업 + 패널은 866px 가 있어야 들어간다
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)')
+    const go = () => { if (mq.matches) location.replace(src) }
+    mq.addEventListener('change', go); return () => mq.removeEventListener('change', go)
+  }, [src])
   if (!DEMO) return <Navigate to="/demo" replace />
   const roles = [
     { label: '손님', href: l.guest }, { label: '주최', href: l.host },
