@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { fitMap, mapMeters, fmtMeters, type Fit } from '../../lib/geo'
 import { cachedRpc, rpc, DEMO } from '../../lib/supabase'
@@ -184,7 +184,7 @@ export default function ParkHome() {
         </ul>
       )}
       {!term && mode === 'map' && (
-        <div className="relative mt-3">
+        <div className="relative mt-3" data-map>
           <img src={event.map_image_url!} alt={`${event.name} 배치도`} className="block w-full select-none" draggable={false}
             onLoad={e => { const im = e.currentTarget; if (im.naturalWidth) setAspect(im.naturalHeight / im.naturalWidth) }} />
           {/* 내 위치 → 목적지 선 */}
@@ -316,16 +316,29 @@ function pinName(name: string) {
 /** 핀마다 이름을 적는다. 대기가 있는 곳은 '이름 + 시간' 색 알약, 그 밖은 흰 이름표. 누르면 상세 화면으로 간다 */
 function Pin({ p, live, onClick }: { p: GuidePlace; live: Live | null; onClick: () => void }) {
   const pill = !!p.booth && !!live
+  // 지도 가장자리에 있는 핀은 이름표가 화면 밖으로 잘린다 — 이름표만 지도 안쪽으로 민다 (꼭짓점은 제자리). 글자·창 폭이 바뀔 때마다 다시 잰다
+  const tag = useRef<HTMLSpanElement>(null)
+  useLayoutEffect(() => {
+    const fit = () => {
+      const el = tag.current, box = el?.closest('[data-map]')
+      if (!el || !box) return
+      el.style.transform = ''
+      const r = el.getBoundingClientRect(), c = box.getBoundingClientRect(), pad = 4
+      const dx = r.left < c.left + pad ? c.left + pad - r.left : r.right > c.right - pad ? c.right - pad - r.right : 0
+      if (dx) el.style.transform = `translateX(${Math.round(dx)}px)`
+    }
+    fit(); window.addEventListener('resize', fit); return () => window.removeEventListener('resize', fit)
+  })
   return (
     <button type="button" onClick={onClick} aria-label={`${p.name}${live ? ` ${live.text}` : ''}`}
       className="absolute -translate-x-1/2 -translate-y-full transition active:scale-95" style={{ left: `${p.x}%`, top: `${p.y}%` }}>
       <span className="flex flex-col items-center">
         {pill
-          ? <span className={`flex items-baseline gap-1 whitespace-nowrap rounded-full px-2.5 py-1 shadow-md ring-2 ring-white ${TONE_PIN[live!.tone]}`}>
+          ? <span ref={tag} className={`flex items-baseline gap-1 whitespace-nowrap rounded-full px-2.5 py-1 shadow-md ring-2 ring-white ${TONE_PIN[live!.tone]}`}>
               <span className="text-[11px] font-medium opacity-90">{pinName(p.name)}</span>
               <span className="text-[13px] font-bold tabular-nums">{live!.text}</span>
             </span>
-          : <span className="whitespace-nowrap rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-gray-700 shadow ring-1 ring-gray-300">{pinName(p.name)}</span>}
+          : <span ref={tag} className="whitespace-nowrap rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-gray-700 shadow ring-1 ring-gray-300">{pinName(p.name)}</span>}
         <span className="-mt-px h-0 w-0 border-x-[5px] border-t-[6px] border-x-transparent border-t-white" />
       </span>
     </button>

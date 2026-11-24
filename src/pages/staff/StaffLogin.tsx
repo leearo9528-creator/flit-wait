@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { rpc, DEMO } from '../../lib/supabase'
+import { rpc, cachedRpc, DEMO } from '../../lib/supabase'
 import { LS } from '../../lib/util'
 import { StaffSession } from '../../lib/types'
 import { Page, Card, Button, Alert } from '../../components/ui'
@@ -11,6 +11,13 @@ export default function StaffLogin() {
   const [pin, setPin] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  // 제목에 부스 이름을 적는다 — 못 읽으면 주소 값(slug)을 그대로 보여 준다. 읽는 동안은 비워 둬 주소 값이 번쩍이지 않게
+  const [boothName, setBoothName] = useState<string | null>(null)
+  useEffect(() => {
+    let live = true
+    cachedRpc<{ booth?: { name?: string } } | null>('booth_summary', slug).then(d => { if (live) setBoothName(d?.booth?.name || slug) }).catch(() => { if (live) setBoothName(slug) })
+    return () => { live = false }
+  }, [slug])
 
   useEffect(() => {
     const s = LS.get<StaffSession>(`staff:${slug}`)
@@ -32,7 +39,7 @@ export default function StaffLogin() {
   const press = (d: string) => { if (pin.length >= 4) return; const next = pin + d; setPin(next); if (next.length === 4) submit(undefined, next) }
 
   return (
-    <Page title="스태프 로그인" sub={`부스 · ${slug}`}>
+    <Page title="스태프 로그인" sub={boothName ? `부스 · ${boothName}` : '부스'}>
       <Card>
         <form onSubmit={submit}>
           <div className="mb-4 text-center text-sm text-gray-500">{DEMO ? '데모예요. 아무 숫자 4자리를 누르세요' : '부스 PIN 4자리를 입력하세요'}</div>

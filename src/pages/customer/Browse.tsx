@@ -3,7 +3,7 @@ import { Alert, Spinner } from '../../components/ui'
 import CustomerNav from '../../components/CustomerNav'
 import DemoBanner from '../../components/DemoBanner'
 import MyStrips from '../../components/MyStrips'
-import { useGuide } from '../../lib/guide'
+import { useGuide, thirdTab } from '../../lib/guide'
 import { TONE_TEXT } from '../../lib/live'
 
 /**
@@ -83,7 +83,8 @@ export default function Browse({ tab }: { tab: 'food' | 'booth' }) {
         ))}
         {list.length === 0 && <p className="py-16 text-center text-sm text-gray-400">표시할 곳이 없어요.</p>}
       </div>
-      <CustomerNav slug={slug} active="food" />
+      {/* 체험 목록은 홈의 '모두 보기'로 들어온다 — 셋째 칸이 먹거리인 행사에서는 홈에 불을 켠다 (먹거리 칸이 켜지면 엉뚱하다) */}
+      <CustomerNav slug={slug} active={tab === 'booth' && thirdTab(slug) === 'food' ? 'now' : 'food'} />
     </div>
   )
 }
