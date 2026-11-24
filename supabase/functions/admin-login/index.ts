@@ -22,8 +22,12 @@ Deno.serve(async (req) => {
 
   const email = `code-${await sha(code)}@admin.flitwait.local`
   let userId: string | null = null
-  const { data: list } = await sb.auth.admin.listUsers({ page: 1, perPage: 1000 })
-  userId = list?.users.find(u => u.email === email)?.id ?? null
+  // 플릿 프로젝트는 셀러 앱 회원과 계정 목록을 같이 쓴다 — 한 쪽(1,000명)만 보면 회원이 늘었을 때 관리자 계정을 못 찾는다
+  for (let page = 1; page <= 50 && !userId; page++) {
+    const { data: list } = await sb.auth.admin.listUsers({ page, perPage: 1000 })
+    userId = list?.users.find(u => u.email === email)?.id ?? null
+    if ((list?.users.length ?? 0) < 1000) break
+  }
   if (!userId) {
     const { data: cu, error } = await sb.auth.admin.createUser({ email, email_confirm: true, user_metadata: { admin_code: code, label: ac.label } })
     if (error) return json({ error: error.message }, 500)
